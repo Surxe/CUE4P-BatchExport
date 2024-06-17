@@ -15,12 +15,11 @@ namespace CUE4Parse.Example
 {
     public static class Program
     {
-        private const string _gameDirectory = "F:\\Datamining\\Dark_and_Darker\\NativeExtractor\\Repack"; // Change game directory path to the one you have.
-        private const string _aesKey = "0x903DBEEB889CFB1C25AFA28A9463F6D4E816B174D68B3902427FE5867E8C688E";
-
+        private const string _gameDirectory = "F:\\Datamining\\Dark_and_Darker\\NativeExtractor\\Repack"; // Change game directory path to the one you have, ideally after repacked
+        private const string _outputPath = "F:\\DarkAndDarkerWiki\\Exports"; // Change output directory path to the one you want.
         private const string _mapping = "F:\\Datamining\\Dark_and_Darker\\0.6.2.3761.usmap";
-
-        private const bool _enableLogging = false;
+        private const string _aesKey = "0x903DBEEB889CFB1C25AFA28A9463F6D4E816B174D68B3902427FE5867E8C688E";
+        private const bool _enableLogging = false; // Recommend enabling this until you're certain it exported all the files you expected, but may slow the runtime
         
 
         //Create all preceding directories of a given file if they don't yet exist
@@ -41,7 +40,7 @@ namespace CUE4Parse.Example
         }
 
         //Extract an asset and write it to a JSON file
-        private static void extractAsset(DefaultFileProvider provider, string assetPath, string exportPath)
+        private static void extractAsset(DefaultFileProvider provider, string assetPath)
         {
             // load all exports the asset has and transform them in a single Json string
             var allExports = provider.LoadAllObjects(assetPath);
@@ -56,10 +55,10 @@ namespace CUE4Parse.Example
                 return;
             }
             // Destination path within exports directory
-            string destPath = exportPath + "/" + assetPath + ".json";
+            string destPath = _outputPath + "/" + assetPath + ".json";
 
             // Create the directories if they don't exist
-            createNeededDirectories(destPath, exportPath);
+            createNeededDirectories(destPath, _outputPath);
 
             // Write the JSON to file
             try
@@ -77,8 +76,7 @@ namespace CUE4Parse.Example
         {
             // Create exports directory
             string rootPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..\\..\\..\\"));
-            string exportPath = Path.Combine(rootPath, "Exports");
-            Console.WriteLine("Exports Directory: " + exportPath);
+            Console.WriteLine("Output Directory: " + _outputPath);
 
             // Decrypt .pak to assets
             if (_enableLogging)
@@ -164,7 +162,7 @@ namespace CUE4Parse.Example
                         {
                             Console.WriteLine("Exporting asset: " + filePath);
                         }
-                        extractAsset(provider, filePath, exportPath);
+                        extractAsset(provider, filePath);
                         break;
                     }
                 }
@@ -174,7 +172,7 @@ namespace CUE4Parse.Example
 
             // Example of extracting an asset
             //string assetPath = "DungeonCrawler/Content/DungeonCrawler/Props/IceWorld/IceWall/GC_IciclesWall_01_Default";
-            //extractAsset(provider, assetPath, exportPath);
+            //extractAsset(provider, assetPath);
         }
     }
 }
