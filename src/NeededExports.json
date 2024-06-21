@@ -41,7 +41,9 @@
         "DungeonCrawler/Content/DungeonCrawler/Characters/Monster",
         "DungeonCrawler/Content/DungeonCrawler/Data/Generated/DT_Monster",
         "DungeonCrawler/Content/DungeonCrawler/Data/Generated/DT_ActorStatus/StatusEffect",
-        "DungeonCrawler/Content/DungeonCrawler/Data/Generated/V2/Monster/Monster"
+        "DungeonCrawler/Content/DungeonCrawler/Data/Generated/V2/Monster/Monster",
+        "DungeonCrawler/Content/DungeonCrawler/Data/GameplayAbility",
+        "DungeonCrawler/Content/DungeonCrawler/Core/GameplayAbilitySystem"
     ],
     "Stat": [
         "DungeonCrawler/Content/DungeonCrawler/Data/GameplayAbility"

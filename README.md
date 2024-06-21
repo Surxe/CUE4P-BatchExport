@@ -29,6 +29,7 @@ Looking how to download assets from someone who already did the below process? J
     5.4 _aesKey which hasn't changed since the game was released
 6. Change the directories you need exported in src\NeededExports.json. Paths can appear more than once. Paths are grouped simply for readability, naming the groups something meaningful is not necessary
 7. Delete pre-existing exports by deleting the folder BatchExport\Exports if it exists (is in .gitignore)
+8. cd BatchExport/src
 8. 'dotnet run' on the .csproj
 9. Compress/Zip src\Exports to src\Exports.zip and push so others on the team can Extract/Unzip
 
