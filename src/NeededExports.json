@@ -55,7 +55,7 @@
     "FloorRule": [
         "DungeonCrawler/Content/DungeonCrawler/Data/Generated/V2/FloorRule/FloorRule"
     ],
-    "PerkSkillSpell": [
+    "Ability": [
         "DungeonCrawler/Content/DungeonCrawler/Data/Generated/V2/Spell",
         "DungeonCrawler/Content/DungeonCrawler/Data/Generated/V2/Skill",
         "DungeonCrawler/Content/DungeonCrawler/Data/Generated/V2/Perk",
@@ -65,5 +65,8 @@
     ],
     "Map": [
         "DungeonCrawler/Content/DungeonCrawler/Maps"
+    ],
+    "AbilitySilence": [
+        "DungeonCrawler/Content/DungeonCrawler/Data/Generated/V2/AbilityRelationshipTagGroup/AbilityRelationshipTagGroup"
     ]
 }
