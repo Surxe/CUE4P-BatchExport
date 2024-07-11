@@ -61,7 +61,20 @@
         "DungeonCrawler/Content/DungeonCrawler/Data/Generated/V2/Perk",
         "DungeonCrawler/Content/DungeonCrawler/Data/Generated/V2/ShapeShift",
         "DungeonCrawler/Content/DungeonCrawler/Data/Generated/V2/ActorStatus",
-        "DungeonCrawler/Content/DungeonCrawler/Data/Generated/V2/MovementModifier"
+        "DungeonCrawler/Content/DungeonCrawler/Data/Generated/V2/MovementModifier",
+        "DungeonCrawler/Content/DungeonCrawler/Data/Generated/V2/GEModifier",
+        "DungeonCrawler/Content/DungeonCrawler/Music",
+        "DungeonCrawler/Content/DungeonCrawler/Skill",
+        "DungeonCrawler/Content/DungeonCrawler/Spell",
+        "DungeonCrawler/Content/DungeonCrawler/ShapeShift",
+        "DungeonCrawler/Content/DungeonCrawler/Characters",
+        "DungeonCrawler/Content/DungeonCrawler/Perk",
+        "DungeonCrawler/Content/DungeonCrawler/Data/Generated/V2/Constant/Constant",
+        "DungeonCrawler/Content/DungeonCrawler/Data/DataAsset/Skill",
+        "DungeonCrawler/Content/DungeonCrawler/Data/DataAsset/Spell",
+        "DungeonCrawler/Content/DungeonCrawler/Data/DataAsset/Perk",
+        "DungeonCrawler/Content/DungeonCrawler/Data/DataAsset/ShapeShift"
+
     ],
     "Map": [
         "DungeonCrawler/Content/DungeonCrawler/Maps"
