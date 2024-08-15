@@ -50,6 +50,8 @@
     ],
     "Prop": [
         "DungeonCrawler/Content/DungeonCrawler/Data/Generated/V2/Props",
+        "DungeonCrawler/Content/DungeonCrawler/Data/DataAsset/Interaction",
+        "DungeonCrawler/Content/DungeonCrawler/Data/DataAsset/Props",
         "DungeonCrawler/Content/DungeonCrawler/Props"
     ],
     "FloorRule": [
