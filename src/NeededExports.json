@@ -78,13 +78,20 @@
         "DungeonCrawler/Content/DungeonCrawler/Data/DataAsset/Perk",
         "DungeonCrawler/Content/DungeonCrawler/Data/DataAsset/ShapeShift",
         "DungeonCrawler/Content/DungeonCrawler/Data/DataAsset/Music",
-        "DungeonCrawler/Content/DungeonCrawler/Data/Generated/DT_ActorStatus/StatusEffect"  //persuasivenessBonusRatio only in DT status effect file, not V2 status effect file
-
+        "DungeonCrawler/Content/DungeonCrawler/Data/Generated/DT_ActorStatus/StatusEffect",  
+        "DungeonCrawler/Content/DungeonCrawler/Aoe",
+        "DungeonCrawler/Content/DungeonCrawler/Data/Generated/V2/Projectile"
     ],
     "Map": [
         "DungeonCrawler/Content/DungeonCrawler/Maps"
     ],
     "AbilitySilence": [
         "DungeonCrawler/Content/DungeonCrawler/Data/Generated/V2/AbilityRelationshipTagGroup/AbilityRelationshipTagGroup"
+    ],
+    "Status": [
+        "DungeonCrawler/Content/DungeonCrawler/UI/Resources/IconActorStatus"
+    ],
+    "Version": [
+        "\\DungeonCrawler\\Config\\DefaultGame.ini"
     ]
 }
