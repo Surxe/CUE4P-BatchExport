@@ -8,7 +8,7 @@ README for the complete export process from downloaded update to exports
 Looking how to download assets from someone who already did the below process? Just Extract/Unzip src/Exports.zip and skip all of the following
 
 ## Repack using Unreal Engine
-1. Download [Unreal Engine](https://www.unrealengine.com/en-US/download) 5.2. When prompted for what to install, use:
+1. Download [Unreal Engine](https://www.unrealengine.com/en-US/download) 5.3. When prompted for what to install, use:
 
 1.1 "Core Components" (required, 40gb)
 
