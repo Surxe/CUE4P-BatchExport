@@ -19,7 +19,7 @@ Looking how to download assets from someone who already did the below process? J
 1.4 "Engine Source" (likely necessary)
 
 1.5 NOT "Editor symbols for debugging" (80gb)
-
+1. Download src\Crypto.json, open with Notepad, ensure the AES key is set for your game.
 
 2. Download src\extract.bat, open with Notepad, and set the line <cd "C:\Program Files\IRONMACE\Dark and Darker\DungeonCrawler\Content\Paks"> to your own DaD download path
 
