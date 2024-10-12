@@ -1,0 +1,17 @@
+{
+    "EncryptionKey": {
+        "Name": "Embedded",
+        "Guid": "00000000-0000-0000-0000-000000000000",
+        "Key": "0x903DBEEB889CFB1C25AFA28A9463F6D4E816B174D68B3902427FE5867E8C688E"
+    },
+    "SigningKey": null,
+    "bEnablePakSigning": false,
+    "bEnablePakIndexEncryption": true,
+    "bEnablePakIniEncryption": true,
+    "bEnablePakUAssetEncryption": true,
+    "bEnablePakFullAssetEncryption": true,
+    "bDataCryptoRequired": true,
+    "PakEncryptionRequired": true,
+    "PakSigningRequired": true,
+    "SecondaryEncryptionKeys": []
+}
