@@ -93,5 +93,9 @@
     ],
     "Version": [
         "\\DungeonCrawler\\Config\\DefaultGame.ini"
+    ],
+    "Achievement": [
+        "DungeonCrawler/Content/DungeonCrawler/Data/Generated/V2/Achievement",
+        "DungeonCrawler/Content/DungeonCrawler/Data/DataAsset/Achievement"
     ]
 }
