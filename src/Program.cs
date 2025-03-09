@@ -15,10 +15,10 @@ namespace CUE4Parse.Example
 {
     public static class Program
     {
-        private const string _gameDirectory = "F:\\Datamining\\Dark_and_Darker\\NativeExtractor\\Repack"; // Change game directory path to the one you have, ideally after repacked
-        private const string _outputPath = "F:\\DarkAndDarkerWiki\\Exports"; // Change output directory path to the one you want.
-        private const string _mapping = "F:\\Datamining\\Dark_and_Darker\\0.6.2.4567.usmap";
-        private const string _aesKey = "0x903DBEEB889CFB1C25AFA28A9463F6D4E816B174D68B3902427FE5867E8C688E";
+        private const string _gameDirectory = "C:\\Datamining\\DaD Repack\\Repack"; // Change game directory path to the one you have, ideally after repacked
+        private const string _outputPath = "C:\\Users\\ruvim\\Repository\\DaD-Scripts\\Exports"; // Change output directory path to the one you want.
+        private const string _mapping = "C:\\Datamining\\DaD Repack\\mapping.usmap";
+        private const string _aesKey = "0x903DBEEB889CFB1C25AFA28A9463F6D4E816B174D68B3902427FE5867E8C688E"; // kD2+64ic+xwlr6KKlGP21OgWsXTWizkCQn/lhn6MaI4= base64 key
         private const bool _enableLogging = false; // Recommend enabling this until you're certain it exported all the files you expected, but may slow the runtime
         
 
@@ -43,7 +43,8 @@ namespace CUE4Parse.Example
         private static void extractAsset(DefaultFileProvider provider, string assetPath)
         {
             // load all exports the asset has and transform them in a single Json string
-            var allExports = provider.LoadAllObjects(assetPath);
+            // var allExports = provider.LoadAllObjects(assetPath);
+            var allExports = provider.LoadPackage(assetPath).GetExports();
             var fullJson = "";
             try 
             {
@@ -78,17 +79,22 @@ namespace CUE4Parse.Example
             string rootPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..\\..\\..\\"));
             Console.WriteLine("Output Directory: " + _outputPath);
 
+            // OodleHelper.DownloadOodleDll();
+            // OodleHelper.Initialize(OodleHelper.OODLE_DLL_NAME);
+
             // Decrypt .pak to assets
             if (_enableLogging)
             {
                 Log.Logger = new LoggerConfiguration().WriteTo.Console(theme: AnsiConsoleTheme.Literate).CreateLogger();
             }
             // var provider = new ApkFileProvider(@"C:\Users\valen\Downloads\ZqOY4K41h0N_Qb6WjEe23TlGExojpQ.apk", true, new VersionContainer(EGame.GAME_UE5_3));
-            var provider = new DefaultFileProvider(_gameDirectory, SearchOption.TopDirectoryOnly, true, new VersionContainer(EGame.GAME_UE5_3));
-            provider.MappingsContainer = new FileUsmapTypeMappingsProvider(_mapping);
+            var provider = new DefaultFileProvider(_gameDirectory, SearchOption.AllDirectories, new VersionContainer(EGame.GAME_UE5_3), StringComparer.OrdinalIgnoreCase)
+            {
+                MappingsContainer = new FileUsmapTypeMappingsProvider(_mapping)
+            };
             provider.Initialize(); // will scan local files and read them to know what it has to deal with (PAK/UTOC/UCAS/UASSET/UMAP)
             provider.SubmitKey(new FGuid(), new FAesKey(_aesKey)); // decrypt basic info (1 guid - 1 key)
-            provider.LoadLocalization(ELanguage.English); // explicit enough
+            // provider.LoadLocalization(); // explicit enough
 
             // Retrieve the list of directories to export
             // Path to the NeededExports.json file
@@ -115,7 +121,7 @@ namespace CUE4Parse.Example
 
             // Export to .json
             string filePath;
-            Console.WriteLine("Exporting files..."); // Starting exporting process            
+            Console.WriteLine("Exporting files..."); // Starting exporting process
             foreach (var file in provider.Files)
             {
                 foreach (var dir in neededExports)
