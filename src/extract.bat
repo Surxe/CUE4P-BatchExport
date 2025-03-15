@@ -8,11 +8,10 @@ cd "C:\Program Files\IRONMACE\Dark and Darker\DungeonCrawler\Content\Paks"
 
 for /r %%i in (*) do "%UserInputPath%\Engine\Binaries\Win64\UnrealPak.exe" -cryptokeys="%scriptpath%Crypto.json" "%%i" -Extract "%scriptpath%PakExtract" -extracttomountpoint 
 
-if not exist "%scriptpath%\Repack\" mkdir "%scriptpath%\Repack\"
-
-"%UserInputPath%\Engine\Binaries\Win64\UnrealPak.exe" -cryptokeys="%scriptpath%Crypto.json" "%scriptpath%Repack\pakchunk.pak" -Create="%scriptpath%PakExtract" -compress -compressionformat=Oodle
+"%UserInputPath%\Engine\Binaries\Win64\UnrealPak.exe" -cryptokeys="%scriptpath%Crypto.json" "C:\Datamining\DaD Repack\Repack\pakchunk.pak" -Create="%scriptpath%PakExtract" -compress -compressionformat=Oodle
 
 cd %scriptpath%
 
-rmdir /s /q "%scriptpath%\PakExtract"
+echo f|xcopy /s /y "%scriptpath%PakExtract\DungeonCrawler\Config\DefaultGame.ini" "C:\Users\ruvim\Repository\DaD-Scripts\Exports\DungeonCrawler\Config\DefaultGame.ini"
 
+rmdir /s /q "%scriptpath%\PakExtract"
