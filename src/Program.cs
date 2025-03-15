@@ -1,4 +1,3 @@
-using System;
 using CUE4Parse.Encryption.Aes;
 using CUE4Parse.FileProvider;
 using CUE4Parse.UE4.Objects.Core.Misc;
@@ -7,9 +6,8 @@ using Newtonsoft.Json;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
 using CUE4Parse.MappingsProvider;
-
-using System.Collections.Generic;
-using System.Drawing.Printing;
+using CUE4Parse.Compression;
+using CUE4Parse.UE4.Assets.Exports.Texture;
 
 namespace CUE4Parse.Example
 {
@@ -75,26 +73,31 @@ namespace CUE4Parse.Example
 
         public static void Main()
         {
+            Console.WriteLine("Deleting previous export contents:\n" + _outputPath + "\\DungeonCrawler\\Content\n");
+            Directory.Delete(_outputPath + "\\DungeonCrawler\\Content",true);
+
             // Create exports directory
             string rootPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..\\..\\..\\"));
             Console.WriteLine("Output Directory: " + _outputPath);
-
-            // OodleHelper.DownloadOodleDll();
-            // OodleHelper.Initialize(OodleHelper.OODLE_DLL_NAME);
 
             // Decrypt .pak to assets
             if (_enableLogging)
             {
                 Log.Logger = new LoggerConfiguration().WriteTo.Console(theme: AnsiConsoleTheme.Literate).CreateLogger();
             }
-            // var provider = new ApkFileProvider(@"C:\Users\valen\Downloads\ZqOY4K41h0N_Qb6WjEe23TlGExojpQ.apk", true, new VersionContainer(EGame.GAME_UE5_3));
-            var provider = new DefaultFileProvider(_gameDirectory, SearchOption.AllDirectories, new VersionContainer(EGame.GAME_UE5_3), StringComparer.OrdinalIgnoreCase)
+
+            OodleHelper.DownloadOodleDll();
+            OodleHelper.Initialize(OodleHelper.OODLE_DLL_NAME);
+
+            var version = new VersionContainer(EGame.GAME_UE5_3, ETexturePlatform.DesktopMobile);
+            var provider = new DefaultFileProvider(_gameDirectory, SearchOption.AllDirectories, version, StringComparer.Ordinal)
             {
                 MappingsContainer = new FileUsmapTypeMappingsProvider(_mapping)
             };
-            provider.Initialize(); // will scan local files and read them to know what it has to deal with (PAK/UTOC/UCAS/UASSET/UMAP)
-            provider.SubmitKey(new FGuid(), new FAesKey(_aesKey)); // decrypt basic info (1 guid - 1 key)
-            // provider.LoadLocalization(); // explicit enough
+            provider.Initialize();
+            provider.SubmitKey(new FGuid(), new FAesKey(_aesKey));
+            provider.PostMount();
+            provider.ChangeCulture("en");
 
             // Retrieve the list of directories to export
             // Path to the NeededExports.json file
