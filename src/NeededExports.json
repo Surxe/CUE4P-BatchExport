@@ -78,7 +78,7 @@
         "DungeonCrawler/Content/DungeonCrawler/Data/DataAsset/Perk",
         "DungeonCrawler/Content/DungeonCrawler/Data/DataAsset/ShapeShift",
         "DungeonCrawler/Content/DungeonCrawler/Data/DataAsset/Music",
-        "DungeonCrawler/Content/DungeonCrawler/Data/Generated/DT_ActorStatus/StatusEffect",  
+        "DungeonCrawler/Content/DungeonCrawler/Data/Generated/DT_ActorStatus/StatusEffect",
         "DungeonCrawler/Content/DungeonCrawler/Aoe",
         "DungeonCrawler/Content/DungeonCrawler/Data/Generated/V2/Projectile"
     ],
@@ -91,18 +91,15 @@
     "Status": [
         "DungeonCrawler/Content/DungeonCrawler/UI/Resources/IconActorStatus"
     ],
-    "Version": [
-        "\\DungeonCrawler\\Config\\DefaultGame.ini"
-    ],
     "Achievement": [
         "DungeonCrawler/Content/DungeonCrawler/Data/Generated/V2/Achievement",
         "DungeonCrawler/Content/DungeonCrawler/Data/DataAsset/Achievement"
     ],
     "V1Data": [
-        "DungeonCrawler/Data/Generated/DT_Perk",
-        "DungeonCrawler/Data/Generated/DT_Skill",
-        "DungeonCrawler/Data/Generated/DT_Spell",
-        "DungeonCrawler/Data/Generated/DT_ShapeShift",
-        "DungeonCrawler/Data/Generated/DT_Music"
+        "DungeonCrawler/Content/DungeonCrawler/Data/Generated/DT_Perk",
+        "DungeonCrawler/Content/DungeonCrawler/Data/Generated/DT_Skill",
+        "DungeonCrawler/Content/DungeonCrawler/Data/Generated/DT_Spell",
+        "DungeonCrawler/Content/DungeonCrawler/Data/Generated/DT_ShapeShift",
+        "DungeonCrawler/Content/DungeonCrawler/Data/Generated/DT_Music"
     ]
 }

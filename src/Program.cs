@@ -117,14 +117,14 @@ namespace CUE4Parse.Example
             Console.WriteLine("Narrowed Directories that will be exported:");
             foreach (var dir in neededExports)
             {
-                Console.WriteLine(dir);
+                Console.WriteLine("\t"+dir);
             }
             Console.WriteLine("");
 
 
             // Export to .json
             string filePath;
-            Console.WriteLine("Exporting files..."); // Starting exporting process
+            Console.WriteLine("Please wait while the script exports files..."); // Starting exporting process
             foreach (var file in provider.Files)
             {
                 foreach (var dir in neededExports)
