@@ -2,44 +2,102 @@
   "version": 3,
   "targets": {
     "net8.0": {
-      "CUE4Parse/1.1.1": {
+      "Blake3/2.0.0": {
         "type": "package",
-        "dependencies": {
-          "DotNetZip": "1.16.0",
-          "Infrablack.UE4Config": "0.7.2.97",
-          "K4os.Compression.LZ4.Streams": "1.3.6",
-          "LZMA-SDK": "22.1.1",
-          "Newtonsoft.Json": "13.0.3",
-          "Serilog": "3.1.1",
-          "Serilog.Sinks.Console": "5.0.0",
-          "System.Memory": "4.5.5",
-          "System.Runtime.CompilerServices.Unsafe": "6.0.0",
-          "ZstdSharp.Port": "0.7.3"
-        },
         "compile": {
-          "lib/net8.0/CUE4Parse-Natives.dll": {},
-          "lib/net8.0/CUE4Parse.dll": {}
+          "lib/net8.0/Blake3.dll": {
+            "related": ".xml"
+          }
         },
         "runtime": {
-          "lib/net8.0/CUE4Parse-Natives.dll": {},
-          "lib/net8.0/CUE4Parse.dll": {}
+          "lib/net8.0/Blake3.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtimeTargets": {
+          "runtimes/linux-arm/native/libblake3_dotnet.so": {
+            "assetType": "native",
+            "rid": "linux-arm"
+          },
+          "runtimes/linux-arm64/native/libblake3_dotnet.so": {
+            "assetType": "native",
+            "rid": "linux-arm64"
+          },
+          "runtimes/linux-x64/native/libblake3_dotnet.so": {
+            "assetType": "native",
+            "rid": "linux-x64"
+          },
+          "runtimes/osx-arm64/native/libblake3_dotnet.dylib": {
+            "assetType": "native",
+            "rid": "osx-arm64"
+          },
+          "runtimes/osx-x64/native/libblake3_dotnet.dylib": {
+            "assetType": "native",
+            "rid": "osx-x64"
+          },
+          "runtimes/win-arm64/native/blake3_dotnet.dll": {
+            "assetType": "native",
+            "rid": "win-arm64"
+          },
+          "runtimes/win-x64/native/blake3_dotnet.dll": {
+            "assetType": "native",
+            "rid": "win-x64"
+          },
+          "runtimes/win-x86/native/blake3_dotnet.dll": {
+            "assetType": "native",
+            "rid": "win-x86"
+          }
         }
       },
-      "DotNetZip/1.16.0": {
+      "BouncyCastle.Cryptography/2.5.0": {
         "type": "package",
-        "dependencies": {
-          "System.Security.Permissions": "4.7.0",
-          "System.Text.Encoding.CodePages": "4.7.1"
-        },
         "compile": {
-          "lib/netstandard2.0/DotNetZip.dll": {
+          "lib/net6.0/BouncyCastle.Cryptography.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net6.0/BouncyCastle.Cryptography.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "CommunityToolkit.HighPerformance/8.3.2": {
+        "type": "package",
+        "compile": {
+          "lib/net8.0/CommunityToolkit.HighPerformance.dll": {
             "related": ".pdb;.xml"
           }
         },
         "runtime": {
-          "lib/netstandard2.0/DotNetZip.dll": {
+          "lib/net8.0/CommunityToolkit.HighPerformance.dll": {
             "related": ".pdb;.xml"
           }
+        }
+      },
+      "CUE4Parse/1.2.2": {
+        "type": "package",
+        "dependencies": {
+          "Blake3": "2.0.0",
+          "BouncyCastle.Cryptography": "2.5.0",
+          "Infrablack.UE4Config": "0.7.2.97",
+          "K4os.Compression.LZ4.Streams": "1.3.8",
+          "LZMA-SDK": "22.1.1",
+          "Newtonsoft.Json": "13.0.3",
+          "OffiUtils": "2.0.1",
+          "Oodle.NET": "2.1.0",
+          "Serilog": "4.2.0",
+          "Serilog.Sinks.Console": "6.0.0",
+          "Zlib-ng.NET": "1.1.1",
+          "ZstdSharp.Port": "0.8.4"
+        },
+        "compile": {
+          "lib/net8.0/CUE4Parse-Natives.dll": {},
+          "lib/net8.0/CUE4Parse.dll": {}
+        },
+        "runtime": {
+          "lib/net8.0/CUE4Parse-Natives.dll": {},
+          "lib/net8.0/CUE4Parse.dll": {}
         }
       },
       "Infrablack.UE4Config/0.7.2.97": {
@@ -51,7 +109,7 @@
           "lib/netstandard2.0/UE4Config.dll": {}
         }
       },
-      "K4os.Compression.LZ4/1.3.6": {
+      "K4os.Compression.LZ4/1.3.8": {
         "type": "package",
         "compile": {
           "lib/net6.0/K4os.Compression.LZ4.dll": {
@@ -64,10 +122,10 @@
           }
         }
       },
-      "K4os.Compression.LZ4.Streams/1.3.6": {
+      "K4os.Compression.LZ4.Streams/1.3.8": {
         "type": "package",
         "dependencies": {
-          "K4os.Compression.LZ4": "1.3.6",
+          "K4os.Compression.LZ4": "1.3.8",
           "K4os.Hash.xxHash": "1.0.8",
           "System.IO.Pipelines": "6.0.3"
         },
@@ -108,37 +166,6 @@
           }
         }
       },
-      "Microsoft.NETCore.Platforms/3.1.1": {
-        "type": "package",
-        "compile": {
-          "lib/netstandard1.0/_._": {}
-        },
-        "runtime": {
-          "lib/netstandard1.0/_._": {}
-        }
-      },
-      "Microsoft.Win32.SystemEvents/4.7.0": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.NETCore.Platforms": "3.1.0"
-        },
-        "compile": {
-          "ref/netstandard2.0/_._": {
-            "related": ".xml"
-          }
-        },
-        "runtime": {
-          "lib/netstandard2.0/Microsoft.Win32.SystemEvents.dll": {
-            "related": ".xml"
-          }
-        },
-        "runtimeTargets": {
-          "runtimes/win/lib/netcoreapp3.0/Microsoft.Win32.SystemEvents.dll": {
-            "assetType": "runtime",
-            "rid": "win"
-          }
-        }
-      },
       "Newtonsoft.Json/13.0.3": {
         "type": "package",
         "compile": {
@@ -152,57 +179,57 @@
           }
         }
       },
-      "Serilog/3.1.1": {
+      "OffiUtils/2.0.1": {
+        "type": "package",
+        "dependencies": {
+          "CommunityToolkit.HighPerformance": "8.3.2"
+        },
+        "compile": {
+          "lib/net8.0/OffiUtils.dll": {}
+        },
+        "runtime": {
+          "lib/net8.0/OffiUtils.dll": {}
+        }
+      },
+      "Oodle.NET/2.1.0": {
         "type": "package",
         "compile": {
-          "lib/net7.0/Serilog.dll": {
+          "lib/net8.0/Oodle.NET.dll": {
             "related": ".xml"
           }
         },
         "runtime": {
-          "lib/net7.0/Serilog.dll": {
+          "lib/net8.0/Oodle.NET.dll": {
             "related": ".xml"
           }
         }
       },
-      "Serilog.Sinks.Console/5.0.0": {
+      "Serilog/4.2.0": {
         "type": "package",
-        "dependencies": {
-          "Serilog": "3.1.0"
-        },
         "compile": {
-          "lib/net7.0/Serilog.Sinks.Console.dll": {
+          "lib/net8.0/Serilog.dll": {
             "related": ".xml"
           }
         },
         "runtime": {
-          "lib/net7.0/Serilog.Sinks.Console.dll": {
+          "lib/net8.0/Serilog.dll": {
             "related": ".xml"
           }
         }
       },
-      "System.Drawing.Common/4.7.0": {
+      "Serilog.Sinks.Console/6.0.0": {
         "type": "package",
         "dependencies": {
-          "Microsoft.NETCore.Platforms": "3.1.0",
-          "Microsoft.Win32.SystemEvents": "4.7.0"
+          "Serilog": "4.0.0"
         },
         "compile": {
-          "ref/netcoreapp3.0/_._": {
+          "lib/net8.0/Serilog.Sinks.Console.dll": {
             "related": ".xml"
           }
         },
         "runtime": {
-          "lib/netstandard2.0/System.Drawing.Common.dll": {}
-        },
-        "runtimeTargets": {
-          "runtimes/unix/lib/netcoreapp3.0/System.Drawing.Common.dll": {
-            "assetType": "runtime",
-            "rid": "unix"
-          },
-          "runtimes/win/lib/netcoreapp3.0/System.Drawing.Common.dll": {
-            "assetType": "runtime",
-            "rid": "win"
+          "lib/net8.0/Serilog.Sinks.Console.dll": {
+            "related": ".xml"
           }
         }
       },
@@ -222,178 +249,113 @@
           "buildTransitive/netcoreapp3.1/_._": {}
         }
       },
-      "System.Memory/4.5.5": {
+      "Zlib-ng.NET/1.1.1": {
         "type": "package",
         "compile": {
-          "ref/netcoreapp2.1/_._": {}
-        },
-        "runtime": {
-          "lib/netcoreapp2.1/_._": {}
-        }
-      },
-      "System.Runtime.CompilerServices.Unsafe/6.0.0": {
-        "type": "package",
-        "compile": {
-          "lib/net6.0/System.Runtime.CompilerServices.Unsafe.dll": {
+          "lib/net8.0/Zlib-ng.NET.dll": {
             "related": ".xml"
           }
         },
         "runtime": {
-          "lib/net6.0/System.Runtime.CompilerServices.Unsafe.dll": {
-            "related": ".xml"
-          }
-        },
-        "build": {
-          "buildTransitive/netcoreapp3.1/_._": {}
-        }
-      },
-      "System.Security.AccessControl/4.7.0": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.NETCore.Platforms": "3.1.0",
-          "System.Security.Principal.Windows": "4.7.0"
-        },
-        "compile": {
-          "ref/netstandard2.0/System.Security.AccessControl.dll": {
-            "related": ".xml"
-          }
-        },
-        "runtime": {
-          "lib/netstandard2.0/System.Security.AccessControl.dll": {
-            "related": ".xml"
-          }
-        },
-        "runtimeTargets": {
-          "runtimes/win/lib/netcoreapp2.0/System.Security.AccessControl.dll": {
-            "assetType": "runtime",
-            "rid": "win"
-          }
-        }
-      },
-      "System.Security.Permissions/4.7.0": {
-        "type": "package",
-        "dependencies": {
-          "System.Security.AccessControl": "4.7.0",
-          "System.Windows.Extensions": "4.7.0"
-        },
-        "compile": {
-          "ref/netcoreapp3.0/System.Security.Permissions.dll": {
-            "related": ".xml"
-          }
-        },
-        "runtime": {
-          "lib/netcoreapp3.0/System.Security.Permissions.dll": {
+          "lib/net8.0/Zlib-ng.NET.dll": {
             "related": ".xml"
           }
         }
       },
-      "System.Security.Principal.Windows/4.7.0": {
+      "ZstdSharp.Port/0.8.4": {
         "type": "package",
         "compile": {
-          "ref/netcoreapp3.0/System.Security.Principal.Windows.dll": {
-            "related": ".xml"
-          }
+          "lib/net8.0/ZstdSharp.dll": {}
         },
         "runtime": {
-          "lib/netstandard2.0/System.Security.Principal.Windows.dll": {
-            "related": ".xml"
-          }
-        },
-        "runtimeTargets": {
-          "runtimes/unix/lib/netcoreapp2.1/System.Security.Principal.Windows.dll": {
-            "assetType": "runtime",
-            "rid": "unix"
-          },
-          "runtimes/win/lib/netcoreapp2.1/System.Security.Principal.Windows.dll": {
-            "assetType": "runtime",
-            "rid": "win"
-          }
-        }
-      },
-      "System.Text.Encoding.CodePages/4.7.1": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.NETCore.Platforms": "3.1.1"
-        },
-        "compile": {
-          "lib/netstandard2.0/System.Text.Encoding.CodePages.dll": {
-            "related": ".xml"
-          }
-        },
-        "runtime": {
-          "lib/netstandard2.0/System.Text.Encoding.CodePages.dll": {
-            "related": ".xml"
-          }
-        },
-        "runtimeTargets": {
-          "runtimes/win/lib/netcoreapp2.0/System.Text.Encoding.CodePages.dll": {
-            "assetType": "runtime",
-            "rid": "win"
-          }
-        }
-      },
-      "System.Windows.Extensions/4.7.0": {
-        "type": "package",
-        "dependencies": {
-          "System.Drawing.Common": "4.7.0"
-        },
-        "compile": {
-          "ref/netcoreapp3.0/System.Windows.Extensions.dll": {
-            "related": ".xml"
-          }
-        },
-        "runtime": {
-          "lib/netcoreapp3.0/System.Windows.Extensions.dll": {
-            "related": ".xml"
-          }
-        },
-        "runtimeTargets": {
-          "runtimes/win/lib/netcoreapp3.0/System.Windows.Extensions.dll": {
-            "assetType": "runtime",
-            "rid": "win"
-          }
-        }
-      },
-      "ZstdSharp.Port/0.7.3": {
-        "type": "package",
-        "compile": {
-          "lib/net7.0/ZstdSharp.dll": {}
-        },
-        "runtime": {
-          "lib/net7.0/ZstdSharp.dll": {}
+          "lib/net8.0/ZstdSharp.dll": {}
         }
       }
     }
   },
   "libraries": {
-    "CUE4Parse/1.1.1": {
-      "sha512": "ZHAvpsQLW2TZwTPi9Avzo5Vm3Odf//SAlnjZFD44+TGonlI8i69i8+lmw8JuYdySoXLVtZbjZ9o95kxdCynlEA==",
+    "Blake3/2.0.0": {
+      "sha512": "v447kojeuNYSY5dvtVGG2bv1+M3vOWJXcrYWwXho/2uUpuwK6qPeu5WSMlqLm4VRJu96kysVO11La0zN3dLAuQ==",
       "type": "package",
-      "path": "cue4parse/1.1.1",
+      "path": "blake3/2.0.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "cue4parse.1.1.1.nupkg.sha512",
+        "blake3.2.0.0.nupkg.sha512",
+        "blake3.nuspec",
+        "lib/net8.0/Blake3.dll",
+        "lib/net8.0/Blake3.xml",
+        "logo.png",
+        "runtimes/linux-arm/native/libblake3_dotnet.so",
+        "runtimes/linux-arm64/native/libblake3_dotnet.so",
+        "runtimes/linux-x64/native/libblake3_dotnet.so",
+        "runtimes/osx-arm64/native/libblake3_dotnet.dylib",
+        "runtimes/osx-x64/native/libblake3_dotnet.dylib",
+        "runtimes/win-arm64/native/blake3_dotnet.dll",
+        "runtimes/win-x64/native/blake3_dotnet.dll",
+        "runtimes/win-x86/native/blake3_dotnet.dll"
+      ]
+    },
+    "BouncyCastle.Cryptography/2.5.0": {
+      "sha512": "rc7vRCq/KD3GtIwSgRtjanGaBwTb9nLenFDZnEcauWlssuuEoxcbMfWA3QWWho6QDMSOSkWjs657McdHzEtEcw==",
+      "type": "package",
+      "path": "bouncycastle.cryptography/2.5.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.md",
+        "README.md",
+        "bouncycastle.cryptography.2.5.0.nupkg.sha512",
+        "bouncycastle.cryptography.nuspec",
+        "lib/net461/BouncyCastle.Cryptography.dll",
+        "lib/net461/BouncyCastle.Cryptography.xml",
+        "lib/net6.0/BouncyCastle.Cryptography.dll",
+        "lib/net6.0/BouncyCastle.Cryptography.xml",
+        "lib/netstandard2.0/BouncyCastle.Cryptography.dll",
+        "lib/netstandard2.0/BouncyCastle.Cryptography.xml",
+        "packageIcon.png"
+      ]
+    },
+    "CommunityToolkit.HighPerformance/8.3.2": {
+      "sha512": "1Os81ua0FmIOtiSgOk5C1KBraQ3SDfxs/7BG4qDagm48nGplr//lAVqLH9I2TLDVqRFdhqTUaEITFA5Ho/Ovkw==",
+      "type": "package",
+      "path": "communitytoolkit.highperformance/8.3.2",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "License.md",
+        "ThirdPartyNotices.txt",
+        "communitytoolkit.highperformance.8.3.2.nupkg.sha512",
+        "communitytoolkit.highperformance.nuspec",
+        "lib/net6.0/CommunityToolkit.HighPerformance.dll",
+        "lib/net6.0/CommunityToolkit.HighPerformance.pdb",
+        "lib/net6.0/CommunityToolkit.HighPerformance.xml",
+        "lib/net7.0/CommunityToolkit.HighPerformance.dll",
+        "lib/net7.0/CommunityToolkit.HighPerformance.pdb",
+        "lib/net7.0/CommunityToolkit.HighPerformance.xml",
+        "lib/net8.0/CommunityToolkit.HighPerformance.dll",
+        "lib/net8.0/CommunityToolkit.HighPerformance.pdb",
+        "lib/net8.0/CommunityToolkit.HighPerformance.xml",
+        "lib/netstandard2.0/CommunityToolkit.HighPerformance.dll",
+        "lib/netstandard2.0/CommunityToolkit.HighPerformance.pdb",
+        "lib/netstandard2.0/CommunityToolkit.HighPerformance.xml",
+        "lib/netstandard2.1/CommunityToolkit.HighPerformance.dll",
+        "lib/netstandard2.1/CommunityToolkit.HighPerformance.pdb",
+        "lib/netstandard2.1/CommunityToolkit.HighPerformance.xml"
+      ]
+    },
+    "CUE4Parse/1.2.2": {
+      "sha512": "bZTy9MAzC3rlITah5n7S7K/fRp6hgJQ8DaRmTdUv8wiW9Ky3FZHxHqdkaPdA9TfsuG38HP2P43lV7gOir+zWUQ==",
+      "type": "package",
+      "path": "cue4parse/1.2.2",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "cue4parse.1.2.2.nupkg.sha512",
         "cue4parse.nuspec",
         "lib/net8.0/CUE4Parse-Natives.dll",
         "lib/net8.0/CUE4Parse.dll"
-      ]
-    },
-    "DotNetZip/1.16.0": {
-      "sha512": "CS9sjjXF23FLIbwlLT5k/jXBYxVnLMn01lyAvN/hxFM+UDvSicjTPB9ZMA+Wp/QlvBPbD2pzkAXUp1O50gP/Lw==",
-      "type": "package",
-      "path": "dotnetzip/1.16.0",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "dotnetzip.1.16.0.nupkg.sha512",
-        "dotnetzip.nuspec",
-        "lib/net40/DotNetZip.dll",
-        "lib/net40/DotNetZip.pdb",
-        "lib/net40/DotNetZip.xml",
-        "lib/netstandard2.0/DotNetZip.dll",
-        "lib/netstandard2.0/DotNetZip.pdb",
-        "lib/netstandard2.0/DotNetZip.xml"
       ]
     },
     "Infrablack.UE4Config/0.7.2.97": {
@@ -408,14 +370,14 @@
         "lib/netstandard2.0/UE4Config.dll"
       ]
     },
-    "K4os.Compression.LZ4/1.3.6": {
-      "sha512": "RxGhoJBjZCgGeZgDqOP4Krs1cR9PHInbz6d2N19Dic0Y6ZACzVKbR3uSpqfEZf4RiUbHk9aiog2eS22nQPTc2A==",
+    "K4os.Compression.LZ4/1.3.8": {
+      "sha512": "LhwlPa7c1zs1OV2XadMtAWdImjLIsqFJPoRcIWAadSRn0Ri1DepK65UbWLPmt4riLqx2d40xjXRk0ogpqNtK7g==",
       "type": "package",
-      "path": "k4os.compression.lz4/1.3.6",
+      "path": "k4os.compression.lz4/1.3.8",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "k4os.compression.lz4.1.3.6.nupkg.sha512",
+        "k4os.compression.lz4.1.3.8.nupkg.sha512",
         "k4os.compression.lz4.nuspec",
         "lib/net462/K4os.Compression.LZ4.dll",
         "lib/net462/K4os.Compression.LZ4.xml",
@@ -429,14 +391,14 @@
         "lib/netstandard2.1/K4os.Compression.LZ4.xml"
       ]
     },
-    "K4os.Compression.LZ4.Streams/1.3.6": {
-      "sha512": "lMvHa2cP7WfWxR/vREnwBmZZK/w29AnUZ/95Q91X7wcDdmlf/E8iLnkk8ahFKArHf/4FqTqZSCIUonA6tSFjgQ==",
+    "K4os.Compression.LZ4.Streams/1.3.8": {
+      "sha512": "P15qr8dZAeo9GvYbUIPEYFQ0MEJ0i5iqr37wsYeRC3la2uCldOoeCa6to0CZ1taiwxIV+Mk8NGuZi+4iWivK9w==",
       "type": "package",
-      "path": "k4os.compression.lz4.streams/1.3.6",
+      "path": "k4os.compression.lz4.streams/1.3.8",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "k4os.compression.lz4.streams.1.3.6.nupkg.sha512",
+        "k4os.compression.lz4.streams.1.3.8.nupkg.sha512",
         "k4os.compression.lz4.streams.nuspec",
         "lib/net462/K4os.Compression.LZ4.Streams.dll",
         "lib/net462/K4os.Compression.LZ4.Streams.xml",
@@ -488,53 +450,6 @@
         "lzma-sdk.nuspec"
       ]
     },
-    "Microsoft.NETCore.Platforms/3.1.1": {
-      "sha512": "RmINcaqiEkawM9C8oxFMN/CZmn1fGKWVsosbSY/8ARUNdHqV47hqhPVbrG3qUqLaRQI5w4HuqFOqrbhoSWcH6w==",
-      "type": "package",
-      "path": "microsoft.netcore.platforms/3.1.1",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "Icon.png",
-        "LICENSE.TXT",
-        "THIRD-PARTY-NOTICES.TXT",
-        "lib/netstandard1.0/_._",
-        "microsoft.netcore.platforms.3.1.1.nupkg.sha512",
-        "microsoft.netcore.platforms.nuspec",
-        "runtime.json",
-        "useSharedDesignerContext.txt",
-        "version.txt"
-      ]
-    },
-    "Microsoft.Win32.SystemEvents/4.7.0": {
-      "sha512": "mtVirZr++rq+XCDITMUdnETD59XoeMxSpLRIII7JRI6Yj0LEDiO1pPn0ktlnIj12Ix8bfvQqQDMMIF9wC98oCA==",
-      "type": "package",
-      "path": "microsoft.win32.systemevents/4.7.0",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "LICENSE.TXT",
-        "THIRD-PARTY-NOTICES.TXT",
-        "lib/net461/Microsoft.Win32.SystemEvents.dll",
-        "lib/net461/Microsoft.Win32.SystemEvents.xml",
-        "lib/netstandard2.0/Microsoft.Win32.SystemEvents.dll",
-        "lib/netstandard2.0/Microsoft.Win32.SystemEvents.xml",
-        "microsoft.win32.systemevents.4.7.0.nupkg.sha512",
-        "microsoft.win32.systemevents.nuspec",
-        "ref/net461/Microsoft.Win32.SystemEvents.dll",
-        "ref/net461/Microsoft.Win32.SystemEvents.xml",
-        "ref/net472/Microsoft.Win32.SystemEvents.dll",
-        "ref/net472/Microsoft.Win32.SystemEvents.xml",
-        "ref/netstandard2.0/Microsoft.Win32.SystemEvents.dll",
-        "ref/netstandard2.0/Microsoft.Win32.SystemEvents.xml",
-        "runtimes/win/lib/netcoreapp2.0/Microsoft.Win32.SystemEvents.dll",
-        "runtimes/win/lib/netcoreapp2.0/Microsoft.Win32.SystemEvents.xml",
-        "runtimes/win/lib/netcoreapp3.0/Microsoft.Win32.SystemEvents.dll",
-        "runtimes/win/lib/netcoreapp3.0/Microsoft.Win32.SystemEvents.xml",
-        "useSharedDesignerContext.txt",
-        "version.txt"
-      ]
-    },
     "Newtonsoft.Json/13.0.3": {
       "sha512": "HrC5BXdl00IP9zeV+0Z848QWPAoCr9P3bDEZguI+gkLcBKAOxix/tLEAAHC+UvDNPv4a2d18lOReHMOagPa+zQ==",
       "type": "package",
@@ -565,10 +480,40 @@
         "packageIcon.png"
       ]
     },
-    "Serilog/3.1.1": {
-      "sha512": "P6G4/4Kt9bT635bhuwdXlJ2SCqqn2nhh4gqFqQueCOr9bK/e7W9ll/IoX1Ter948cV2Z/5+5v8pAfJYUISY03A==",
+    "OffiUtils/2.0.1": {
+      "sha512": "tu2rqpbba2Qss5tWqKK5pYgfKKLCUawGTuZ/XrqVx5bUAlgDH4hUvd8DzShQ/RGHul3x/hwGTD6khzSR8yzgxw==",
       "type": "package",
-      "path": "serilog/3.1.1",
+      "path": "offiutils/2.0.1",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "icon.png",
+        "lib/net8.0/OffiUtils.dll",
+        "lib/net9.0/OffiUtils.dll",
+        "offiutils.2.0.1.nupkg.sha512",
+        "offiutils.nuspec"
+      ]
+    },
+    "Oodle.NET/2.1.0": {
+      "sha512": "kQGCpQeM3eUvm4lOdzEfd2C1aUO1dmJJj0YTjMdJGoeqVNTayk8hSLt2cW73yRXBgCI8AMF/mubMJFOTZ9myHA==",
+      "type": "package",
+      "path": "oodle.net/2.1.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "icon.png",
+        "lib/net8.0/Oodle.NET.dll",
+        "lib/net8.0/Oodle.NET.xml",
+        "lib/net9.0/Oodle.NET.dll",
+        "lib/net9.0/Oodle.NET.xml",
+        "oodle.net.2.1.0.nupkg.sha512",
+        "oodle.net.nuspec"
+      ]
+    },
+    "Serilog/4.2.0": {
+      "sha512": "gmoWVOvKgbME8TYR+gwMf7osROiWAURterc6Rt2dQyX7wtjZYpqFiA/pY6ztjGQKKV62GGCyOcmtP1UKMHgSmA==",
+      "type": "package",
+      "path": "serilog/4.2.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -578,24 +523,22 @@
         "lib/net462/Serilog.xml",
         "lib/net471/Serilog.dll",
         "lib/net471/Serilog.xml",
-        "lib/net5.0/Serilog.dll",
-        "lib/net5.0/Serilog.xml",
         "lib/net6.0/Serilog.dll",
         "lib/net6.0/Serilog.xml",
-        "lib/net7.0/Serilog.dll",
-        "lib/net7.0/Serilog.xml",
+        "lib/net8.0/Serilog.dll",
+        "lib/net8.0/Serilog.xml",
+        "lib/net9.0/Serilog.dll",
+        "lib/net9.0/Serilog.xml",
         "lib/netstandard2.0/Serilog.dll",
         "lib/netstandard2.0/Serilog.xml",
-        "lib/netstandard2.1/Serilog.dll",
-        "lib/netstandard2.1/Serilog.xml",
-        "serilog.3.1.1.nupkg.sha512",
+        "serilog.4.2.0.nupkg.sha512",
         "serilog.nuspec"
       ]
     },
-    "Serilog.Sinks.Console/5.0.0": {
-      "sha512": "IZ6bn79k+3SRXOBpwSOClUHikSkp2toGPCZ0teUkscv4dpDg9E2R2xVsNkLmwddE4OpNVO3N0xiYsAH556vN8Q==",
+    "Serilog.Sinks.Console/6.0.0": {
+      "sha512": "fQGWqVMClCP2yEyTXPIinSr5c+CBGUvBybPxjAGcf7ctDhadFhrQw03Mv8rJ07/wR5PDfFjewf2LimvXCDzpbA==",
       "type": "package",
-      "path": "serilog.sinks.console/5.0.0",
+      "path": "serilog.sinks.console/6.0.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -605,57 +548,14 @@
         "lib/net462/Serilog.Sinks.Console.xml",
         "lib/net471/Serilog.Sinks.Console.dll",
         "lib/net471/Serilog.Sinks.Console.xml",
-        "lib/net5.0/Serilog.Sinks.Console.dll",
-        "lib/net5.0/Serilog.Sinks.Console.xml",
         "lib/net6.0/Serilog.Sinks.Console.dll",
         "lib/net6.0/Serilog.Sinks.Console.xml",
-        "lib/net7.0/Serilog.Sinks.Console.dll",
-        "lib/net7.0/Serilog.Sinks.Console.xml",
+        "lib/net8.0/Serilog.Sinks.Console.dll",
+        "lib/net8.0/Serilog.Sinks.Console.xml",
         "lib/netstandard2.0/Serilog.Sinks.Console.dll",
         "lib/netstandard2.0/Serilog.Sinks.Console.xml",
-        "lib/netstandard2.1/Serilog.Sinks.Console.dll",
-        "lib/netstandard2.1/Serilog.Sinks.Console.xml",
-        "serilog.sinks.console.5.0.0.nupkg.sha512",
+        "serilog.sinks.console.6.0.0.nupkg.sha512",
         "serilog.sinks.console.nuspec"
-      ]
-    },
-    "System.Drawing.Common/4.7.0": {
-      "sha512": "v+XbyYHaZjDfn0ENmJEV1VYLgGgCTx1gnfOBcppowbpOAriglYgGCvFCPr2EEZyBvXlpxbEsTwkOlInl107ahA==",
-      "type": "package",
-      "path": "system.drawing.common/4.7.0",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "LICENSE.TXT",
-        "THIRD-PARTY-NOTICES.TXT",
-        "lib/MonoAndroid10/_._",
-        "lib/MonoTouch10/_._",
-        "lib/net461/System.Drawing.Common.dll",
-        "lib/netstandard2.0/System.Drawing.Common.dll",
-        "lib/xamarinios10/_._",
-        "lib/xamarinmac20/_._",
-        "lib/xamarintvos10/_._",
-        "lib/xamarinwatchos10/_._",
-        "ref/MonoAndroid10/_._",
-        "ref/MonoTouch10/_._",
-        "ref/net461/System.Drawing.Common.dll",
-        "ref/netcoreapp3.0/System.Drawing.Common.dll",
-        "ref/netcoreapp3.0/System.Drawing.Common.xml",
-        "ref/netstandard2.0/System.Drawing.Common.dll",
-        "ref/xamarinios10/_._",
-        "ref/xamarinmac20/_._",
-        "ref/xamarintvos10/_._",
-        "ref/xamarinwatchos10/_._",
-        "runtimes/unix/lib/netcoreapp2.0/System.Drawing.Common.dll",
-        "runtimes/unix/lib/netcoreapp3.0/System.Drawing.Common.dll",
-        "runtimes/unix/lib/netcoreapp3.0/System.Drawing.Common.xml",
-        "runtimes/win/lib/netcoreapp2.0/System.Drawing.Common.dll",
-        "runtimes/win/lib/netcoreapp3.0/System.Drawing.Common.dll",
-        "runtimes/win/lib/netcoreapp3.0/System.Drawing.Common.xml",
-        "system.drawing.common.4.7.0.nupkg.sha512",
-        "system.drawing.common.nuspec",
-        "useSharedDesignerContext.txt",
-        "version.txt"
       ]
     },
     "System.IO.Pipelines/6.0.3": {
@@ -683,265 +583,46 @@
         "useSharedDesignerContext.txt"
       ]
     },
-    "System.Memory/4.5.5": {
-      "sha512": "XIWiDvKPXaTveaB7HVganDlOCRoj03l+jrwNvcge/t8vhGYKvqV+dMv6G4SAX2NoNmN0wZfVPTAlFwZcZvVOUw==",
+    "Zlib-ng.NET/1.1.1": {
+      "sha512": "VuO3aiVg0ow/BdCPJHkObfdQ+IX+veaXY2IbDOxt+QSsly5M/ieY8arpvosffoKbVyYwgLz8boXu1UaH52YPYQ==",
       "type": "package",
-      "path": "system.memory/4.5.5",
+      "path": "zlib-ng.net/1.1.1",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "LICENSE.TXT",
-        "THIRD-PARTY-NOTICES.TXT",
-        "lib/net461/System.Memory.dll",
-        "lib/net461/System.Memory.xml",
-        "lib/netcoreapp2.1/_._",
-        "lib/netstandard1.1/System.Memory.dll",
-        "lib/netstandard1.1/System.Memory.xml",
-        "lib/netstandard2.0/System.Memory.dll",
-        "lib/netstandard2.0/System.Memory.xml",
-        "ref/netcoreapp2.1/_._",
-        "system.memory.4.5.5.nupkg.sha512",
-        "system.memory.nuspec",
-        "useSharedDesignerContext.txt",
-        "version.txt"
+        "icon.png",
+        "lib/net8.0/Zlib-ng.NET.dll",
+        "lib/net8.0/Zlib-ng.NET.xml",
+        "lib/net9.0/Zlib-ng.NET.dll",
+        "lib/net9.0/Zlib-ng.NET.xml",
+        "zlib-ng.net.1.1.1.nupkg.sha512",
+        "zlib-ng.net.nuspec"
       ]
     },
-    "System.Runtime.CompilerServices.Unsafe/6.0.0": {
-      "sha512": "/iUeP3tq1S0XdNNoMz5C9twLSrM/TH+qElHkXWaPvuNOt+99G75NrV0OS2EqHx5wMN7popYjpc8oTjC1y16DLg==",
+    "ZstdSharp.Port/0.8.4": {
+      "sha512": "eieSXq3kakCUXbgdxkKaRqWS6hF0KBJcqok9LlDCs60GOyrynLvPOcQ0pRw7shdPF7lh/VepJ9cP9n9HHc759g==",
       "type": "package",
-      "path": "system.runtime.compilerservices.unsafe/6.0.0",
+      "path": "zstdsharp.port/0.8.4",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "Icon.png",
-        "LICENSE.TXT",
-        "THIRD-PARTY-NOTICES.TXT",
-        "buildTransitive/netcoreapp2.0/System.Runtime.CompilerServices.Unsafe.targets",
-        "buildTransitive/netcoreapp3.1/_._",
-        "lib/net461/System.Runtime.CompilerServices.Unsafe.dll",
-        "lib/net461/System.Runtime.CompilerServices.Unsafe.xml",
-        "lib/net6.0/System.Runtime.CompilerServices.Unsafe.dll",
-        "lib/net6.0/System.Runtime.CompilerServices.Unsafe.xml",
-        "lib/netcoreapp3.1/System.Runtime.CompilerServices.Unsafe.dll",
-        "lib/netcoreapp3.1/System.Runtime.CompilerServices.Unsafe.xml",
-        "lib/netstandard2.0/System.Runtime.CompilerServices.Unsafe.dll",
-        "lib/netstandard2.0/System.Runtime.CompilerServices.Unsafe.xml",
-        "system.runtime.compilerservices.unsafe.6.0.0.nupkg.sha512",
-        "system.runtime.compilerservices.unsafe.nuspec",
-        "useSharedDesignerContext.txt"
-      ]
-    },
-    "System.Security.AccessControl/4.7.0": {
-      "sha512": "JECvTt5aFF3WT3gHpfofL2MNNP6v84sxtXxpqhLBCcDRzqsPBmHhQ6shv4DwwN2tRlzsUxtb3G9M3763rbXKDg==",
-      "type": "package",
-      "path": "system.security.accesscontrol/4.7.0",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "LICENSE.TXT",
-        "THIRD-PARTY-NOTICES.TXT",
-        "lib/net46/System.Security.AccessControl.dll",
-        "lib/net461/System.Security.AccessControl.dll",
-        "lib/net461/System.Security.AccessControl.xml",
-        "lib/netstandard1.3/System.Security.AccessControl.dll",
-        "lib/netstandard2.0/System.Security.AccessControl.dll",
-        "lib/netstandard2.0/System.Security.AccessControl.xml",
-        "lib/uap10.0.16299/_._",
-        "ref/net46/System.Security.AccessControl.dll",
-        "ref/net461/System.Security.AccessControl.dll",
-        "ref/net461/System.Security.AccessControl.xml",
-        "ref/netstandard1.3/System.Security.AccessControl.dll",
-        "ref/netstandard1.3/System.Security.AccessControl.xml",
-        "ref/netstandard1.3/de/System.Security.AccessControl.xml",
-        "ref/netstandard1.3/es/System.Security.AccessControl.xml",
-        "ref/netstandard1.3/fr/System.Security.AccessControl.xml",
-        "ref/netstandard1.3/it/System.Security.AccessControl.xml",
-        "ref/netstandard1.3/ja/System.Security.AccessControl.xml",
-        "ref/netstandard1.3/ko/System.Security.AccessControl.xml",
-        "ref/netstandard1.3/ru/System.Security.AccessControl.xml",
-        "ref/netstandard1.3/zh-hans/System.Security.AccessControl.xml",
-        "ref/netstandard1.3/zh-hant/System.Security.AccessControl.xml",
-        "ref/netstandard2.0/System.Security.AccessControl.dll",
-        "ref/netstandard2.0/System.Security.AccessControl.xml",
-        "ref/uap10.0.16299/_._",
-        "runtimes/win/lib/net46/System.Security.AccessControl.dll",
-        "runtimes/win/lib/net461/System.Security.AccessControl.dll",
-        "runtimes/win/lib/net461/System.Security.AccessControl.xml",
-        "runtimes/win/lib/netcoreapp2.0/System.Security.AccessControl.dll",
-        "runtimes/win/lib/netcoreapp2.0/System.Security.AccessControl.xml",
-        "runtimes/win/lib/netstandard1.3/System.Security.AccessControl.dll",
-        "runtimes/win/lib/uap10.0.16299/_._",
-        "system.security.accesscontrol.4.7.0.nupkg.sha512",
-        "system.security.accesscontrol.nuspec",
-        "useSharedDesignerContext.txt",
-        "version.txt"
-      ]
-    },
-    "System.Security.Permissions/4.7.0": {
-      "sha512": "dkOV6YYVBnYRa15/yv004eCGRBVADXw8qRbbNiCn/XpdJSUXkkUeIvdvFHkvnko4CdKMqG8yRHC4ox83LSlMsQ==",
-      "type": "package",
-      "path": "system.security.permissions/4.7.0",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "LICENSE.TXT",
-        "THIRD-PARTY-NOTICES.TXT",
-        "lib/net461/System.Security.Permissions.dll",
-        "lib/net461/System.Security.Permissions.xml",
-        "lib/netcoreapp3.0/System.Security.Permissions.dll",
-        "lib/netcoreapp3.0/System.Security.Permissions.xml",
-        "lib/netstandard2.0/System.Security.Permissions.dll",
-        "lib/netstandard2.0/System.Security.Permissions.xml",
-        "ref/net461/System.Security.Permissions.dll",
-        "ref/net461/System.Security.Permissions.xml",
-        "ref/netcoreapp3.0/System.Security.Permissions.dll",
-        "ref/netcoreapp3.0/System.Security.Permissions.xml",
-        "ref/netstandard2.0/System.Security.Permissions.dll",
-        "ref/netstandard2.0/System.Security.Permissions.xml",
-        "system.security.permissions.4.7.0.nupkg.sha512",
-        "system.security.permissions.nuspec",
-        "useSharedDesignerContext.txt",
-        "version.txt"
-      ]
-    },
-    "System.Security.Principal.Windows/4.7.0": {
-      "sha512": "ojD0PX0XhneCsUbAZVKdb7h/70vyYMDYs85lwEI+LngEONe/17A0cFaRFqZU+sOEidcVswYWikYOQ9PPfjlbtQ==",
-      "type": "package",
-      "path": "system.security.principal.windows/4.7.0",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "LICENSE.TXT",
-        "THIRD-PARTY-NOTICES.TXT",
-        "lib/net46/System.Security.Principal.Windows.dll",
-        "lib/net461/System.Security.Principal.Windows.dll",
-        "lib/net461/System.Security.Principal.Windows.xml",
-        "lib/netstandard1.3/System.Security.Principal.Windows.dll",
-        "lib/netstandard2.0/System.Security.Principal.Windows.dll",
-        "lib/netstandard2.0/System.Security.Principal.Windows.xml",
-        "lib/uap10.0.16299/_._",
-        "ref/net46/System.Security.Principal.Windows.dll",
-        "ref/net461/System.Security.Principal.Windows.dll",
-        "ref/net461/System.Security.Principal.Windows.xml",
-        "ref/netcoreapp3.0/System.Security.Principal.Windows.dll",
-        "ref/netcoreapp3.0/System.Security.Principal.Windows.xml",
-        "ref/netstandard1.3/System.Security.Principal.Windows.dll",
-        "ref/netstandard1.3/System.Security.Principal.Windows.xml",
-        "ref/netstandard1.3/de/System.Security.Principal.Windows.xml",
-        "ref/netstandard1.3/es/System.Security.Principal.Windows.xml",
-        "ref/netstandard1.3/fr/System.Security.Principal.Windows.xml",
-        "ref/netstandard1.3/it/System.Security.Principal.Windows.xml",
-        "ref/netstandard1.3/ja/System.Security.Principal.Windows.xml",
-        "ref/netstandard1.3/ko/System.Security.Principal.Windows.xml",
-        "ref/netstandard1.3/ru/System.Security.Principal.Windows.xml",
-        "ref/netstandard1.3/zh-hans/System.Security.Principal.Windows.xml",
-        "ref/netstandard1.3/zh-hant/System.Security.Principal.Windows.xml",
-        "ref/netstandard2.0/System.Security.Principal.Windows.dll",
-        "ref/netstandard2.0/System.Security.Principal.Windows.xml",
-        "ref/uap10.0.16299/_._",
-        "runtimes/unix/lib/netcoreapp2.0/System.Security.Principal.Windows.dll",
-        "runtimes/unix/lib/netcoreapp2.0/System.Security.Principal.Windows.xml",
-        "runtimes/unix/lib/netcoreapp2.1/System.Security.Principal.Windows.dll",
-        "runtimes/unix/lib/netcoreapp2.1/System.Security.Principal.Windows.xml",
-        "runtimes/win/lib/net46/System.Security.Principal.Windows.dll",
-        "runtimes/win/lib/net461/System.Security.Principal.Windows.dll",
-        "runtimes/win/lib/net461/System.Security.Principal.Windows.xml",
-        "runtimes/win/lib/netcoreapp2.0/System.Security.Principal.Windows.dll",
-        "runtimes/win/lib/netcoreapp2.0/System.Security.Principal.Windows.xml",
-        "runtimes/win/lib/netcoreapp2.1/System.Security.Principal.Windows.dll",
-        "runtimes/win/lib/netcoreapp2.1/System.Security.Principal.Windows.xml",
-        "runtimes/win/lib/netstandard1.3/System.Security.Principal.Windows.dll",
-        "runtimes/win/lib/uap10.0.16299/_._",
-        "system.security.principal.windows.4.7.0.nupkg.sha512",
-        "system.security.principal.windows.nuspec",
-        "useSharedDesignerContext.txt",
-        "version.txt"
-      ]
-    },
-    "System.Text.Encoding.CodePages/4.7.1": {
-      "sha512": "i2fOvznVVgOOTLUz8FgSap/MsR98I4Iaoz99VXcOW/e7Y2OdY42zhYpBYpZyivk5alYY/UsOWAVswhtjxceodA==",
-      "type": "package",
-      "path": "system.text.encoding.codepages/4.7.1",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "Icon.png",
-        "LICENSE.TXT",
-        "THIRD-PARTY-NOTICES.TXT",
-        "lib/MonoAndroid10/_._",
-        "lib/MonoTouch10/_._",
-        "lib/net46/System.Text.Encoding.CodePages.dll",
-        "lib/net461/System.Text.Encoding.CodePages.dll",
-        "lib/net461/System.Text.Encoding.CodePages.xml",
-        "lib/netstandard1.3/System.Text.Encoding.CodePages.dll",
-        "lib/netstandard2.0/System.Text.Encoding.CodePages.dll",
-        "lib/netstandard2.0/System.Text.Encoding.CodePages.xml",
-        "lib/xamarinios10/_._",
-        "lib/xamarinmac20/_._",
-        "lib/xamarintvos10/_._",
-        "lib/xamarinwatchos10/_._",
-        "ref/MonoAndroid10/_._",
-        "ref/MonoTouch10/_._",
-        "ref/xamarinios10/_._",
-        "ref/xamarinmac20/_._",
-        "ref/xamarintvos10/_._",
-        "ref/xamarinwatchos10/_._",
-        "runtimes/win/lib/net461/System.Text.Encoding.CodePages.dll",
-        "runtimes/win/lib/net461/System.Text.Encoding.CodePages.xml",
-        "runtimes/win/lib/netcoreapp2.0/System.Text.Encoding.CodePages.dll",
-        "runtimes/win/lib/netcoreapp2.0/System.Text.Encoding.CodePages.xml",
-        "runtimes/win/lib/netstandard1.3/System.Text.Encoding.CodePages.dll",
-        "runtimes/win/lib/netstandard2.0/System.Text.Encoding.CodePages.dll",
-        "runtimes/win/lib/netstandard2.0/System.Text.Encoding.CodePages.xml",
-        "system.text.encoding.codepages.4.7.1.nupkg.sha512",
-        "system.text.encoding.codepages.nuspec",
-        "useSharedDesignerContext.txt",
-        "version.txt"
-      ]
-    },
-    "System.Windows.Extensions/4.7.0": {
-      "sha512": "CeWTdRNfRaSh0pm2gDTJFwVaXfTq6Xwv/sA887iwPTneW7oMtMlpvDIO+U60+3GWTB7Aom6oQwv5VZVUhQRdPQ==",
-      "type": "package",
-      "path": "system.windows.extensions/4.7.0",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "LICENSE.TXT",
-        "THIRD-PARTY-NOTICES.TXT",
-        "lib/netcoreapp3.0/System.Windows.Extensions.dll",
-        "lib/netcoreapp3.0/System.Windows.Extensions.xml",
-        "ref/netcoreapp3.0/System.Windows.Extensions.dll",
-        "ref/netcoreapp3.0/System.Windows.Extensions.xml",
-        "runtimes/win/lib/netcoreapp3.0/System.Windows.Extensions.dll",
-        "runtimes/win/lib/netcoreapp3.0/System.Windows.Extensions.xml",
-        "system.windows.extensions.4.7.0.nupkg.sha512",
-        "system.windows.extensions.nuspec",
-        "useSharedDesignerContext.txt",
-        "version.txt"
-      ]
-    },
-    "ZstdSharp.Port/0.7.3": {
-      "sha512": "U9Ix4l4cl58Kzz1rJzj5hoVTjmbx1qGMwzAcbv1j/d3NzrFaESIurQyg+ow4mivCgkE3S413y+U9k4WdnEIkRA==",
-      "type": "package",
-      "path": "zstdsharp.port/0.7.3",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "lib/net461/ZstdSharp.dll",
+        "lib/net462/ZstdSharp.dll",
         "lib/net5.0/ZstdSharp.dll",
         "lib/net6.0/ZstdSharp.dll",
         "lib/net7.0/ZstdSharp.dll",
+        "lib/net8.0/ZstdSharp.dll",
+        "lib/net9.0/ZstdSharp.dll",
         "lib/netcoreapp3.1/ZstdSharp.dll",
         "lib/netstandard2.0/ZstdSharp.dll",
         "lib/netstandard2.1/ZstdSharp.dll",
-        "zstdsharp.port.0.7.3.nupkg.sha512",
+        "zstdsharp.port.0.8.4.nupkg.sha512",
         "zstdsharp.port.nuspec"
       ]
     }
   },
   "projectFileDependencyGroups": {
     "net8.0": [
-      "CUE4Parse >= 1.1.1"
+      "CUE4Parse >= 1.2.2"
     ]
   },
   "packageFolders": {
@@ -988,7 +669,7 @@
         "dependencies": {
           "CUE4Parse": {
             "target": "Package",
-            "version": "[1.1.1, )"
+            "version": "[1.2.2, )"
           }
         },
         "imports": [

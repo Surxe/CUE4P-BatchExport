@@ -46,12 +46,10 @@ Looking how to download assets from someone who already did the below process? J
   
 7. Change the directories you need exported in src\NeededExports.json. Paths can appear more than once. Paths are grouped simply for readability, naming the groups something meaningful is not necessary. If exporting all, simply add the root path and all files within will be exported
    
-8. Delete pre-existing exports by deleting the folder BatchExport\Exports if it exists (is in .gitignore)
+8. `cd BatchExport/src`
    
-9. cd BatchExport/src
-   
-10. 'dotnet run' on the .csproj
+9.  `dotnet ru`' on the .csproj
     
-11. Compress/Zip src\Exports to src\Exports.zip and push so others on the team can Extract/Unzip
+10. Compress/Zip src\Exports to src\Exports.zip and attach through some other file sharing site as it is too big for GitHub to share
 
 .usmap and .uasset are currently the only files this will export
