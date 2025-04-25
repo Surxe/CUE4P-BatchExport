@@ -83,7 +83,8 @@
         "DungeonCrawler/Content/DungeonCrawler/Data/Generated/V2/Projectile"
     ],
     "Map": [
-        "DungeonCrawler/Content/DungeonCrawler/Maps"
+        "DungeonCrawler/Content/DungeonCrawler/Maps",
+        "DungeonCrawler/Content/DungeonCrawler/UI/Resources/Minimap"
     ],
     "AbilitySilence": [
         "DungeonCrawler/Content/DungeonCrawler/Data/Generated/V2/AbilityRelationshipTagGroup/AbilityRelationshipTagGroup"
