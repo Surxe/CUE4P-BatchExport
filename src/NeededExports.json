@@ -84,7 +84,8 @@
     ],
     "Map": [
         "DungeonCrawler/Content/DungeonCrawler/Maps",
-        "DungeonCrawler/Content/DungeonCrawler/UI/Resources/Minimap"
+        "DungeonCrawler/Content/DungeonCrawler/UI/Resources/Minimap",
+        "DungeonCrawler/Content/DungeonCrawler/Data/Generated/V2/Dungeon"
     ],
     "AbilitySilence": [
         "DungeonCrawler/Content/DungeonCrawler/Data/Generated/V2/AbilityRelationshipTagGroup/AbilityRelationshipTagGroup"
