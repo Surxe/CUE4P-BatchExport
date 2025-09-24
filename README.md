@@ -48,7 +48,7 @@ Looking how to download assets from someone who already did the below process? J
    
 8. `cd BatchExport/src`
    
-9.  `dotnet ru`' on the .csproj
+9.  `dotnet run BatchExport.csproj`
     
 10. Compress/Zip src\Exports to src\Exports.zip and attach through some other file sharing site as it is too big for GitHub to share
 
