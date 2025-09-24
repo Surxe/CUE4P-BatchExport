@@ -36,13 +36,13 @@ Looking how to download assets from someone who already did the below process? J
    
 5.1.2 Run in terminal: "dotnet add package CUE4Parse"
    
-5.2 _gameDirectory to directory of the "Repacked" files created by the extract.bat native repacker
+5.2 in program.cs set _gameDirectory to directory of the "Repacked" files created by the extract.bat native repacker
    
-5.3 _outputPath to directory to save exports to
+5.3 in program.cs set _outputPath to directory to save exports to
    
-5.3 _mapping to name of .usmap file
+5.3 in program.cs set _mapping to name of .usmap file
    
-5.4 _aesKey which hasn't changed since the game was released
+5.4 in program.cs set _aesKey which hasn't changed since the game was released
   
 7. Change the directories you need exported in src\NeededExports.json. Paths can appear more than once. Paths are grouped simply for readability, naming the groups something meaningful is not necessary. If exporting all, simply add the root path and all files within will be exported
    
