@@ -13,9 +13,9 @@ namespace CUE4Parse.Example
 {
     public static class Program
     {
-        private const string _gameDirectory = @"C:\Users\twopo\Desktop\DarkerDatamining\Plyroth's Native Extractor\Repack"; // Change game directory path to the one you have, ideally after repacked
-        private const string _outputPath = @"C:\Users\twopo\Desktop\DarkerDatamining\BatchExport-Output"; // Change output directory path to the one you want.
-        private const string _mapping = @"C:\Users\twopo\Desktop\DarkerDatamining\UE_7_Pre_Release.usmap";
+        private const string _gameDirectory = @"C:\Datamining\Dark_and_Darker\NativeExtractor\Repack"; // Change game directory path to the one you have, ideally after repacked
+        private const string _outputPath = @"C:\DarkAndDarkerWiki\Exports"; // Change output directory path to the one you want.
+        private const string _mapping = @"C:\Datamining\Dark_and_Darker\0.6.2.5622-686.usmap";
         private const string _aesKey = @"0x903DBEEB889CFB1C25AFA28A9463F6D4E816B174D68B3902427FE5867E8C688E"; // kD2+64ic+xwlr6KKlGP21OgWsXTWizkCQn/lhn6MaI4= base64 key
         private const bool _enableLogging = true; // Recommend enabling this until you're certain it exported all the files you expected, but may slow the runtime
         
