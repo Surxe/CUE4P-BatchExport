@@ -13,10 +13,10 @@ namespace CUE4Parse.Example
 {
     public static class Program
     {
-        private const string _gameDirectory = @"C:\Datamining\Dark_and_Darker\NativeExtractor\Repack"; // Change game directory path to the one you have, ideally after repacked
-        private const string _outputPath = @"C:\DarkAndDarkerWiki\Exports"; // Change output directory path to the one you want.
-        private const string _mapping = @"C:\Datamining\Dark_and_Darker\0.6.2.5622-686.usmap";
-        private const string _aesKey = @"0x903DBEEB889CFB1C25AFA28A9463F6D4E816B174D68B3902427FE5867E8C688E"; // kD2+64ic+xwlr6KKlGP21OgWsXTWizkCQn/lhn6MaI4= base64 key
+        private const string _gameDirectory = @"D:\Steam\steamapps\common\WRFrontiers\13_2017027\WRFrontiers\Content\Paks"; // Change game directory path to the one you have, ideally after repacked
+        private const string _outputPath = @"D:\WRFrontiersDB\BatchExportOutput"; // Change output directory path to the one you want.
+        private const string _mapping = @"D:\WRFrontiersDB\Mappings\5.4.4-0+Unknown-WRFrontiers 2025-09-23.usmap";
+        // no aes key necessary for this game
         private const bool _enableLogging = true; // Recommend enabling this until you're certain it exported all the files you expected, but may slow the runtime
         
 
@@ -74,24 +74,24 @@ namespace CUE4Parse.Example
         public static void Main()
         {
             // === replaced block starts here ===
-            var toDelete = Path.Combine(_outputPath, "DungeonCrawler", "Content");
-            Console.WriteLine($"Preparing export directory:\n{toDelete}\n");
+            // var toDelete = Path.Combine(_outputPath, "DungeonCrawler", "Content");
+            // Console.WriteLine($"Preparing export directory:\n{toDelete}\n");
 
-            if (Directory.Exists(toDelete))
-            {
-                try
-                {
-                    Directory.Delete(toDelete, true);
-                    Console.WriteLine("Old export contents deleted.");
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Warning: could not delete previous contents: " + ex.Message);
-                }
-            }
+            // if (Directory.Exists(toDelete))
+            // {
+            //     try
+            //     {
+            //         Directory.Delete(toDelete, true);
+            //         Console.WriteLine("Old export contents deleted.");
+            //     }
+            //     catch (Exception ex)
+            //     {
+            //         Console.WriteLine("Warning: could not delete previous contents: " + ex.Message);
+            //     }
+            // }
 
             // Ensure the full path exists for new exports
-            Directory.CreateDirectory(toDelete);
+            //Directory.CreateDirectory(toDelete);
             // === replaced block ends here ===
 
             // Create exports directory
