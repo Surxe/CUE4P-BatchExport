@@ -18,6 +18,7 @@ namespace BatchExport
         private const string _mappingFilePath = @"D:\WRFrontiersDB\Mappings\5.4.4-0+Unknown-WRFrontiers 2025-09-23.usmap";
         private const string? _aesKeyHex = null; // Set to AES key hex string if encryption is used, or null if no encryption
         private const bool _isLoggingEnabled = true; // Recommend enabling this until you're certain it exported all the files you expected, but may slow the runtime
+        private const bool _shouldWipeOutputDirectory = false; // Set to true to delete existing output directory contents before exporting
         
         // File filtering configuration
         private static readonly string[] SupportedAssetFileExtensions = { ".uasset", ".umap" };
@@ -96,6 +97,28 @@ namespace BatchExport
             // Create exports directory
             string applicationRootPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..\\..\\..\\"));
             Utils.LogInfo("Output Directory: " + _exportOutputPath, _isLoggingEnabled);
+
+            // Handle output directory cleanup if requested
+            if (_shouldWipeOutputDirectory && Directory.Exists(_exportOutputPath))
+            {
+                try
+                {
+                    Utils.LogInfo("Wiping existing output directory contents...", _isLoggingEnabled);
+                    Directory.Delete(_exportOutputPath, true);
+                    Utils.LogInfo("Output directory successfully cleared.", _isLoggingEnabled);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Warning: Failed to delete output directory: {ex.Message}");
+                }
+            }
+
+            // Ensure output directory exists
+            if (!Directory.Exists(_exportOutputPath))
+            {
+                Directory.CreateDirectory(_exportOutputPath);
+                Utils.LogInfo("Created output directory.", _isLoggingEnabled);
+            }
 
             // Decrypt .pak to assets
             if (_isLoggingEnabled)
