@@ -16,6 +16,11 @@ Use predefined game configurations that automatically set optimal values:
 }
 ```
 
+**How Presets Work:**
+- ✅ **Your paths are preserved**: `pakFilesDirectory`, `exportOutputPath`, `mappingFilePath` from your main config
+- ✅ **Game settings are applied**: AES key, UE version, file extensions, exclusions from the preset
+- ✅ **Best of both**: You get game-optimized settings with your custom paths
+
 ### 2. Manual Configuration File (appsettings.json)
 Create an `appsettings.json` file in the same directory as the executable with your settings. Use `appsettings.template.json` as an example.
 

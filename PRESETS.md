@@ -26,6 +26,8 @@ The BatchExport application now includes game presets that automatically configu
    - Unreal Engine version
    - Texture platform
 
+**Important**: Presets only override game-specific settings. Your custom paths (`pakFilesDirectory`, `exportOutputPath`, `mappingFilePath`) are preserved from your main configuration file.
+
 **Note**: By default, `neededExportsFilePath` is set to `null` in all configurations, which means all assets will be exported. If you want to limit exports to specific directories, create a NeededExports.json file and set the path to it.
 
 ## Available Presets
@@ -64,6 +66,24 @@ Mix presets with custom settings:
 ```
 
 The preset will load settings from `appsettings.darkanddarker.json`, applying the AES key, UE version, and file filters, while your custom settings override logging and directory cleanup behavior.
+
+### Example: Mixed Configuration
+**Your appsettings.json:**
+```json
+{
+  "preset": "WarRobotsFrontiers",
+  "pakFilesDirectory": "C:\\MyCustomPath\\Paks",
+  "exportOutputPath": "C:\\MyExports",
+  "mappingFilePath": "C:\\MyMappings\\custom.usmap",
+  "isLoggingEnabled": false
+}
+```
+
+**Result after preset is applied:**
+- ✅ Uses your custom paths: `C:\MyCustomPath\Paks`, `C:\MyExports`, etc.
+- ✅ Uses preset's AES key: `null` (from WarRobotsFrontiers preset)
+- ✅ Uses preset's UE version: `GAME_UE5_4` (from WarRobotsFrontiers preset)
+- ✅ Uses your logging preference: `false`
 
 ## Preset Files
 

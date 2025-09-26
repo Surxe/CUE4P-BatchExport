@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using CUE4Parse.UE4.Versions;
 using CUE4Parse.UE4.Assets.Exports.Texture;
 
@@ -162,37 +163,51 @@ namespace BatchExport
 
                 if (presetSettings != null)
                 {
-                    // Apply only the preset-specific settings, not paths which should remain user-configured
-                    if (presetSettings.AesKeyHex != null) 
-                    {
-                        AesKeyHex = presetSettings.AesKeyHex;
-                        Console.WriteLine($"Loaded from preset: AesKeyHex = {(AesKeyHex != null ? "[Set]" : "null")}");
-                    }
+                    // Store user's path settings before applying preset
+                    string userPakPath = PakFilesDirectory;
+                    string userOutputPath = ExportOutputPath;
+                    string userMappingPath = MappingFilePath;
+                    bool userLogging = IsLoggingEnabled;
+                    bool userWipeOutput = ShouldWipeOutputDirectory;
+                    string? userNeededExports = NeededExportsFilePath;
+                    
+                    // Apply preset game-specific settings (always apply these from preset)
+                    AesKeyHex = presetSettings.AesKeyHex;
+                    Console.WriteLine($"Loaded from preset: AesKeyHex = {(AesKeyHex != null ? "[Set]" : "null")}");
+                    
                     if (presetSettings.SupportedAssetFileExtensions != null) 
                     {
                         SupportedAssetFileExtensions = presetSettings.SupportedAssetFileExtensions;
                         Console.WriteLine($"Loaded from preset: SupportedAssetFileExtensions = [{string.Join(", ", SupportedAssetFileExtensions)}]");
                     }
-                    if (presetSettings.ExcludedAssetFilePrefixes != null) 
-                    {
-                        ExcludedAssetFilePrefixes = presetSettings.ExcludedAssetFilePrefixes;
-                        Console.WriteLine($"Loaded from preset: ExcludedAssetFilePrefixes = [{string.Join(", ", ExcludedAssetFilePrefixes)}]");
-                    }
-                    else if (presetSettings.ExcludedAssetFilePrefixes == null && ExcludedAssetFilePrefixes != null)
-                    {
-                        ExcludedAssetFilePrefixes = null;
-                        Console.WriteLine("Loaded from preset: ExcludedAssetFilePrefixes = null (no exclusions)");
-                    }
+                    
+                    ExcludedAssetFilePrefixes = presetSettings.ExcludedAssetFilePrefixes;
+                    var excludedDisplay = ExcludedAssetFilePrefixes != null ? $"[{string.Join(", ", ExcludedAssetFilePrefixes)}]" : "null (no exclusions)";
+                    Console.WriteLine($"Loaded from preset: ExcludedAssetFilePrefixes = {excludedDisplay}");
+                    
                     if (!string.IsNullOrEmpty(presetSettings.UnrealEngineVersion)) 
                     {
                         UnrealEngineVersion = presetSettings.UnrealEngineVersion;
                         Console.WriteLine($"Loaded from preset: UnrealEngineVersion = {UnrealEngineVersion}");
                     }
+                    
                     if (!string.IsNullOrEmpty(presetSettings.TexturePlatform)) 
                     {
                         TexturePlatform = presetSettings.TexturePlatform;
                         Console.WriteLine($"Loaded from preset: TexturePlatform = {TexturePlatform}");
                     }
+                    
+                    // Restore user's path and preference settings (these should NEVER be overridden by preset)
+                    PakFilesDirectory = userPakPath;
+                    ExportOutputPath = userOutputPath;
+                    MappingFilePath = userMappingPath;
+                    IsLoggingEnabled = userLogging;
+                    ShouldWipeOutputDirectory = userWipeOutput;
+                    NeededExportsFilePath = userNeededExports;
+                    
+                    Console.WriteLine($"User paths preserved: PakFilesDirectory = {PakFilesDirectory}");
+                    Console.WriteLine($"User paths preserved: ExportOutputPath = {ExportOutputPath}");
+                    Console.WriteLine($"User paths preserved: MappingFilePath = {MappingFilePath}");
                 }
             }
             catch (Exception ex)
@@ -220,7 +235,8 @@ namespace BatchExport
             {
                 PropertyNameCaseInsensitive = true,
                 ReadCommentHandling = JsonCommentHandling.Skip,
-                AllowTrailingCommas = true
+                AllowTrailingCommas = true,
+                Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
             });
 
             var result = settings ?? new Settings();

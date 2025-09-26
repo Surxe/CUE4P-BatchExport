@@ -11,4 +11,11 @@
     <PackageReference Include="CUE4Parse" Version="1.2.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="appsettings*.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="NeededExports.warrobotsfrontiers.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="NeededExports.darkanddarker.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="Crypto.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>
