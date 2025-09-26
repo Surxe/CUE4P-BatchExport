@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace CUE4Parse.Example
+namespace BatchExport
 {
     public static class Utils
     {

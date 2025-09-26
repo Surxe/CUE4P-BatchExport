@@ -9,9 +9,9 @@ using CUE4Parse.MappingsProvider;
 using CUE4Parse.Compression;
 using CUE4Parse.UE4.Assets.Exports.Texture;
 
-namespace CUE4Parse.Example
+namespace BatchExport
 {
-    public static class Program
+    public static class BatchExportProgram
     {
         private const string _pakFilesDirectory = @"D:\Steam\steamapps\common\WRFrontiers\13_2017027\WRFrontiers\Content\Paks"; // Change game directory path to the one you have, ideally after repacked
         private const string _exportOutputPath = @"D:\WRFrontiersDB\BatchExportOutput"; // Change output directory path to the one you want.
