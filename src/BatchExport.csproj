@@ -14,7 +14,6 @@
   <ItemGroup>
     <None Include="appsettings*.json" CopyToOutputDirectory="PreserveNewest" />
     <None Include="presets/**/*" CopyToOutputDirectory="PreserveNewest" />
-    <None Include="Crypto.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>
