@@ -95,7 +95,7 @@ namespace CUE4Parse.Example
         {
             // Create exports directory
             string rootPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..\\..\\..\\"));
-            Console.WriteLine("Output Directory: " + _outputPath);
+            Utils.LogInfo("Output Directory: " + _outputPath, _enableLogging);
 
             // Decrypt .pak to assets
             if (_enableLogging)
@@ -103,11 +103,11 @@ namespace CUE4Parse.Example
                 Log.Logger = new LoggerConfiguration().WriteTo.Console(theme: AnsiConsoleTheme.Literate).CreateLogger();
             }
 
-            Console.WriteLine("Initializing Oodle...");
+            Utils.LogInfo("Initializing Oodle...", _enableLogging);
             OodleHelper.DownloadOodleDll();
             OodleHelper.Initialize(OodleHelper.OODLE_DLL_NAME);
 
-            Console.WriteLine("Creating version container and file provider...");
+            Utils.LogInfo("Creating version container and file provider...", _enableLogging);
             Utils.LogInfo($"Game directory: {_gameDirectory}", _enableLogging);
             Utils.LogInfo($"Mappings file: {_mapping}", _enableLogging);
             
@@ -129,8 +129,8 @@ namespace CUE4Parse.Example
             Utils.LogInfo("Post-mounting provider...", _enableLogging);
             provider.PostMount();
             Utils.LogInfo($"Files found after PostMount(): {provider.Files.Count}", _enableLogging);
-            
-            Console.WriteLine($"Total files found by provider: {provider.Files.Count}");
+
+            Utils.LogInfo($"Total files found by provider: {provider.Files.Count}", _enableLogging);
 
             // Retrieve the list of directories to export
             string neededExportsPath = Path.Combine(rootPath,"NeededExports.json");
@@ -146,42 +146,35 @@ namespace CUE4Parse.Example
             string neededExportsJson = File.ReadAllText(neededExportsPath);
 
             List<string> neededExports = Utils.GetNarrowestDirectories(neededExportsJson);
-            Console.WriteLine("Narrowed Directories that will be exported:");
+            Utils.LogInfo("Narrowed Directories that will be exported:", _enableLogging);
             foreach (var dir in neededExports)
             {
-                Console.WriteLine("\t"+dir);
+                Utils.LogInfo("\t"+dir, _enableLogging);
             }
-            Console.WriteLine("");
 
             // Export to .json
-            Console.WriteLine("Please wait while the script exports files...");
+            Utils.LogInfo("Please wait while the script exports files...", _enableLogging);
             int totalProcessed = 0;
             int totalExported = 0;
-            
+
             foreach (var file in provider.Files)
             {
                 totalProcessed++;
                 string filePath = file.Value.ToString();
-                
-                // Debug: Print first 10 files to see what we're working with
-                if (totalProcessed <= 10)
-                {
-                    Utils.LogInfo($"Sample file {totalProcessed}: {filePath}", _enableLogging);
-                }
-                
+
                 // Use the new ShouldProcessFile method
                 if (ShouldProcessFile(filePath, neededExports))
                 {
                     string assetPath = filePath.Replace(".uasset", "").Replace(".umap", "");
-                    
+
                     Utils.LogInfo("Exporting asset: " + assetPath, _enableLogging);
-                    
+
                     extractAsset(provider, assetPath);
                     totalExported++;
                 }
             }
 
-            Console.WriteLine($"Processing complete. Files processed: {totalProcessed}, Files exported: {totalExported}");
+            Utils.LogInfo($"Processing complete. Files processed: {totalProcessed}, Files exported: {totalExported}", _enableLogging);
         }
     }
 }
