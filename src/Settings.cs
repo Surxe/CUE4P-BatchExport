@@ -163,15 +163,12 @@ namespace BatchExport
 
                 if (presetSettings != null)
                 {
-                    // Store user's path settings before applying preset
+                    // Store ONLY the 3 user path settings that should be preserved
                     string userPakPath = PakFilesDirectory;
                     string userOutputPath = ExportOutputPath;
                     string userMappingPath = MappingFilePath;
-                    bool userLogging = IsLoggingEnabled;
-                    bool userWipeOutput = ShouldWipeOutputDirectory;
-                    string? userNeededExports = NeededExportsFilePath;
                     
-                    // Apply preset game-specific settings (always apply these from preset)
+                    // Apply ALL preset settings (overwrite current values)
                     AesKeyHex = presetSettings.AesKeyHex;
                     Console.WriteLine($"Loaded from preset: AesKeyHex = {(AesKeyHex != null ? "[Set]" : "null")}");
                     
@@ -197,13 +194,19 @@ namespace BatchExport
                         Console.WriteLine($"Loaded from preset: TexturePlatform = {TexturePlatform}");
                     }
                     
-                    // Restore user's path and preference settings (these should NEVER be overridden by preset)
+                    // Apply preset values for all non-path settings
+                    IsLoggingEnabled = presetSettings.IsLoggingEnabled;
+                    ShouldWipeOutputDirectory = presetSettings.ShouldWipeOutputDirectory;
+                    NeededExportsFilePath = presetSettings.NeededExportsFilePath;
+                    
+                    Console.WriteLine($"Loaded from preset: IsLoggingEnabled = {IsLoggingEnabled}");
+                    Console.WriteLine($"Loaded from preset: ShouldWipeOutputDirectory = {ShouldWipeOutputDirectory}");
+                    Console.WriteLine($"Loaded from preset: NeededExportsFilePath = {NeededExportsFilePath ?? "null"}");
+                    
+                    // Restore ONLY the 3 user path settings that should never be overridden by preset
                     PakFilesDirectory = userPakPath;
                     ExportOutputPath = userOutputPath;
                     MappingFilePath = userMappingPath;
-                    IsLoggingEnabled = userLogging;
-                    ShouldWipeOutputDirectory = userWipeOutput;
-                    NeededExportsFilePath = userNeededExports;
                     
                     Console.WriteLine($"User paths preserved: PakFilesDirectory = {PakFilesDirectory}");
                     Console.WriteLine($"User paths preserved: ExportOutputPath = {ExportOutputPath}");
