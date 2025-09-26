@@ -28,7 +28,7 @@ The BatchExport application now includes game presets that automatically configu
 
 **Important**: Presets only override game-specific settings. Your custom paths (`pakFilesDirectory`, `exportOutputPath`, `mappingFilePath`) are preserved from your main configuration file.
 
-**Note**: By default, `neededExportsFilePath` is set to `null` in all configurations, which means all assets will be exported. If you want to limit exports to specific directories, create a NeededExports.json file and set the path to it.
+**Note**: By default, `neededExportsFilePath` is set to `null`, which means all assets will be exported. If you want to limit exports to specific directories, create a NeededExports.json file, set the path setting to it, and create a list of file paths. Use a tool with GUI like [FModel](https://fmodel.app) (also runs on CUE4Parse) to first discover paths you wish to export.
 
 ## Available Presets
 
