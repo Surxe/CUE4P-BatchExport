@@ -4,7 +4,19 @@ The BatchExport application now supports flexible configuration through a Settin
 
 ## Configuration Methods
 
-### 1. Configuration File (appsettings.json)
+### 1. Game Presets (Recommended)
+Use predefined game configurations that automatically set optimal values:
+
+```json
+{
+  "preset": "WarRobotsFrontiers",
+  "pakFilesDirectory": "D:\\Steam\\steamapps\\common\\WRFrontiers\\13_2017027\\WRFrontiers\\Content\\Paks",
+  "exportOutputPath": "D:\\WRFrontiersDB\\BatchExportOutput",
+  "mappingFilePath": "D:\\WRFrontiersDB\\Mappings\\5.4.4-0+Unknown-WRFrontiers 2025-09-23.usmap"
+}
+```
+
+### 2. Manual Configuration File (appsettings.json)
 Create an `appsettings.json` file in the same directory as the executable with your settings:
 
 ```json
@@ -45,6 +57,7 @@ You can also modify the `LoadSettings()` method in `Program.cs` to load settings
 | `neededExportsFilePath` | string? | Custom path to NeededExports.json | null (uses default) |
 | `unrealEngineVersion` | string | UE version for parsing | "GAME_UE5_4" |
 | `texturePlatform` | string | Texture platform for parsing | "DesktopMobile" |
+| `preset` | string | Game preset to apply | "None" |
 
 ## Benefits of the Settings System
 
@@ -97,3 +110,32 @@ The `texturePlatform` setting currently supports:
 - `"DesktopMobile"` - Desktop and mobile platforms (default)
 
 Additional platforms may be available depending on the CUE4Parse library version. If you need support for other platforms, check the CUE4Parse documentation or add them to the `GetTexturePlatform()` method in `Settings.cs`.
+
+## Available Game Presets
+
+### WarRobotsFrontiers
+- **AES Key**: `0x903DBEEB889CFB1C25AFA28A9463F6D4E816B174D68B3902427FE5867E8C688E`
+- **Supported Extensions**: `.uasset`, `.umap`
+- **Excluded Prefixes**: None
+- **UE Version**: `GAME_UE5_4`
+- **Texture Platform**: `DesktopMobile`
+
+### DarkAndDarker
+- **AES Key**: None (unencrypted)
+- **Supported Extensions**: `.uasset`, `.umap`
+- **Excluded Prefixes**: None
+- **UE Version**: `GAME_UE5_3`
+- **Texture Platform**: `DesktopMobile`
+
+### None
+- **Description**: No preset applied - use manual configuration
+- **Benefit**: Full control over all settings
+
+## Using Presets
+
+1. **Quick Setup**: Set only the `preset` field and required paths (pak directory, output path, mappings file)
+2. **Preset + Overrides**: Use a preset but override specific settings as needed
+3. **Example Files**: Check the provided example files:
+   - `appsettings.warrobotsfrontiers.json`
+   - `appsettings.darkanddarker.json`
+   - `appsettings.template.json` (for manual configuration)

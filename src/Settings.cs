@@ -5,6 +5,27 @@ using CUE4Parse.UE4.Assets.Exports.Texture;
 namespace BatchExport
 {
     /// <summary>
+    /// Predefined game presets with common settings
+    /// </summary>
+    public enum GamePreset
+    {
+        /// <summary>
+        /// No preset - use manual configuration
+        /// </summary>
+        None,
+        
+        /// <summary>
+        /// Dark and Darker game settings
+        /// </summary>
+        DarkAndDarker,
+        
+        /// <summary>
+        /// War Robots: Frontiers game settings
+        /// </summary>
+        WarRobotsFrontiers
+    }
+
+    /// <summary>
     /// Configuration settings for the BatchExport application
     /// </summary>
     public class Settings
@@ -65,10 +86,94 @@ namespace BatchExport
         public string TexturePlatform { get; set; } = "DesktopMobile";
 
         /// <summary>
+        /// Game preset to use for automatic configuration. When set to a value other than None, 
+        /// preset values will override individual settings where applicable.
+        /// </summary>
+        public GamePreset Preset { get; set; } = GamePreset.None;
+
+        /// <summary>
         /// Creates a Settings instance with default values
         /// </summary>
         public Settings()
         {
+        }
+
+        /// <summary>
+        /// Applies preset configuration values based on the Preset property
+        /// </summary>
+        public void ApplyPreset()
+        {
+            switch (Preset)
+            {
+                case GamePreset.DarkAndDarker:
+                    ApplyDarkAndDarkerPreset();
+                    break;
+                case GamePreset.WarRobotsFrontiers:
+                    ApplyWarRobotsFrontiersPreset();
+                    break;
+                case GamePreset.None:
+                    // No preset to apply
+                    break;
+                default:
+                    throw new ArgumentException($"Unknown preset: {Preset}");
+            }
+        }
+
+        /// <summary>
+        /// Applies Dark and Darker game preset settings by loading from appsettings.darkanddarker.json
+        /// </summary>
+        private void ApplyDarkAndDarkerPreset()
+        {
+            ApplyPresetFromFile("appsettings.darkanddarker.json");
+        }
+
+        /// <summary>
+        /// Applies War Robots: Frontiers game preset settings by loading from appsettings.warrobotsfrontiers.json
+        /// </summary>
+        private void ApplyWarRobotsFrontiersPreset()
+        {
+            ApplyPresetFromFile("appsettings.warrobotsfrontiers.json");
+        }
+
+        /// <summary>
+        /// Loads preset settings from a specific JSON file.
+        /// This allows preset configurations to be maintained as separate files,
+        /// making them easier to customize, version control, and share.
+        /// </summary>
+        /// <param name="presetFileName">Name of the preset configuration file</param>
+        private void ApplyPresetFromFile(string presetFileName)
+        {
+            string presetFilePath = Path.Combine(AppContext.BaseDirectory, presetFileName);
+            
+            if (!File.Exists(presetFilePath))
+            {
+                throw new FileNotFoundException($"Preset configuration file not found: {presetFilePath}");
+            }
+
+            try
+            {
+                string jsonContent = File.ReadAllText(presetFilePath);
+                var presetSettings = JsonSerializer.Deserialize<Settings>(jsonContent, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true,
+                    ReadCommentHandling = JsonCommentHandling.Skip,
+                    AllowTrailingCommas = true
+                });
+
+                if (presetSettings != null)
+                {
+                    // Apply only the preset-specific settings, not paths which should remain user-configured
+                    if (presetSettings.AesKeyHex != null) AesKeyHex = presetSettings.AesKeyHex;
+                    if (presetSettings.SupportedAssetFileExtensions != null) SupportedAssetFileExtensions = presetSettings.SupportedAssetFileExtensions;
+                    if (presetSettings.ExcludedAssetFilePrefixes != null) ExcludedAssetFilePrefixes = presetSettings.ExcludedAssetFilePrefixes;
+                    if (!string.IsNullOrEmpty(presetSettings.UnrealEngineVersion)) UnrealEngineVersion = presetSettings.UnrealEngineVersion;
+                    if (!string.IsNullOrEmpty(presetSettings.TexturePlatform)) TexturePlatform = presetSettings.TexturePlatform;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Failed to load preset from {presetFileName}: {ex.Message}", ex);
+            }
         }
 
         /// <summary>
@@ -93,7 +198,27 @@ namespace BatchExport
                 AllowTrailingCommas = true
             });
 
-            return settings ?? new Settings();
+            var result = settings ?? new Settings();
+            
+            // Apply preset if one is specified
+            if (result.Preset != GamePreset.None)
+            {
+                result.ApplyPreset();
+            }
+            
+            return result;
+        }
+
+        /// <summary>
+        /// Creates a Settings instance with a specific game preset applied
+        /// </summary>
+        /// <param name="preset">The game preset to apply</param>
+        /// <returns>Settings instance with preset values applied</returns>
+        public static Settings CreateWithPreset(GamePreset preset)
+        {
+            var settings = new Settings { Preset = preset };
+            settings.ApplyPreset();
+            return settings;
         }
 
         /// <summary>

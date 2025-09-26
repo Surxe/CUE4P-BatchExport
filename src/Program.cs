@@ -26,7 +26,12 @@ namespace BatchExport
             {
                 try
                 {
-                    return Settings.LoadFromFile(configFilePath);
+                    var settings = Settings.LoadFromFile(configFilePath);
+                    if (settings.Preset != GamePreset.None)
+                    {
+                        Console.WriteLine($"Using preset: {settings.Preset}");
+                    }
+                    return settings;
                 }
                 catch (Exception ex)
                 {
