@@ -17,30 +17,7 @@ Use predefined game configurations that automatically set optimal values:
 ```
 
 ### 2. Manual Configuration File (appsettings.json)
-Create an `appsettings.json` file in the same directory as the executable with your settings:
-
-```json
-{
-  "pakFilesDirectory": "D:\\Steam\\steamapps\\common\\WRFrontiers\\13_2017027\\WRFrontiers\\Content\\Paks",
-  "exportOutputPath": "D:\\WRFrontiersDB\\BatchExportOutput",
-  "mappingFilePath": "D:\\WRFrontiersDB\\Mappings\\5.4.4-0+Unknown-WRFrontiers 2025-09-23.usmap",
-  "aesKeyHex": null,
-  "isLoggingEnabled": true,
-  "shouldWipeOutputDirectory": false,
-  "supportedAssetFileExtensions": [ ".uasset", ".umap" ],
-  "excludedAssetFilePrefixes": [ "FXS_" ],
-  "neededExportsFilePath": null,
-  "unrealEngineVersion": "GAME_UE5_4",
-  "texturePlatform": "DesktopMobile"
-}
-```
-
-### 2. Programmatic Configuration
-You can also modify the `LoadSettings()` method in `Program.cs` to load settings from other sources like:
-- Command line arguments
-- Environment variables
-- Database
-- Remote configuration services
+Create an `appsettings.json` file in the same directory as the executable with your settings. Use `appsettings.template.json` as an example.
 
 ## Configuration Options
 
