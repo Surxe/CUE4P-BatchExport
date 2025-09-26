@@ -1,5 +1,3 @@
-{
-    "Test": [
-        "WRFrontiers/Content/Sparrow/Abilities/AmmoGenerator"
-    ]
-}
+[
+    "WRFrontiers/Content/Sparrow/Abilities/AmmoGenerator"
+]

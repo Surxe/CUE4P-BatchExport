@@ -5,13 +5,13 @@ public class DirectoriesCoverage
 {
     public static List<string> GetNarrowestDirectories(string json)
     {
-        var directories = JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(json);
+        var directories = JsonConvert.DeserializeObject<List<string>>(json);
 
         List<string> narrowedDirectories = new List<string>();
 
-        foreach (var kvp in directories)
+        if (directories != null)
         {
-            foreach (var directory in kvp.Value)
+            foreach (var directory in directories)
             {
                 AddNarrowest(directory, narrowedDirectories);
             }
