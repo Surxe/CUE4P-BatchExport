@@ -23,18 +23,25 @@ Create an `appsettings.json` file in the same directory as the executable with y
 
 | Setting | Type | Description | Default |
 |---------|------|-------------|---------|
+-- Personal and required
 | `pakFilesDirectory` | string | Path to directory containing .pak files | "D:\\YourGame\\Content\\Paks" |
 | `exportOutputPath` | string | Output directory for exported files | "D:\\YourGameDB\\BatchExportOutput" |
 | `mappingFilePath` | string | Path to .usmap mappings file | "D:\\YourGameDB\\Mappings\\mappings.usmap" |
+
+-- Preset to use, if preferred
+| `preset` | string | Game preset to apply | "None" |
+
+-- Game specific
+| `unrealEngineVersion` | string | UE version for parsing | "GAME_UE5_4" |
+| `texturePlatform` | string | Texture platform for parsing | "DesktopMobile" |
 | `aesKeyHex` | string? | AES encryption key (hex string) or null | null |
-| `isLoggingEnabled` | bool | Enable detailed logging | true |
-| `shouldWipeOutputDirectory` | bool | Clear output directory before export | false |
 | `supportedAssetFileExtensions` | string[] | File extensions to process | [".uasset", ".umap"] |
 | `excludedAssetFilePrefixes` | string[]? | File prefixes to exclude | null (no exclusions) |
 | `neededExportsFilePath` | string? | Custom path to NeededExports.json | null (uses default) |
-| `unrealEngineVersion` | string | UE version for parsing | "GAME_UE5_4" |
-| `texturePlatform` | string | Texture platform for parsing | "DesktopMobile" |
-| `preset` | string | Game preset to apply | "None" |
+
+-- Personal and preference
+| `isLoggingEnabled` | bool | Enable detailed logging | true |
+| `shouldWipeOutputDirectory` | bool | Clear output directory before export | false |
 
 ## Benefits of the Settings System
 
