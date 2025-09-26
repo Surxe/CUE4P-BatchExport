@@ -108,27 +108,27 @@ namespace CUE4Parse.Example
             OodleHelper.Initialize(OodleHelper.OODLE_DLL_NAME);
 
             Console.WriteLine("Creating version container and file provider...");
-            Console.WriteLine($"Game directory: {_gameDirectory}");
-            Console.WriteLine($"Mappings file: {_mapping}");
+            Utils.LogInfo($"Game directory: {_gameDirectory}", _enableLogging);
+            Utils.LogInfo($"Mappings file: {_mapping}", _enableLogging);
             
-            Console.WriteLine("Trying GAME_UE5_4 with IoStore support...");
+            Utils.LogInfo("Trying GAME_UE5_4 with IoStore support...", _enableLogging);
             var version = new VersionContainer(EGame.GAME_UE5_4, ETexturePlatform.DesktopMobile);
             var provider = new DefaultFileProvider(_gameDirectory, SearchOption.AllDirectories, version, StringComparer.Ordinal);
             
-            Console.WriteLine("Setting mappings...");
+            Utils.LogInfo("Setting mappings...", _enableLogging);
             provider.MappingsContainer = new FileUsmapTypeMappingsProvider(_mapping);
             
-            Console.WriteLine("Initializing provider...");
+            Utils.LogInfo("Initializing provider...", _enableLogging);
             provider.Initialize();
-            Console.WriteLine($"Files found after Initialize(): {provider.Files.Count}");
+            Utils.LogInfo($"Files found after Initialize(): {provider.Files.Count}", _enableLogging);
             
-            Console.WriteLine("Mounting provider...");
+            Utils.LogInfo("Mounting provider...", _enableLogging);
             provider.Mount();
-            Console.WriteLine($"Files found after Mount(): {provider.Files.Count}");
+            Utils.LogInfo($"Files found after Mount(): {provider.Files.Count}", _enableLogging);
             
-            Console.WriteLine("Post-mounting provider...");
+            Utils.LogInfo("Post-mounting provider...", _enableLogging);
             provider.PostMount();
-            Console.WriteLine($"Files found after PostMount(): {provider.Files.Count}");
+            Utils.LogInfo($"Files found after PostMount(): {provider.Files.Count}", _enableLogging);
             
             Console.WriteLine($"Total files found by provider: {provider.Files.Count}");
 
@@ -145,7 +145,7 @@ namespace CUE4Parse.Example
             // Read the JSON data from the file
             string neededExportsJson = File.ReadAllText(neededExportsPath);
 
-            List<string> neededExports = DirectoriesCoverage.GetNarrowestDirectories(neededExportsJson);
+            List<string> neededExports = Utils.GetNarrowestDirectories(neededExportsJson);
             Console.WriteLine("Narrowed Directories that will be exported:");
             foreach (var dir in neededExports)
             {
@@ -166,7 +166,7 @@ namespace CUE4Parse.Example
                 // Debug: Print first 10 files to see what we're working with
                 if (totalProcessed <= 10)
                 {
-                    Console.WriteLine($"Sample file {totalProcessed}: {filePath}");
+                    Utils.LogInfo($"Sample file {totalProcessed}: {filePath}", _enableLogging);
                 }
                 
                 // Use the new ShouldProcessFile method
@@ -174,10 +174,7 @@ namespace CUE4Parse.Example
                 {
                     string assetPath = filePath.Replace(".uasset", "").Replace(".umap", "");
                     
-                    if (_enableLogging)
-                    {
-                        Console.WriteLine("Exporting asset: " + assetPath);
-                    }
+                    Utils.LogInfo("Exporting asset: " + assetPath, _enableLogging);
                     
                     extractAsset(provider, assetPath);
                     totalExported++;
