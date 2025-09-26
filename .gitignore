@@ -1,2 +1,10 @@
 
 /src/Exports
+src/obj/BatchExport.csproj.nuget.dgspec.json
+src/obj/BatchExport.csproj.nuget.g.props
+src/obj/Debug/net8.0/BatchExport.AssemblyInfo.cs
+src/obj/Debug/net8.0/BatchExport.AssemblyInfoInputs.cache
+src/obj/Debug/net8.0/BatchExport.assets.cache
+src/obj/Debug/net8.0/BatchExport.GeneratedMSBuildEditorConfig.editorconfig
+src/obj/project.assets.json
+src/obj/project.nuget.cache
