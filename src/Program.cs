@@ -16,7 +16,7 @@ namespace BatchExport
         private const string _pakFilesDirectory = @"D:\Steam\steamapps\common\WRFrontiers\13_2017027\WRFrontiers\Content\Paks"; // Change game directory path to the one you have, ideally after repacked
         private const string _exportOutputPath = @"D:\WRFrontiersDB\BatchExportOutput"; // Change output directory path to the one you want.
         private const string _mappingFilePath = @"D:\WRFrontiersDB\Mappings\5.4.4-0+Unknown-WRFrontiers 2025-09-23.usmap";
-        // no aes key necessary for this game
+        private const string? _aesKeyHex = null; // Set to AES key hex string if encryption is used, or null if no encryption
         private const bool _isLoggingEnabled = true; // Recommend enabling this until you're certain it exported all the files you expected, but may slow the runtime
         
         // File filtering configuration
@@ -114,6 +114,17 @@ namespace BatchExport
             Utils.LogInfo("Trying GAME_UE5_4 with IoStore support...", _isLoggingEnabled);
             var gameVersionContainer = new VersionContainer(EGame.GAME_UE5_4, ETexturePlatform.DesktopMobile);
             var fileProvider = new DefaultFileProvider(_pakFilesDirectory, SearchOption.AllDirectories, gameVersionContainer, StringComparer.Ordinal);
+            
+            // Submit AES key if provided
+            if (!string.IsNullOrEmpty(_aesKeyHex))
+            {
+                Utils.LogInfo("Submitting AES encryption key...", _isLoggingEnabled);
+                fileProvider.SubmitKey(new FGuid(), new FAesKey(_aesKeyHex));
+            }
+            else
+            {
+                Utils.LogInfo("No AES key provided - assuming unencrypted pak files", _isLoggingEnabled);
+            }
             
             Utils.LogInfo("Setting mappings...", _isLoggingEnabled);
             fileProvider.MappingsContainer = new FileUsmapTypeMappingsProvider(_mappingFilePath);
