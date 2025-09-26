@@ -111,9 +111,8 @@ namespace BatchExport
             Utils.LogInfo($"Game directory: {_pakFilesDirectory}", _isLoggingEnabled);
             Utils.LogInfo($"Mappings file: {_mappingFilePath}", _isLoggingEnabled);
             
-            Utils.LogInfo("Trying GAME_UE5_4 with IoStore support...", _isLoggingEnabled);
-            var gameVersionContainer = new VersionContainer(EGame.GAME_UE5_4, ETexturePlatform.DesktopMobile);
-            var fileProvider = new DefaultFileProvider(_pakFilesDirectory, SearchOption.AllDirectories, gameVersionContainer, StringComparer.Ordinal);
+            Utils.LogInfo("Creating provider...", _isLoggingEnabled);
+            var fileProvider = new DefaultFileProvider(_pakFilesDirectory, SearchOption.AllDirectories, new VersionContainer(EGame.GAME_UE5_4, ETexturePlatform.DesktopMobile), StringComparer.Ordinal);
             
             // Submit AES key if provided
             if (!string.IsNullOrEmpty(_aesKeyHex))
@@ -153,9 +152,8 @@ namespace BatchExport
                 return;
             }
 
-            // Read the JSON data from the file
+            // Determine which directories to export
             string neededExportsJsonContent = File.ReadAllText(neededExportsFilePath);
-
             List<string> exportDirectoriesToProcess = Utils.GetNarrowestDirectories(neededExportsJsonContent);
             Utils.LogInfo("Narrowed Directories that will be exported:", _isLoggingEnabled);
             foreach (var exportDirectory in exportDirectoriesToProcess)
@@ -167,19 +165,14 @@ namespace BatchExport
             Utils.LogInfo("Please wait while the script exports files...", _isLoggingEnabled);
             int totalFilesProcessed = 0;
             int totalFilesExported = 0;
-
             foreach (var gameFile in fileProvider.Files)
             {
                 totalFilesProcessed++;
                 string currentFilePath = gameFile.Value.ToString();
-
-                // Use the new ShouldProcessFile method
                 if (ShouldProcessFile(currentFilePath, exportDirectoriesToProcess))
                 {
                     string assetPathForExport = currentFilePath.Replace(".uasset", "").Replace(".umap", "");
-
                     Utils.LogInfo("Exporting asset: " + assetPathForExport, _isLoggingEnabled);
-
                     ExtractAsset(fileProvider, assetPathForExport);
                     totalFilesExported++;
                 }
