@@ -1,4 +1,6 @@
 using System.Text.Json;
+using CUE4Parse.UE4.Versions;
+using CUE4Parse.UE4.Assets.Exports.Texture;
 
 namespace BatchExport
 {
@@ -51,6 +53,16 @@ namespace BatchExport
         /// Path to the NeededExports.json file. If null, will use default location relative to application.
         /// </summary>
         public string? NeededExportsFilePath { get; set; } = null;
+
+        /// <summary>
+        /// Unreal Engine version to use for parsing. Common options: "GAME_UE4_27", "GAME_UE5_0", "GAME_UE5_1", "GAME_UE5_2", "GAME_UE5_3", "GAME_UE5_4"
+        /// </summary>
+        public string UnrealEngineVersion { get; set; } = "GAME_UE5_4";
+
+        /// <summary>
+        /// Texture platform to use for parsing. Common options: "DesktopMobile", "Mobile", "Console"
+        /// </summary>
+        public string TexturePlatform { get; set; } = "DesktopMobile";
 
         /// <summary>
         /// Creates a Settings instance with default values
@@ -126,6 +138,23 @@ namespace BatchExport
 
             if (ExcludedAssetFilePrefixes == null)
                 throw new ArgumentException("ExcludedAssetFilePrefixes cannot be null");
+
+            if (string.IsNullOrWhiteSpace(UnrealEngineVersion))
+                throw new ArgumentException("UnrealEngineVersion cannot be null or empty");
+
+            if (string.IsNullOrWhiteSpace(TexturePlatform))
+                throw new ArgumentException("TexturePlatform cannot be null or empty");
+
+            // Validate that the UE version and texture platform are supported
+            try
+            {
+                GetUnrealEngineVersion();
+                GetTexturePlatform();
+            }
+            catch (ArgumentException ex)
+            {
+                throw new ArgumentException($"Configuration validation failed: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -136,6 +165,40 @@ namespace BatchExport
         public string GetNeededExportsFilePath(string applicationRootPath)
         {
             return NeededExportsFilePath ?? Path.Combine(applicationRootPath, "NeededExports.json");
+        }
+
+        /// <summary>
+        /// Gets the EGame enum value from the UnrealEngineVersion string
+        /// </summary>
+        /// <returns>EGame enum value</returns>
+        /// <exception cref="ArgumentException">Thrown when the UnrealEngineVersion is not recognized</exception>
+        public CUE4Parse.UE4.Versions.EGame GetUnrealEngineVersion()
+        {
+            return UnrealEngineVersion?.ToUpperInvariant() switch
+            {
+                "GAME_UE4_27" => CUE4Parse.UE4.Versions.EGame.GAME_UE4_27,
+                "GAME_UE5_0" => CUE4Parse.UE4.Versions.EGame.GAME_UE5_0,
+                "GAME_UE5_1" => CUE4Parse.UE4.Versions.EGame.GAME_UE5_1,
+                "GAME_UE5_2" => CUE4Parse.UE4.Versions.EGame.GAME_UE5_2,
+                "GAME_UE5_3" => CUE4Parse.UE4.Versions.EGame.GAME_UE5_3,
+                "GAME_UE5_4" => CUE4Parse.UE4.Versions.EGame.GAME_UE5_4,
+                _ => throw new ArgumentException($"Unsupported Unreal Engine version: {UnrealEngineVersion}")
+            };
+        }
+
+        /// <summary>
+        /// Gets the ETexturePlatform enum value from the TexturePlatform string
+        /// </summary>
+        /// <returns>ETexturePlatform enum value</returns>
+        /// <exception cref="ArgumentException">Thrown when the TexturePlatform is not recognized</exception>
+        public ETexturePlatform GetTexturePlatform()
+        {
+            return TexturePlatform?.ToUpperInvariant() switch
+            {
+                "DESKTOPMOBILE" => ETexturePlatform.DesktopMobile,
+                // Add other platforms as needed based on the CUE4Parse library version
+                _ => throw new ArgumentException($"Unsupported texture platform: {TexturePlatform}. Currently supported: DesktopMobile")
+            };
         }
     }
 }

@@ -17,7 +17,9 @@ Create an `appsettings.json` file in the same directory as the executable with y
   "shouldWipeOutputDirectory": false,
   "supportedAssetFileExtensions": [ ".uasset", ".umap" ],
   "excludedAssetFilePrefixes": [ "FXS_" ],
-  "neededExportsFilePath": null
+  "neededExportsFilePath": null,
+  "unrealEngineVersion": "GAME_UE5_4",
+  "texturePlatform": "DesktopMobile"
 }
 ```
 
@@ -41,6 +43,8 @@ You can also modify the `LoadSettings()` method in `Program.cs` to load settings
 | `supportedAssetFileExtensions` | string[] | File extensions to process | [".uasset", ".umap"] |
 | `excludedAssetFilePrefixes` | string[] | File prefixes to exclude | ["FXS_"] |
 | `neededExportsFilePath` | string? | Custom path to NeededExports.json | null (uses default) |
+| `unrealEngineVersion` | string | UE version for parsing | "GAME_UE5_4" |
+| `texturePlatform` | string | Texture platform for parsing | "DesktopMobile" |
 
 ## Benefits of the Settings System
 
@@ -76,3 +80,20 @@ Disable logging for faster batch processing:
   "shouldWipeOutputDirectory": true
 }
 ```
+
+## Supported Unreal Engine Versions
+
+The `unrealEngineVersion` setting supports the following values:
+- `"GAME_UE4_27"` - Unreal Engine 4.27
+- `"GAME_UE5_0"` - Unreal Engine 5.0
+- `"GAME_UE5_1"` - Unreal Engine 5.1
+- `"GAME_UE5_2"` - Unreal Engine 5.2
+- `"GAME_UE5_3"` - Unreal Engine 5.3
+- `"GAME_UE5_4"` - Unreal Engine 5.4 (default)
+
+## Supported Texture Platforms
+
+The `texturePlatform` setting currently supports:
+- `"DesktopMobile"` - Desktop and mobile platforms (default)
+
+Additional platforms may be available depending on the CUE4Parse library version. If you need support for other platforms, check the CUE4Parse documentation or add them to the `GetTexturePlatform()` method in `Settings.cs`.

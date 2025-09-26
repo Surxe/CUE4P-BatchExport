@@ -164,7 +164,8 @@ namespace BatchExport
             Utils.LogInfo($"Mappings file: {settings.MappingFilePath}", settings.IsLoggingEnabled);
             
             Utils.LogInfo("Creating provider...", settings.IsLoggingEnabled);
-            var fileProvider = new DefaultFileProvider(settings.PakFilesDirectory, SearchOption.AllDirectories, new VersionContainer(EGame.GAME_UE5_4, ETexturePlatform.DesktopMobile), StringComparer.Ordinal);
+            Utils.LogInfo($"Using UE version: {settings.UnrealEngineVersion}, Texture platform: {settings.TexturePlatform}", settings.IsLoggingEnabled);
+            var fileProvider = new DefaultFileProvider(settings.PakFilesDirectory, SearchOption.AllDirectories, new VersionContainer(settings.GetUnrealEngineVersion(), settings.GetTexturePlatform()), StringComparer.Ordinal);
             
             // Submit AES key if provided
             if (!string.IsNullOrEmpty(settings.AesKeyHex))
