@@ -1,10 +1,24 @@
 
-/src/Exports
-src/obj/BatchExport.csproj.nuget.dgspec.json
-src/obj/BatchExport.csproj.nuget.g.props
-src/obj/Debug/net8.0/BatchExport.AssemblyInfo.cs
-src/obj/Debug/net8.0/BatchExport.AssemblyInfoInputs.cache
-src/obj/Debug/net8.0/BatchExport.assets.cache
-src/obj/Debug/net8.0/BatchExport.GeneratedMSBuildEditorConfig.editorconfig
-src/obj/project.assets.json
-src/obj/project.nuget.cache
+# Build outputs
+src/bin/
+src/obj/
+
+# Exports directory
+src/Exports/
+
+# Visual Studio files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+.vs/
+
+# NuGet packages
+*.nupkg
+*.snupkg
+
+# Runtime files
+*.dll
+*.exe
+*.pdb
+!src/oo2core_9_win64.dll
