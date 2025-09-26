@@ -1,2 +1,24 @@
 
-/src/Exports
+# Build outputs
+src/bin/
+src/obj/
+
+# Exports directory
+src/Exports/
+
+# Visual Studio files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+.vs/
+
+# NuGet packages
+*.nupkg
+*.snupkg
+
+# Runtime files
+*.dll
+*.exe
+*.pdb
+!src/oo2core_9_win64.dll
