@@ -33,17 +33,17 @@ namespace BatchExport
         /// <summary>
         /// Path to the directory containing .pak files
         /// </summary>
-        public string PakFilesDirectory { get; set; } = @"D:\Steam\steamapps\common\WRFrontiers\13_2017027\WRFrontiers\Content\Paks";
+        public string PakFilesDirectory { get; set; } = @"D:\YourGame\Content\Paks";
 
         /// <summary>
         /// Path where exported files will be saved
         /// </summary>
-        public string ExportOutputPath { get; set; } = @"D:\WRFrontiersDB\BatchExportOutput";
+        public string ExportOutputPath { get; set; } = @"D:\YourGameDB\BatchExportOutput";
 
         /// <summary>
         /// Path to the mappings file (.usmap)
         /// </summary>
-        public string MappingFilePath { get; set; } = @"D:\WRFrontiersDB\Mappings\5.4.4-0+Unknown-WRFrontiers 2025-09-23.usmap";
+        public string MappingFilePath { get; set; } = @"D:\YourGameDB\Mappings\mappings.usmap";
 
         /// <summary>
         /// AES key hex string for encrypted pak files. Set to null if no encryption is used.
@@ -68,7 +68,7 @@ namespace BatchExport
         /// <summary>
         /// Asset file prefixes to exclude from processing
         /// </summary>
-        public string[] ExcludedAssetFilePrefixes { get; set; } = { "FXS_" };
+        public string[]? ExcludedAssetFilePrefixes { get; set; } = null;
 
         /// <summary>
         /// Path to the NeededExports.json file. If null, will use default location relative to application.
@@ -163,11 +163,36 @@ namespace BatchExport
                 if (presetSettings != null)
                 {
                     // Apply only the preset-specific settings, not paths which should remain user-configured
-                    if (presetSettings.AesKeyHex != null) AesKeyHex = presetSettings.AesKeyHex;
-                    if (presetSettings.SupportedAssetFileExtensions != null) SupportedAssetFileExtensions = presetSettings.SupportedAssetFileExtensions;
-                    if (presetSettings.ExcludedAssetFilePrefixes != null) ExcludedAssetFilePrefixes = presetSettings.ExcludedAssetFilePrefixes;
-                    if (!string.IsNullOrEmpty(presetSettings.UnrealEngineVersion)) UnrealEngineVersion = presetSettings.UnrealEngineVersion;
-                    if (!string.IsNullOrEmpty(presetSettings.TexturePlatform)) TexturePlatform = presetSettings.TexturePlatform;
+                    if (presetSettings.AesKeyHex != null) 
+                    {
+                        AesKeyHex = presetSettings.AesKeyHex;
+                        Console.WriteLine($"Loaded from preset: AesKeyHex = {(AesKeyHex != null ? "[Set]" : "null")}");
+                    }
+                    if (presetSettings.SupportedAssetFileExtensions != null) 
+                    {
+                        SupportedAssetFileExtensions = presetSettings.SupportedAssetFileExtensions;
+                        Console.WriteLine($"Loaded from preset: SupportedAssetFileExtensions = [{string.Join(", ", SupportedAssetFileExtensions)}]");
+                    }
+                    if (presetSettings.ExcludedAssetFilePrefixes != null) 
+                    {
+                        ExcludedAssetFilePrefixes = presetSettings.ExcludedAssetFilePrefixes;
+                        Console.WriteLine($"Loaded from preset: ExcludedAssetFilePrefixes = [{string.Join(", ", ExcludedAssetFilePrefixes)}]");
+                    }
+                    else if (presetSettings.ExcludedAssetFilePrefixes == null && ExcludedAssetFilePrefixes != null)
+                    {
+                        ExcludedAssetFilePrefixes = null;
+                        Console.WriteLine("Loaded from preset: ExcludedAssetFilePrefixes = null (no exclusions)");
+                    }
+                    if (!string.IsNullOrEmpty(presetSettings.UnrealEngineVersion)) 
+                    {
+                        UnrealEngineVersion = presetSettings.UnrealEngineVersion;
+                        Console.WriteLine($"Loaded from preset: UnrealEngineVersion = {UnrealEngineVersion}");
+                    }
+                    if (!string.IsNullOrEmpty(presetSettings.TexturePlatform)) 
+                    {
+                        TexturePlatform = presetSettings.TexturePlatform;
+                        Console.WriteLine($"Loaded from preset: TexturePlatform = {TexturePlatform}");
+                    }
                 }
             }
             catch (Exception ex)
@@ -261,8 +286,7 @@ namespace BatchExport
             if (SupportedAssetFileExtensions == null || SupportedAssetFileExtensions.Length == 0)
                 throw new ArgumentException("SupportedAssetFileExtensions cannot be null or empty");
 
-            if (ExcludedAssetFilePrefixes == null)
-                throw new ArgumentException("ExcludedAssetFilePrefixes cannot be null");
+            // ExcludedAssetFilePrefixes can be null (meaning no exclusions)
 
             if (string.IsNullOrWhiteSpace(UnrealEngineVersion))
                 throw new ArgumentException("UnrealEngineVersion cannot be null or empty");

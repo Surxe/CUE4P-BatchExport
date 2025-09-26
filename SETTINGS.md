@@ -23,14 +23,14 @@ Create an `appsettings.json` file in the same directory as the executable with y
 
 | Setting | Type | Description | Default |
 |---------|------|-------------|---------|
-| `pakFilesDirectory` | string | Path to directory containing .pak files | (WRFrontiers default path) |
-| `exportOutputPath` | string | Output directory for exported files | (WRFrontiersDB default path) |
-| `mappingFilePath` | string | Path to .usmap mappings file | (WRFrontiersDB default path) |
+| `pakFilesDirectory` | string | Path to directory containing .pak files | "D:\\YourGame\\Content\\Paks" |
+| `exportOutputPath` | string | Output directory for exported files | "D:\\YourGameDB\\BatchExportOutput" |
+| `mappingFilePath` | string | Path to .usmap mappings file | "D:\\YourGameDB\\Mappings\\mappings.usmap" |
 | `aesKeyHex` | string? | AES encryption key (hex string) or null | null |
 | `isLoggingEnabled` | bool | Enable detailed logging | true |
 | `shouldWipeOutputDirectory` | bool | Clear output directory before export | false |
 | `supportedAssetFileExtensions` | string[] | File extensions to process | [".uasset", ".umap"] |
-| `excludedAssetFilePrefixes` | string[] | File prefixes to exclude | ["FXS_"] |
+| `excludedAssetFilePrefixes` | string[]? | File prefixes to exclude | null (no exclusions) |
 | `neededExportsFilePath` | string? | Custom path to NeededExports.json | null (uses default) |
 | `unrealEngineVersion` | string | UE version for parsing | "GAME_UE5_4" |
 | `texturePlatform` | string | Texture platform for parsing | "DesktopMobile" |
@@ -91,16 +91,16 @@ Additional platforms may be available depending on the CUE4Parse library version
 ## Available Game Presets
 
 ### WarRobotsFrontiers
-- **AES Key**: `0x903DBEEB889CFB1C25AFA28A9463F6D4E816B174D68B3902427FE5867E8C688E`
+- **AES Key**: None (unencrypted)
 - **Supported Extensions**: `.uasset`, `.umap`
 - **Excluded Prefixes**: None
 - **UE Version**: `GAME_UE5_4`
 - **Texture Platform**: `DesktopMobile`
 
 ### DarkAndDarker
-- **AES Key**: None (unencrypted)
+- **AES Key**: `0x903DBEEB889CFB1C25AFA28A9463F6D4E816B174D68B3902427FE5867E8C688E`
 - **Supported Extensions**: `.uasset`, `.umap`
-- **Excluded Prefixes**: None
+- **Excluded Prefixes**: `FXS_`
 - **UE Version**: `GAME_UE5_3`
 - **Texture Platform**: `DesktopMobile`
 
