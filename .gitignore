@@ -22,3 +22,7 @@ src/Exports/
 *.exe
 *.pdb
 !src/oo2core_9_win64.dll
+
+# Application
+appsettings.json
+NeededExports.json
