@@ -121,19 +121,19 @@ namespace BatchExport
         }
 
         /// <summary>
-        /// Applies Dark and Darker game preset settings by loading from appsettings.darkanddarker.json
+        /// Applies Dark and Darker game preset settings by loading from presets/DarkAndDarker/appsettings.json
         /// </summary>
         private void ApplyDarkAndDarkerPreset()
         {
-            ApplyPresetFromFile("appsettings.darkanddarker.json");
+            ApplyPresetFromFile("presets/DarkAndDarker/appsettings.json");
         }
 
         /// <summary>
-        /// Applies War Robots: Frontiers game preset settings by loading from appsettings.warrobotsfrontiers.json
+        /// Applies War Robots: Frontiers game preset settings by loading from presets/WarRobotsFrontiers/appsettings.json
         /// </summary>
         private void ApplyWarRobotsFrontiersPreset()
         {
-            ApplyPresetFromFile("appsettings.warrobotsfrontiers.json");
+            ApplyPresetFromFile("presets/WarRobotsFrontiers/appsettings.json");
         }
 
         /// <summary>
