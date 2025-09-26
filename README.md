@@ -18,7 +18,7 @@ Some games, such as Dark and Darker, will require repackaging the game first to 
 2. Install dependencies
    1. .NET SDK https://dotnet.microsoft.com/en-us/download
    2. Run in terminal: `dotnet add package CUE4Parse`
-3. Create `src/appsettings.json` using `appsettings.template.json` as a template, with `SETTINGS.md` and `PRESETS.md` as guidelines 
+3. Create `src/appsettings.json` using `appsettings.template.json` as a template and  `SETTINGS.md` as a guideline
 4. `cd BatchExport/src`
 5. `dotnet build`
 6. `dotnet run BatchExport.csproj`

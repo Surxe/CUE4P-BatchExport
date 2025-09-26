@@ -16,10 +16,11 @@ Use predefined game configurations that automatically set optimal values:
 }
 ```
 
-**How Presets Work:**
-- ✅ **Your paths are preserved**: `pakFilesDirectory`, `exportOutputPath`, `mappingFilePath` from your main config
-- ✅ **Game settings are applied**: AES key, UE version, file extensions, exclusions from the preset
-- ✅ **Best of both**: You get game-optimized settings with your custom paths
+When you select a preset, the application:
+1. Loads your main `appsettings.json` configuration
+2. Applies the preset by loading the corresponding preset file (`appsettings.{preset}.json`)
+3. Merges preset-specific settings (AES key, UE version, file filters) with your paths and preferences
+4. Your custom settings (pak directory, output path, logging) are preserved
 
 ### 2. Manual Configuration File (appsettings.json)
 Create an `appsettings.json` file in the same directory as the executable with your settings. Use `appsettings.template.json` as an example.
@@ -58,12 +59,6 @@ Create an `appsettings.json` file in the same directory as the executable with y
 
 ## Usage Examples
 
-### Different Games
-Create different `appsettings.json` files for different games:
-- `appsettings.wrfrontiers.json`
-- `appsettings.fortnite.json`
-- etc.
-
 ### Development vs Production
 Use different output paths and logging levels:
 ```json
@@ -101,6 +96,10 @@ Control which assets are exported using `neededExportsFilePath`:
 ```
 
 When `neededExportsFilePath` is `null`, all assets will be exported (subject to file extension and prefix filters). When a path is specified, only assets in the directories listed in that JSON file will be exported.
+
+By default, `neededExportsFilePath` is set to `null`, which means all assets will be exported. If you want to limit exports to specific directories, create a NeededExports.json file, set the path setting to it, and create a list of file paths. Use a tool with GUI like [FModel](https://fmodel.app) (also runs on CUE4Parse) to first discover paths you wish to export. See the following that can be referenced as examples:
+- `src/presets/WarRobotsFrontiers/NeededExports.json`
+- `src/resets/DarkAndDarker/NeededExports.json`
 
 ## Supported Unreal Engine Versions
 
@@ -144,6 +143,6 @@ Additional platforms may be available depending on the CUE4Parse library version
 1. **Quick Setup**: Set only the `preset` field and required paths (pak directory, output path, mappings file)
 2. **Preset + Overrides**: Use a preset but override specific settings as needed
 3. **Example Files**: Check the provided example files:
-   - `appsettings.warrobotsfrontiers.json`
-   - `appsettings.darkanddarker.json`
-   - `appsettings.template.json` (for manual configuration)
+   - `src/presets/WarRobotsFrontiers/appsettings.json` (also loaded if preset="WarRobotsFrontiers")
+   - `src/presets/DarkAndDarker/appsettings.json` (also loaded if preset="DarkAndDarker")
+   - `appsettings.template.json` (for reference only)
