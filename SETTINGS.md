@@ -37,7 +37,7 @@ Create an `appsettings.json` file in the same directory as the executable with y
 | `aesKeyHex` | string? | AES encryption key (hex string) or null | null |
 | `supportedAssetFileExtensions` | string[] | File extensions to process | [".uasset", ".umap"] |
 | `excludedAssetFilePrefixes` | string[]? | File prefixes to exclude | null (no exclusions) |
-| `neededExportsFilePath` | string? | Custom path to NeededExports.json | null (uses default) |
+| `neededExportsFilePath` | string? | Custom path to NeededExports.json | null (exports all assets) |
 
 -- Personal and preference
 | `isLoggingEnabled` | bool | Enable detailed logging | true |
@@ -77,6 +77,25 @@ Disable logging for faster batch processing:
   "shouldWipeOutputDirectory": true
 }
 ```
+
+### Export Filtering
+Control which assets are exported using `neededExportsFilePath`:
+
+**Export All Assets:**
+```json
+{
+  "neededExportsFilePath": null
+}
+```
+
+**Export Specific Directories:**
+```json
+{
+  "neededExportsFilePath": "C:\\path\\to\\NeededExports.json"
+}
+```
+
+When `neededExportsFilePath` is `null`, all assets will be exported (subject to file extension and prefix filters). When a path is specified, only assets in the directories listed in that JSON file will be exported.
 
 ## Supported Unreal Engine Versions
 

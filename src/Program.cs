@@ -111,8 +111,8 @@ namespace BatchExport
                     return false;
             }
 
-            // Check if file is in any export directory
-            return targetExportDirectories.Any(dir => assetFilePath.StartsWith(dir, StringComparison.OrdinalIgnoreCase));
+            // Check if file is in any export directory (empty string means export all)
+            return targetExportDirectories.Any(dir => string.IsNullOrEmpty(dir) || assetFilePath.StartsWith(dir, StringComparison.OrdinalIgnoreCase));
         }
 
         public static void Main()
@@ -203,23 +203,34 @@ namespace BatchExport
 
             Utils.LogInfo($"Total files found by provider: {fileProvider.Files.Count}", settings.IsLoggingEnabled);
 
-            // Retrieve the list of directories to export
-            string neededExportsFilePath = settings.GetNeededExportsFilePath(applicationRootPath);
-
-            // Check if the file exists
-            if (!File.Exists(neededExportsFilePath))
-            {
-                Console.WriteLine(neededExportsFilePath + " file not found.");
-                return;
-            }
-
             // Determine which directories to export
-            string neededExportsJsonContent = File.ReadAllText(neededExportsFilePath);
-            List<string> exportDirectoriesToProcess = Utils.GetNarrowestDirectories(neededExportsJsonContent);
-            Utils.LogInfo("Narrowed Directories that will be exported:", settings.IsLoggingEnabled);
-            foreach (var exportDirectory in exportDirectoriesToProcess)
+            List<string> exportDirectoriesToProcess;
+            
+            if (settings.NeededExportsFilePath == null)
             {
-                Utils.LogInfo("\t"+exportDirectory, settings.IsLoggingEnabled);
+                // Export all assets when no specific export file is specified
+                Utils.LogInfo("No NeededExports file specified - exporting all assets", settings.IsLoggingEnabled);
+                exportDirectoriesToProcess = new List<string> { "" }; // Empty string matches all paths
+            }
+            else
+            {
+                // Retrieve the list of directories to export from the specified file
+                string neededExportsFilePath = settings.GetNeededExportsFilePath(applicationRootPath);
+
+                // Check if the file exists
+                if (!File.Exists(neededExportsFilePath))
+                {
+                    Console.WriteLine(neededExportsFilePath + " file not found.");
+                    return;
+                }
+
+                string neededExportsJsonContent = File.ReadAllText(neededExportsFilePath);
+                exportDirectoriesToProcess = Utils.GetNarrowestDirectories(neededExportsJsonContent);
+                Utils.LogInfo("Narrowed Directories that will be exported:", settings.IsLoggingEnabled);
+                foreach (var exportDirectory in exportDirectoriesToProcess)
+                {
+                    Utils.LogInfo("\t"+exportDirectory, settings.IsLoggingEnabled);
+                }
             }
 
             // Export to .json

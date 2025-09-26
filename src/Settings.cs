@@ -71,7 +71,7 @@ namespace BatchExport
         public string[]? ExcludedAssetFilePrefixes { get; set; } = null;
 
         /// <summary>
-        /// Path to the NeededExports.json file. If null, will use default location relative to application.
+        /// Path to the NeededExports.json file. If null, will export all assets instead of using directory filtering.
         /// </summary>
         public string? NeededExportsFilePath { get; set; } = null;
 
@@ -307,7 +307,8 @@ namespace BatchExport
         }
 
         /// <summary>
-        /// Gets the resolved path for the NeededExports.json file
+        /// Gets the resolved path for the NeededExports.json file.
+        /// This method should only be called when NeededExportsFilePath is not null.
         /// </summary>
         /// <param name="applicationRootPath">Application root path for relative resolution</param>
         /// <returns>Full path to the NeededExports.json file</returns>

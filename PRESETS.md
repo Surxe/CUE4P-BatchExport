@@ -26,6 +26,8 @@ The BatchExport application now includes game presets that automatically configu
    - Unreal Engine version
    - Texture platform
 
+**Note**: By default, `neededExportsFilePath` is set to `null` in all configurations, which means all assets will be exported. If you want to limit exports to specific directories, create a NeededExports.json file and set the path to it.
+
 ## Available Presets
 
 | Preset | AES Key | UE Version | Description |
