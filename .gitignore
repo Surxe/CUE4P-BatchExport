@@ -22,3 +22,12 @@ src/Exports/
 *.exe
 *.pdb
 !src/oo2core_9_win64.dll
+
+# User configuration files (only ignore root-level user configs)
+src/appsettings.json
+src/NeededExports.json
+
+# Keep preset files in git (these should be tracked)
+!src/presets/*/
+!src/presets/*/appsettings.json
+!src/presets/*/NeededExports.json

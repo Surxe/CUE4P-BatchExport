@@ -1,0 +1,93 @@
+[
+    "DungeonCrawler/Content/DungeonCrawler/Data/Generated/DT_PlayerCharacter/PlayerCharacterEffect",
+
+    "DungeonCrawler/Content/DungeonCrawler/Data/Generated/V2/ItemProperty",
+    
+    "DungeonCrawler/Content/DungeonCrawler/Characters/Player/Common/Animations",
+    "DungeonCrawler/Content/DungeonCrawler/Core/GameplayAbilitySystem/GameplayAbility",
+    "DungeonCrawler/Content/DungeonCrawler/Data/Generated/DT_Item",
+    "DungeonCrawler/Content/DungeonCrawler/Data/Generated/DT_ItemProperty/ItemProperty",
+    "DungeonCrawler/Content/DungeonCrawler/Data/Generated/DT_MeleeAttack/MeleeAttack",
+    "DungeonCrawler/Content/DungeonCrawler/Data/Generated/DT_MovementModifier/MovementModifier",
+    "DungeonCrawler/Content/DungeonCrawler/Data/Generated/DT_ActorStatus/StatusEffect",
+    "DungeonCrawler/Content/DungeonCrawler/Data/GameplayAbility",
+    "DungeonCrawler/Content/DungeonCrawler/Item",
+    "DungeonCrawler/Content/DungeonCrawler/Projectile",
+    
+    "DungeonCrawler/Content/DungeonCrawler/Characters/Monster",
+    "DungeonCrawler/Content/DungeonCrawler/Characters/Npc",
+    "DungeonCrawler/Content/DungeonCrawler/Characters/Summoned",
+    "DungeonCrawler/Content/DungeonCrawler/Data/Generated/DT_Item/Item",
+    "DungeonCrawler/Content/DungeonCrawler/Data/Generated/DT_Monster/Monster",
+    "DungeonCrawler/Content/DungeonCrawler/Data/Generated/DT_Props/Props",
+    "DungeonCrawler/Content/DungeonCrawler/Data/Generated/DT_Spawner/Spawner",
+    "DungeonCrawler/Content/DungeonCrawler/Data/Generated/V2/LootDrop",
+    "DungeonCrawler/Content/DungeonCrawler/Props",
+    "DungeonCrawler/Content/DungeonCrawler/Maps/Dungeon/Modules",
+    
+    "DungeonCrawler/Content/DungeonCrawler/Data/Generated/V2/Merchant",
+    "DungeonCrawler/Content/DungeonCrawler/Data/Generated/V2/Item/Item",
+    "DungeonCrawler/Content/DungeonCrawler/Data/Generated/V2/Monster/Monster",
+    "DungeonCrawler/Content/DungeonCrawler/Data/Generated/V2/Quest",
+    "DungeonCrawler/Content/DungeonCrawler/Data/Generated/V2/Dungeon/DungeonModule",
+
+    "DungeonCrawler/Content/DungeonCrawler/ActorStatus",
+    "DungeonCrawler/Content/DungeonCrawler/Characters/Monster",
+    "DungeonCrawler/Content/DungeonCrawler/Data/Generated/DT_Monster",
+    "DungeonCrawler/Content/DungeonCrawler/Data/Generated/DT_ActorStatus/StatusEffect",
+    "DungeonCrawler/Content/DungeonCrawler/Data/Generated/V2/Monster/Monster",
+    "DungeonCrawler/Content/DungeonCrawler/Data/GameplayAbility",
+    "DungeonCrawler/Content/DungeonCrawler/Core/GameplayAbilitySystem",
+    
+    "DungeonCrawler/Content/DungeonCrawler/Data/GameplayAbility",
+    
+    "DungeonCrawler/Content/DungeonCrawler/Data/Generated/V2/Props",
+    "DungeonCrawler/Content/DungeonCrawler/Data/DataAsset/Interaction",
+    "DungeonCrawler/Content/DungeonCrawler/Data/DataAsset/Props",
+    "DungeonCrawler/Content/DungeonCrawler/Props",
+    
+    "DungeonCrawler/Content/DungeonCrawler/Data/Generated/V2/FloorRule/FloorRule",
+    
+    "DungeonCrawler/Content/DungeonCrawler/Data/Generated/V2/Spell",
+    "DungeonCrawler/Content/DungeonCrawler/Data/Generated/V2/Skill",
+    "DungeonCrawler/Content/DungeonCrawler/Data/Generated/V2/Perk",
+    "DungeonCrawler/Content/DungeonCrawler/Data/Generated/V2/ShapeShift",
+    "DungeonCrawler/Content/DungeonCrawler/Data/Generated/V2/Music",
+    "DungeonCrawler/Content/DungeonCrawler/Data/Generated/V2/ActorStatus",
+    "DungeonCrawler/Content/DungeonCrawler/Data/Generated/V2/MovementModifier",
+    "DungeonCrawler/Content/DungeonCrawler/Data/Generated/V2/GEModifier",
+    "DungeonCrawler/Content/DungeonCrawler/Music",
+    "DungeonCrawler/Content/DungeonCrawler/Skill",
+    "DungeonCrawler/Content/DungeonCrawler/Spell",
+    "DungeonCrawler/Content/DungeonCrawler/ShapeShift",
+    "DungeonCrawler/Content/DungeonCrawler/Characters",
+    "DungeonCrawler/Content/DungeonCrawler/Perk",
+    "DungeonCrawler/Content/DungeonCrawler/Data/Generated/V2/Constant/Constant",
+    "DungeonCrawler/Content/DungeonCrawler/Data/DataAsset/Skill",
+    "DungeonCrawler/Content/DungeonCrawler/Data/DataAsset/Spell",
+    "DungeonCrawler/Content/DungeonCrawler/Data/DataAsset/Perk",
+    "DungeonCrawler/Content/DungeonCrawler/Data/DataAsset/ShapeShift",
+    "DungeonCrawler/Content/DungeonCrawler/Data/DataAsset/Music",
+    "DungeonCrawler/Content/DungeonCrawler/Data/Generated/DT_ActorStatus/StatusEffect",
+    "DungeonCrawler/Content/DungeonCrawler/Aoe",
+    "DungeonCrawler/Content/DungeonCrawler/Data/Generated/V2/Projectile",
+    
+    "DungeonCrawler/Content/DungeonCrawler/Maps",
+    "DungeonCrawler/Content/DungeonCrawler/UI/Resources/Minimap",
+    "DungeonCrawler/Content/DungeonCrawler/Data/Generated/V2/Dungeon",
+    "DungeonCrawler/Content/DungeonCrawler/Data/Generated/V2/Spawner",
+
+    "DungeonCrawler/Content/DungeonCrawler/Data/Generated/V2/AbilityRelationshipTagGroup/AbilityRelationshipTagGroup",
+    
+    "DungeonCrawler/Content/DungeonCrawler/UI/Resources/IconActorStatus",
+
+    "DungeonCrawler/Content/DungeonCrawler/Data/Generated/V2/Achievement",
+    "DungeonCrawler/Content/DungeonCrawler/Data/DataAsset/Achievement",
+
+    "DungeonCrawler/Content/DungeonCrawler/Data/Generated/DT_Perk",
+    "DungeonCrawler/Content/DungeonCrawler/Data/Generated/DT_Skill",
+    "DungeonCrawler/Content/DungeonCrawler/Data/Generated/DT_Spell",
+    "DungeonCrawler/Content/DungeonCrawler/Data/Generated/DT_ShapeShift",
+    "DungeonCrawler/Content/DungeonCrawler/Data/Generated/DT_Music"
+    
+]

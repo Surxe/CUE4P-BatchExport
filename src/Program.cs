@@ -9,44 +9,67 @@ using CUE4Parse.MappingsProvider;
 using CUE4Parse.Compression;
 using CUE4Parse.UE4.Assets.Exports.Texture;
 
-namespace CUE4Parse.Example
+namespace BatchExport
 {
-    public static class Program
+    public static class BatchExportProgram
     {
-        private const string _gameDirectory = @"C:\Datamining\Dark_and_Darker\NativeExtractor\Repack"; // Change game directory path to the one you have, ideally after repacked
-        private const string _outputPath = @"C:\DarkAndDarkerWiki\Exports"; // Change output directory path to the one you want.
-        private const string _mapping = @"C:\Datamining\Dark_and_Darker\0.6.2.5622-686.usmap";
-        private const string _aesKey = @"0x903DBEEB889CFB1C25AFA28A9463F6D4E816B174D68B3902427FE5867E8C688E"; // kD2+64ic+xwlr6KKlGP21OgWsXTWizkCQn/lhn6MaI4= base64 key
-        private const bool _enableLogging = true; // Recommend enabling this until you're certain it exported all the files you expected, but may slow the runtime
-        
+        /// <summary>
+        /// Loads settings from various sources (config file, environment variables, defaults)
+        /// </summary>
+        /// <returns>Configured Settings instance</returns>
+        private static Settings LoadSettings()
+        {
+            // Try to load from config file first
+            string configFilePath = Path.Combine(AppContext.BaseDirectory, "appsettings.json");
+            
+            if (File.Exists(configFilePath))
+            {
+                try
+                {
+                    var settings = Settings.LoadFromFile(configFilePath);
+                    if (settings.Preset != GamePreset.None)
+                    {
+                        Console.WriteLine($"Using preset: {settings.Preset}");
+                    }
+                    return settings;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Warning: Failed to load config file {configFilePath}: {ex.Message}");
+                    Console.WriteLine("Using default settings...");
+                }
+            }
+            
+            // Fall back to default settings
+            return new Settings();
+        }
 
         //Create all preceding directories of a given file if they don't yet exist
-        private static void createNeededDirectories(string filepath, string exportsPath)
+        private static void CreateNeededDirectories(string destinationFilePath, string baseExportPath)
         {
-            string[] directories = filepath.Split('/'); //List of directories to create
-            Array.Resize(ref directories, directories.Length - 1); //Remove last element which is the actual object name
-            string currentDirectory = exportsPath;
+            string[] directoryParts = destinationFilePath.Split('/'); //List of directories to create
+            Array.Resize(ref directoryParts, directoryParts.Length - 1); //Remove last element which is the actual object name
+            string currentDirectoryPath = baseExportPath;
 
-            foreach (string directory in directories)
+            foreach (string directoryName in directoryParts)
             {
-                currentDirectory = Path.Combine(currentDirectory, directory);
-                if (!Directory.Exists(currentDirectory))
+                currentDirectoryPath = Path.Combine(currentDirectoryPath, directoryName);
+                if (!Directory.Exists(currentDirectoryPath))
                 {
-                    Directory.CreateDirectory(currentDirectory);
+                    Directory.CreateDirectory(currentDirectoryPath);
                 }
             }
         }
 
         //Extract an asset and write it to a JSON file
-        private static void extractAsset(DefaultFileProvider provider, string assetPath)
+        private static void ExtractAsset(DefaultFileProvider gameFileProvider, string assetPath, Settings settings)
         {
             // load all exports the asset has and transform them in a single Json string
-            // var allExports = provider.LoadAllObjects(assetPath);
-            var allExports = provider.LoadPackage(assetPath).GetExports();
-            var fullJson = "";
+            var assetExports = gameFileProvider.LoadPackage(assetPath).GetExports();
+            var serializedJson = "";
             try 
             {
-                fullJson = JsonConvert.SerializeObject(allExports, Formatting.Indented);
+                serializedJson = JsonConvert.SerializeObject(assetExports, Formatting.Indented);
             }
             catch (Exception ex)
             {
@@ -54,152 +77,180 @@ namespace CUE4Parse.Example
                 return;
             }
             // Destination path within exports directory
-            string destPath = _outputPath + "/" + assetPath + ".json";
+            string destinationFilePath = settings.ExportOutputPath + "/" + assetPath + ".json";
 
             // Create the directories if they don't exist
-            createNeededDirectories(destPath, _outputPath);
+            CreateNeededDirectories(destinationFilePath, settings.ExportOutputPath);
 
             // Write the JSON to file
             try
             {
-                File.WriteAllText(destPath, fullJson);
-                // Console.WriteLine("JSON written to file: " + destPath);
+                File.WriteAllText(destinationFilePath, serializedJson);
             }
             catch (Exception ex)
             {
-                Console.WriteLine("An error occurred when writing export to file: " + destPath + " " + ex.Message);
+                Console.WriteLine("An error occurred when writing export to file: " + destinationFilePath + " " + ex.Message);
             }
+        }
+
+        private static bool ShouldProcessFile(string assetFilePath, List<string> targetExportDirectories, Settings settings)
+        {
+            // Check file extension
+            if (!settings.SupportedAssetFileExtensions.Any(ext => assetFilePath.EndsWith(ext, StringComparison.OrdinalIgnoreCase)))
+                return false;
+
+            // Skip engine files
+            if (assetFilePath.StartsWith("engine", StringComparison.OrdinalIgnoreCase))
+                return false;
+
+            // Check excluded prefixes (skip if null - means no exclusions)
+            if (settings.ExcludedAssetFilePrefixes != null)
+            {
+                var assetFileName = Path.GetFileName(assetFilePath);
+                if (settings.ExcludedAssetFilePrefixes.Any(prefix => assetFileName.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)))
+                    return false;
+            }
+
+            // Check if file is in any export directory (empty string means export all)
+            return targetExportDirectories.Any(dir => string.IsNullOrEmpty(dir) || assetFilePath.StartsWith(dir, StringComparison.OrdinalIgnoreCase));
         }
 
         public static void Main()
         {
-            // === replaced block starts here ===
-            var toDelete = Path.Combine(_outputPath, "DungeonCrawler", "Content");
-            Console.WriteLine($"Preparing export directory:\n{toDelete}\n");
+            // Load settings (you can extend this to load from config file or command line args)
+            var settings = LoadSettings();
+            
+            // Validate settings
+            try
+            {
+                settings.Validate();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Configuration error: {ex.Message}");
+                return;
+            }
 
-            if (Directory.Exists(toDelete))
+            // Create exports directory
+            string applicationRootPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..\\..\\..\\"));
+            Utils.LogInfo("Output Directory: " + settings.ExportOutputPath, settings.IsLoggingEnabled);
+
+            // Handle output directory cleanup if requested
+            if (settings.ShouldWipeOutputDirectory && Directory.Exists(settings.ExportOutputPath))
             {
                 try
                 {
-                    Directory.Delete(toDelete, true);
-                    Console.WriteLine("Old export contents deleted.");
+                    Utils.LogInfo("Wiping existing output directory contents...", settings.IsLoggingEnabled);
+                    Directory.Delete(settings.ExportOutputPath, true);
+                    Utils.LogInfo("Output directory successfully cleared.", settings.IsLoggingEnabled);
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("Warning: could not delete previous contents: " + ex.Message);
+                    Console.WriteLine($"Warning: Failed to delete output directory: {ex.Message}");
                 }
             }
 
-            // Ensure the full path exists for new exports
-            Directory.CreateDirectory(toDelete);
-            // === replaced block ends here ===
-
-            // Create exports directory
-            string rootPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..\\..\\..\\"));
-            Console.WriteLine("Output Directory: " + _outputPath);
+            // Ensure output directory exists
+            if (!Directory.Exists(settings.ExportOutputPath))
+            {
+                Directory.CreateDirectory(settings.ExportOutputPath);
+                Utils.LogInfo("Created output directory.", settings.IsLoggingEnabled);
+            }
 
             // Decrypt .pak to assets
-            if (_enableLogging)
+            if (settings.IsLoggingEnabled)
             {
                 Log.Logger = new LoggerConfiguration().WriteTo.Console(theme: AnsiConsoleTheme.Literate).CreateLogger();
             }
 
+            Utils.LogInfo("Initializing Oodle...", settings.IsLoggingEnabled);
             OodleHelper.DownloadOodleDll();
             OodleHelper.Initialize(OodleHelper.OODLE_DLL_NAME);
 
-            var version = new VersionContainer(EGame.GAME_UE5_3, ETexturePlatform.DesktopMobile);
-            var provider = new DefaultFileProvider(_gameDirectory, SearchOption.AllDirectories, version, StringComparer.Ordinal)
+            Utils.LogInfo("Creating version container and file provider...", settings.IsLoggingEnabled);
+            Utils.LogInfo($"Game directory: {settings.PakFilesDirectory}", settings.IsLoggingEnabled);
+            Utils.LogInfo($"Mappings file: {settings.MappingFilePath}", settings.IsLoggingEnabled);
+            
+            Utils.LogInfo("Creating provider...", settings.IsLoggingEnabled);
+            Utils.LogInfo($"Using UE version: {settings.UnrealEngineVersion}, Texture platform: {settings.TexturePlatform}", settings.IsLoggingEnabled);
+            var fileProvider = new DefaultFileProvider(settings.PakFilesDirectory, SearchOption.AllDirectories, new VersionContainer(settings.GetUnrealEngineVersion(), settings.GetTexturePlatform()), StringComparer.Ordinal);
+            
+            // Submit AES key if provided
+            if (!string.IsNullOrEmpty(settings.AesKeyHex))
             {
-                MappingsContainer = new FileUsmapTypeMappingsProvider(_mapping)
-            };
-            provider.Initialize();
-            provider.SubmitKey(new FGuid(), new FAesKey(_aesKey));
-            provider.PostMount();
-            provider.ChangeCulture("en");
-
-            // Retrieve the list of directories to export
-            // Path to the NeededExports.json file
-            string neededExportsPath = Path.Combine(rootPath,"NeededExports.json");
-
-            // Check if the file exists
-            if (!File.Exists(neededExportsPath))
-            {
-                Console.WriteLine(neededExportsPath + " file not found.");
-                return;
+                Utils.LogInfo("Submitting AES encryption key...", settings.IsLoggingEnabled);
+                fileProvider.SubmitKey(new FGuid(), new FAesKey(settings.AesKeyHex));
             }
-
-            // Read the JSON data from the file
-            string neededExportsJson = File.ReadAllText(neededExportsPath);
-
-            List<string> neededExports = DirectoriesCoverage.GetNarrowestDirectories(neededExportsJson);
-            Console.WriteLine("Narrowed Directories that will be exported:");
-            foreach (var dir in neededExports)
+            else
             {
-                Console.WriteLine("\t"+dir);
+                Utils.LogInfo("No AES key provided - assuming unencrypted pak files", settings.IsLoggingEnabled);
             }
-            Console.WriteLine("");
+            
+            Utils.LogInfo("Setting mappings...", settings.IsLoggingEnabled);
+            fileProvider.MappingsContainer = new FileUsmapTypeMappingsProvider(settings.MappingFilePath);
+            
+            Utils.LogInfo("Initializing provider...", settings.IsLoggingEnabled);
+            fileProvider.Initialize();
+            Utils.LogInfo($"Files found after Initialize(): {fileProvider.Files.Count}", settings.IsLoggingEnabled);
+            
+            Utils.LogInfo("Mounting provider...", settings.IsLoggingEnabled);
+            fileProvider.Mount();
+            Utils.LogInfo($"Files found after Mount(): {fileProvider.Files.Count}", settings.IsLoggingEnabled);
+            
+            Utils.LogInfo("Post-mounting provider...", settings.IsLoggingEnabled);
+            fileProvider.PostMount();
+            Utils.LogInfo($"Files found after PostMount(): {fileProvider.Files.Count}", settings.IsLoggingEnabled);
 
+            Utils.LogInfo($"Total files found by provider: {fileProvider.Files.Count}", settings.IsLoggingEnabled);
 
-            // Export to .json
-            string filePath;
-            Console.WriteLine("Please wait while the script exports files..."); // Starting exporting process
-            foreach (var file in provider.Files)
+            // Determine which directories to export
+            List<string> exportDirectoriesToProcess;
+            
+            if (settings.NeededExportsFilePath == null)
             {
-                foreach (var dir in neededExports)
+                // Export all assets when no specific export file is specified
+                Utils.LogInfo("No NeededExports file specified - exporting all assets", settings.IsLoggingEnabled);
+                exportDirectoriesToProcess = new List<string> { "" }; // Empty string matches all paths
+            }
+            else
+            {
+                // Retrieve the list of directories to export from the specified file
+                string neededExportsFilePath = settings.GetNeededExportsFilePath(applicationRootPath);
+
+                // Check if the file exists
+                if (!File.Exists(neededExportsFilePath))
                 {
-                    filePath = file.Value.ToString(); // Access the FilePath property of the GameFile object
-                    
-                    // Filter out unneeded exports
-                    // File types that aren't .uasset
-                    // if (filePath.EndsWith(".uexp", StringComparison.OrdinalIgnoreCase) //|| 
-                    //     //filePath.EndsWith(".ubulk", StringComparison.OrdinalIgnoreCase) || 
-                    //     //filePath.EndsWith(".uptnl", StringComparison.OrdinalIgnoreCase
-                    //     )
-                    // {
-                    //     continue;
-                    // }
-                    if (!(filePath.EndsWith(".uasset", StringComparison.OrdinalIgnoreCase) || filePath.EndsWith(".umap", StringComparison.OrdinalIgnoreCase))) // Only export .uasset and .umap files
-                    {
-                        //Console.WriteLine("Skipped file: " + filePath);
-                        continue;
-                    }
-                    // Files in root/Engine
-                    if (filePath.StartsWith("engine", StringComparison.OrdinalIgnoreCase))
-                    {
-                        continue;
-                    }
-                    string packageName = filePath.Split('/').Last(); // Get the package name from the file path, i.e. ABP_OilLantern
-                    // Package prefixes that indicate files that aren't needed
-                    if (//packageName.StartsWith("ABP_", StringComparison.OrdinalIgnoreCase) || 
-                        //packageName.StartsWith("SK_", StringComparison.OrdinalIgnoreCase) || 
-                        //packageName.StartsWith("SKEL_", StringComparison.OrdinalIgnoreCase) ||
-                        //packageName.StartsWith("SM_", StringComparison.OrdinalIgnoreCase) ||
-                        //packageName.StartsWith("PHYS_", StringComparison.OrdinalIgnoreCase) ||
-                        packageName.StartsWith("FXS_", StringComparison.OrdinalIgnoreCase))
-                    {
-                        continue;
-                    }
-                    // Check if the file is in the needed narrowed directories
-                    if (filePath.StartsWith(dir))
-                    {
-                        //Save file path to list of files to export
-                        filePath = filePath.Replace(".uasset", "").Replace(".umap", "");
-                        //filesToExport.Add(filePath);
-                        if (_enableLogging)
-                        {
-                            Console.WriteLine("Exporting asset: " + filePath);
-                        }
-                        extractAsset(provider, filePath);
-                        break;
-                    }
+                    Console.WriteLine(neededExportsFilePath + " file not found.");
+                    return;
+                }
+
+                string neededExportsJsonContent = File.ReadAllText(neededExportsFilePath);
+                exportDirectoriesToProcess = Utils.GetNarrowestDirectories(neededExportsJsonContent);
+                Utils.LogInfo("Narrowed Directories that will be exported:", settings.IsLoggingEnabled);
+                foreach (var exportDirectory in exportDirectoriesToProcess)
+                {
+                    Utils.LogInfo("\t"+exportDirectory, settings.IsLoggingEnabled);
                 }
             }
 
-            Console.WriteLine("All files exported successfully!"); // Finished exporting process
+            // Export to .json
+            Utils.LogInfo("Please wait while the script exports files...", settings.IsLoggingEnabled);
+            int totalFilesProcessed = 0;
+            int totalFilesExported = 0;
+            foreach (var gameFile in fileProvider.Files)
+            {
+                totalFilesProcessed++;
+                string currentFilePath = gameFile.Value.ToString();
+                if (ShouldProcessFile(currentFilePath, exportDirectoriesToProcess, settings))
+                {
+                    string assetPathForExport = currentFilePath.Replace(".uasset", "").Replace(".umap", "");
+                    Utils.LogInfo("Exporting asset: " + assetPathForExport, settings.IsLoggingEnabled);
+                    ExtractAsset(fileProvider, assetPathForExport, settings);
+                    totalFilesExported++;
+                }
+            }
 
-            // Example of extracting an asset
-            //string assetPath = "DungeonCrawler/Content/DungeonCrawler/Props/IceWorld/IceWall/GC_IciclesWall_01_Default";
-            //extractAsset(provider, assetPath);
+            Utils.LogInfo($"Processing complete. Files processed: {totalFilesProcessed}, Files exported: {totalFilesExported}", settings.IsLoggingEnabled);
         }
     }
 }

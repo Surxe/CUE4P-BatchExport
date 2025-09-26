@@ -1,55 +1,24 @@
 # BatchExport
- Quickly decrypts and exports using CUE4PARSE
-
-# Process
-
-README for the complete export process from downloaded update to exports
-
-Looking how to download assets from someone who already did the below process? Just Extract/Unzip src/Exports.zip and skip all of the following
+At its core, this is just a wrapper for the CUE4Parse repository that exports assets from an Unreal Engine game's pak folders.
 
 ## Repack using Unreal Engine
+Some games, such as Dark and Darker, will require repackaging the game first to address other issues. Following is what this process looks like for Dark and Darker.
 1. Download [Unreal Engine](https://www.unrealengine.com/en-US/download) 5.3. When prompted for what to install, use:
+   1.  "Core Components" (required, 40gb)
+   2.  "Starter Content" (might not be necessary)
+   3.  "Templates and Feature Packs" (might not be necessary)
+   4.  "Engine Source" (likely necessary)
+   5.  NOT "Editor symbols for debugging" (80gb)
+2. Download `repackaging\Crypto.json`, open with Notepad, ensure the AES key is set for your game.
+3. Download `repackaging\extract.bat`, open with Notepad, and set the line `<cd "C:\Program Files\IRONMACE\Dark and Darker\DungeonCrawler\Content\Paks">` to your own game's pak path
+4. Run `extract.bat` as Administrator (might not work if not as Admin), enter your UE5.3 download path, by default it is `C:\Program Files\Epic Games\UE_5.3` on Windows, let it repackage for ~10 minutes
 
-1.1 "Core Components" (required, 40gb)
-
-1.2 "Starter Content" (might not be necessary)
-
-1.3 "Templates and Feature Packs" (might not be necessary)
-
-1.4 "Engine Source" (likely necessary)
-
-1.5 NOT "Editor symbols for debugging" (80gb)
-1. Download src\Crypto.json, open with Notepad, ensure the AES key is set for your game.
-
-2. Download src\extract.bat, open with Notepad, and set the line <cd "C:\Program Files\IRONMACE\Dark and Darker\DungeonCrawler\Content\Paks"> to your own DaD download path
-
-3. Run extract.bat as Administrator (might not work if not as Admin), enter your UE5.3 download path, by default it is C:\Program Files\Epic Games\UE_5.3, let it repackage for ~10 minutes
-
-## Decrypt and export with CUE4Parse
-4. Get a 1.0 (NOT 2.0) .usmap mapper file for the current game version
-   
-6. Configure settings for src\Program.cs
-   
-5.1 Install dependencies
-   
-5.1.1 .NET SDK https://dotnet.microsoft.com/en-us/download
-   
-5.1.2 Run in terminal: "dotnet add package CUE4Parse"
-   
-5.2 in program.cs set _gameDirectory to directory of the "Repacked" files created by the extract.bat native repacker
-   
-5.3 in program.cs set _outputPath to directory to save exports to
-   
-5.3 in program.cs set _mapping to name of .usmap file
-   
-5.4 in program.cs set _aesKey which hasn't changed since the game was released
-  
-7. Change the directories you need exported in src\NeededExports.json. Paths can appear more than once. Paths are grouped simply for readability, naming the groups something meaningful is not necessary. If exporting all, simply add the root path and all files within will be exported
-   
-8. `cd BatchExport/src`
-   
-9.  `dotnet run BatchExport.csproj`
-    
-10. Compress/Zip src\Exports to src\Exports.zip and attach through some other file sharing site as it is too big for GitHub to share
-
-.usmap and .uasset are currently the only files this will export
+## Decrypt and batch export with CUE4Parse
+1. Get a 1.0 (NOT 2.0) .usmap mapper file for the current game version  
+2. Install dependencies
+   1. .NET SDK https://dotnet.microsoft.com/en-us/download
+   2. Run in terminal: `dotnet add package CUE4Parse`
+3. Create `src/appsettings.json` using `appsettings.template.json` as a template and  `SETTINGS.md` as a guideline
+4. `cd BatchExport/src`
+5. `dotnet build`
+6. `dotnet run BatchExport.csproj`
