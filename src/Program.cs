@@ -104,18 +104,43 @@ namespace CUE4Parse.Example
                 Log.Logger = new LoggerConfiguration().WriteTo.Console(theme: AnsiConsoleTheme.Literate).CreateLogger();
             }
 
+            Console.WriteLine("Initializing Oodle...");
             OodleHelper.DownloadOodleDll();
             OodleHelper.Initialize(OodleHelper.OODLE_DLL_NAME);
 
-            var version = new VersionContainer(EGame.GAME_UE5_3, ETexturePlatform.DesktopMobile);
-            var provider = new DefaultFileProvider(_gameDirectory, SearchOption.AllDirectories, version, StringComparer.Ordinal)
-            {
-                MappingsContainer = new FileUsmapTypeMappingsProvider(_mapping)
-            };
+            Console.WriteLine("Creating version container and file provider...");
+            Console.WriteLine($"Game directory: {_gameDirectory}");
+            Console.WriteLine($"Mappings file: {_mapping}");
+            
+            // Try different game versions - the mappings suggest 5.4.4 and we have .ucas/.utoc files (IoStore)
+            Console.WriteLine("Trying GAME_UE5_4 with IoStore support...");
+            var version = new VersionContainer(EGame.GAME_UE5_4, ETexturePlatform.DesktopMobile);
+            var provider = new DefaultFileProvider(_gameDirectory, SearchOption.AllDirectories, version, StringComparer.Ordinal);
+            
+            //provider.SubmitKey(new FGuid(), new FAesKey(_aesKey));
+            
+            // Also try with different versions if this doesn't work
+            Console.WriteLine("Trying without mappings first...");
+            
+            Console.WriteLine("Setting mappings...");
+            provider.MappingsContainer = new FileUsmapTypeMappingsProvider(_mapping);
+            
+            Console.WriteLine("Initializing provider...");
             provider.Initialize();
-            provider.SubmitKey(new FGuid(), new FAesKey(_aesKey));
+            Console.WriteLine($"Files found after Initialize(): {provider.Files.Count}");
+            
+            Console.WriteLine("Mounting provider...");
+            provider.Mount(); // This is the missing step!
+            Console.WriteLine($"Files found after Mount(): {provider.Files.Count}");
+            
+            // provider.SubmitKey(new FGuid(), new FAesKey(_aesKey)); //no aes key for this game
+            Console.WriteLine("Post-mounting provider...");
             provider.PostMount();
-            provider.ChangeCulture("en");
+            Console.WriteLine($"Files found after PostMount(): {provider.Files.Count}");
+            
+            // provider.ChangeCulture("en"); // Commented out - culture not available for this game
+            
+            Console.WriteLine($"Total files found by provider: {provider.Files.Count}");
 
             // Retrieve the list of directories to export
             // Path to the NeededExports.json file
@@ -143,12 +168,21 @@ namespace CUE4Parse.Example
             // Export to .json
             string filePath;
             Console.WriteLine("Please wait while the script exports files..."); // Starting exporting process
+            int totalProcessed = 0;
+            int totalExported = 0;
             foreach (var file in provider.Files)
             {
+                totalProcessed++;
+                filePath = file.Value.ToString(); // Access the FilePath property of the GameFile object
+                
+                // Debug: Print first 10 files to see what we're working with
+                if (totalProcessed <= 10)
+                {
+                    Console.WriteLine($"Sample file {totalProcessed}: {filePath}");
+                }
+                
                 foreach (var dir in neededExports)
                 {
-                    filePath = file.Value.ToString(); // Access the FilePath property of the GameFile object
-                    
                     // Filter out unneeded exports
                     // File types that aren't .uasset
                     // if (filePath.EndsWith(".uexp", StringComparison.OrdinalIgnoreCase) //|| 
@@ -190,12 +224,13 @@ namespace CUE4Parse.Example
                             Console.WriteLine("Exporting asset: " + filePath);
                         }
                         extractAsset(provider, filePath);
+                        totalExported++;
                         break;
                     }
                 }
             }
 
-            Console.WriteLine("All files exported successfully!"); // Finished exporting process
+            Console.WriteLine($"Processing complete. Files processed: {totalProcessed}, Files exported: {totalExported}"); // Finished exporting process
 
             // Example of extracting an asset
             //string assetPath = "DungeonCrawler/Content/DungeonCrawler/Props/IceWorld/IceWall/GC_IciclesWall_01_Default";
