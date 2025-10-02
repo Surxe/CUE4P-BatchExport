@@ -64,7 +64,7 @@ namespace BatchExport
         /// <summary>
         /// Supported asset file extensions for processing
         /// </summary>
-        public string[] SupportedAssetFileExtensions { get; set; } = { ".uasset", ".umap" };
+        public string[] SupportedAssetFileExtensions { get; set; } = { ".uasset", ".umap", ".locres" };
 
         /// <summary>
         /// Asset file prefixes to exclude from processing

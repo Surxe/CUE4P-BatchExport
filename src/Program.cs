@@ -8,6 +8,7 @@ using Serilog.Sinks.SystemConsole.Themes;
 using CUE4Parse.MappingsProvider;
 using CUE4Parse.Compression;
 using CUE4Parse.UE4.Assets.Exports.Texture;
+using CUE4Parse.UE4.Localization;
 
 namespace BatchExport
 {
@@ -64,6 +65,14 @@ namespace BatchExport
         //Extract an asset and write it to a JSON file
         private static void ExtractAsset(DefaultFileProvider gameFileProvider, string assetPath, Settings settings)
         {
+            // Check if this is a .locres file (localization resource)
+            if (assetPath.EndsWith(".locres", StringComparison.OrdinalIgnoreCase))
+            {
+                ExtractLocresFile(gameFileProvider, assetPath, settings);
+                return;
+            }
+
+            // Handle regular UE packages (.uasset, .umap)
             // load all exports the asset has and transform them in a single Json string
             var assetExports = gameFileProvider.LoadPackage(assetPath).GetExports();
             var serializedJson = "";
@@ -90,6 +99,42 @@ namespace BatchExport
             catch (Exception ex)
             {
                 Console.WriteLine("An error occurred when writing export to file: " + destinationFilePath + " " + ex.Message);
+            }
+        }
+
+        private static void ExtractLocresFile(DefaultFileProvider gameFileProvider, string assetPath, Settings settings)
+        {
+            try
+            {
+                // Get the game file for the locres
+                var gameFile = gameFileProvider.Files[assetPath];
+                if (gameFile != null)
+                {
+                    using var archive = gameFile.CreateReader();
+                    
+                    // Parse the locres file using CUE4Parse
+                    var locres = new FTextLocalizationResource(archive);
+                    
+                    // Serialize the locres object directly to JSON
+                    string serializedJson = JsonConvert.SerializeObject(locres, Formatting.Indented);
+                    
+                    // Destination path within exports directory (change extension to .json)
+                    string destinationFilePath = settings.ExportOutputPath + "/" + assetPath.Replace(".locres", ".json");
+
+                    // Create the directories if they don't exist
+                    CreateNeededDirectories(destinationFilePath, settings.ExportOutputPath);
+
+                    // Write the JSON to file
+                    File.WriteAllText(destinationFilePath, serializedJson);
+                }
+                else
+                {
+                    Console.WriteLine($"Could not find locres file: {assetPath}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred when parsing locres file {assetPath}: {ex.Message}");
             }
         }
 
@@ -201,6 +246,8 @@ namespace BatchExport
             fileProvider.PostMount();
             Utils.LogInfo($"Files found after PostMount(): {fileProvider.Files.Count}", settings.IsLoggingEnabled);
 
+            fileProvider.ChangeCulture("en");
+
             Utils.LogInfo($"Total files found by provider: {fileProvider.Files.Count}", settings.IsLoggingEnabled);
 
             // Determine which directories to export
@@ -243,7 +290,17 @@ namespace BatchExport
                 string currentFilePath = gameFile.Value.ToString();
                 if (ShouldProcessFile(currentFilePath, exportDirectoriesToProcess, settings))
                 {
-                    string assetPathForExport = currentFilePath.Replace(".uasset", "").Replace(".umap", "");
+                    string assetPathForExport;
+                    if (currentFilePath.EndsWith(".locres", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // Keep full path for .locres files (they need their extension)
+                        assetPathForExport = currentFilePath;
+                    }
+                    else
+                    {
+                        // Remove extensions for UE packages (.uasset, .umap)
+                        assetPathForExport = currentFilePath.Replace(".uasset", "").Replace(".umap", "");
+                    }
                     Utils.LogInfo("Exporting asset: " + assetPathForExport, settings.IsLoggingEnabled);
                     ExtractAsset(fileProvider, assetPathForExport, settings);
                     totalFilesExported++;
