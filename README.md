@@ -7,8 +7,8 @@ A .NET application that exports Unreal Engine game assets to JSON format using [
 
 ### Prerequisites
 - [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) or higher
-- Game .pak files
-- Corresponding .usmap mappings file for your game version
+- Game `.pak` files
+- Corresponding `.usmap` mappings file for your game version
 
 ### Build Steps
 1. Clone the repository:
@@ -38,7 +38,6 @@ A .NET application that exports Unreal Engine game assets to JSON format using [
 5. Run the application:
    ```bash
    dotnet run
-   # OR navigate to bin/Release/net8.0/ and run BatchExport.exe
    ```
 
 ## Supported Games & Presets
