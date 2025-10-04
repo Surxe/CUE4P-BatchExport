@@ -3,6 +3,20 @@
 
 A .NET application that exports Unreal Engine game assets to JSON format using [CUE4Parse](https://github.com/FabianFG/CUE4Parse). Supports multiple games with preset configurations and can export assets, localization files, and more.
 
+## Quick Start
+
+**Build and run directly:**
+```bash
+dotnet build --configuration Release
+cd bin/Release/net8.0
+
+# Run with command-line arguments (no config file needed)
+.\BatchExport.exe --preset WarRobotsFrontiers --pak-dir "C:\Game\Paks" --output "C:\Export" --mappings "C:\mappings.usmap"
+
+# Or see all available options
+.\BatchExport.exe --help
+```
+
 ## Installation
 
 ### Prerequisites
@@ -28,16 +42,24 @@ A .NET application that exports Unreal Engine game assets to JSON format using [
    dotnet build --configuration Release
    ```
 
-4. Create configuration file:
+4. Configure and run:
+   
+   **Option A - Using configuration file:**
    ```bash
    cp appsettings.template.json appsettings.json
    # Edit appsettings.json with your paths and settings
    # Refer to SETTINGS.md
-   ```
-
-5. Run the application:
-   ```bash
    dotnet run
+   ```
+   
+   **Option B - Using command-line arguments (no config file needed):**
+   ```bash
+   # Via dotnet run
+   dotnet run -- --pak-dir "C:\Game\Paks" --output "C:\Export" --mappings "C:\mappings.usmap" --preset WarRobotsFrontiers
+   
+   # Or run the executable directly
+   cd bin/Release/net8.0
+   .\BatchExport.exe --pak-dir "C:\Game\Paks" --output "C:\Export" --mappings "C:\mappings.usmap" --preset WarRobotsFrontiers
    ```
 
 ## Supported Games & Presets
@@ -48,7 +70,8 @@ The application includes built-in presets for popular games:
 - **Dark and Darker** - UE 5.3, AES encrypted
 
 ### Using Presets
-Simply specify a preset in your `appsettings.json`:
+
+**Via configuration file (`appsettings.json`):**
 ```json
 {
   "pakFilesDirectory": "C:\\Path\\To\\Your\\Game\\Paks",
@@ -58,18 +81,102 @@ Simply specify a preset in your `appsettings.json`:
 }
 ```
 
+**Via command-line arguments:**
+```bash
+BatchExport.exe --preset WarRobotsFrontiers --pak-dir "C:\Game\Paks" --output "C:\Export" --mappings "C:\mappings.usmap"
+```
+
 ## Features
 
 - **Multi-format Support**: Exports .uasset, .umap, and .locres files
 - **Localization**: Automatically parses and exports localization files as JSON
 - **Game Presets**: Pre-configured settings for some games
 - **Flexible Filtering**: Include/exclude specific asset types and directories
+- **Command-Line Interface**: Run without config files using CLI arguments
+- **Configuration Override**: CLI arguments take precedence over config file values
+
+## Command-Line Usage
+
+The application supports comprehensive command-line arguments, making configuration files optional:
+
+### Basic Usage
+```bash
+# Using preset (recommended) - via dotnet run
+dotnet run -- --preset WarRobotsFrontiers \
+  --pak-dir "C:\Game\Paks" \
+  --output "C:\Export" \
+  --mappings "C:\mappings.usmap"
+
+# Using preset - direct executable (after build)
+.\BatchExport.exe --preset WarRobotsFrontiers \
+  --pak-dir "C:\Game\Paks" \
+  --output "C:\Export" \
+  --mappings "C:\mappings.usmap"
+
+# Manual configuration - direct executable
+.\BatchExport.exe --pak-dir "C:\Game\Paks" \
+  --output "C\Export" \
+  --mappings "C:\mappings.usmap" \
+  --ue-version GAME_UE5_4 \
+  --aes-key null
+```
+
+### Available Arguments
+| Argument | Description | Example |
+|----------|-------------|---------|
+| `--pak-dir <path>` | Directory containing .pak files | `--pak-dir "C:\Game\Paks"` |
+| `--output <path>` | Export output directory | `--output "C:\Export"` |
+| `--mappings <path>` | Path to .usmap mappings file | `--mappings "C:\mappings.usmap"` |
+| `--preset <name>` | Game preset (None, DarkAndDarker, WarRobotsFrontiers) | `--preset WarRobotsFrontiers` |
+| `--aes-key <hex>` | AES encryption key (or 'null') | `--aes-key "0x1234..."` |
+| `--ue-version <version>` | Unreal Engine version | `--ue-version GAME_UE5_4` |
+| `--texture-platform <name>` | Texture platform | `--texture-platform DesktopMobile` |
+| `--needed-exports <path>` | Path to NeededExports.json (or 'null') | `--needed-exports "exports.json"` |
+| `--logging <true\|false>` | Enable detailed logging | `--logging false` |
+| `--wipe-output <true\|false>` | Clear output directory first | `--wipe-output true` |
+| `--help`, `-h` | Show help message | `--help` |
+
+### Configuration Priority
+1. **Command-line arguments** (highest priority)
+2. **Configuration file** (`appsettings.json`)
+3. **Default values** (lowest priority)
+
+### Usage Scenarios
+
+**Scenario 1: Config file + CLI overrides**
+```bash
+# Use appsettings.json but override logging and output path
+dotnet run -- --logging false --output "C:\NewExportPath"
+# Or: .\BatchExport.exe --logging false --output "C:\NewExportPath"
+```
+
+**Scenario 2: Completely CLI-driven (no config file)**
+```bash
+# All configuration via command line
+.\BatchExport.exe --pak-dir "C:\Game\Paks" \
+  --output "C:\Export" \
+  --mappings "C:\mappings.usmap" \
+  --ue-version GAME_UE5_4 \
+  --aes-key null \
+  --logging true \
+  --wipe-output false
+```
+
+**Scenario 3: Preset with custom paths**
+```bash
+# Use preset for game settings, specify custom paths
+.\BatchExport.exe --preset DarkAndDarker \
+  --pak-dir "D:\SteamLibrary\DarkAndDarker\Paks" \
+  --output "D:\Exports\DaD" \
+  --mappings "D:\Mappings\dad_5.3.usmap"
+```
 
 ## Advanced Configuration
 
 For detailed configuration options, see:
 - `SETTINGS.md` - Complete configuration reference
 - `appsettings.template.json` - Template configuration file
+- Command-line help: `BatchExport.exe --help`
 
 ## Repack using Unreal Engine (Dark and Darker Only)
 
