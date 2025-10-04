@@ -15,34 +15,222 @@ namespace BatchExport
     public static class BatchExportProgram
     {
         /// <summary>
-        /// Loads settings from various sources (config file, environment variables, defaults)
+        /// Loads settings from config file (if available) and command-line arguments
         /// </summary>
+        /// <param name="args">Command-line arguments</param>
         /// <returns>Configured Settings instance</returns>
-        private static Settings LoadSettings()
+        private static Settings LoadSettings(string[] args)
         {
-            // Try to load from config file first
+            Settings settings;
+            
+            // Try to load from config file first (optional)
             string configFilePath = Path.Combine(AppContext.BaseDirectory, "appsettings.json");
             
             if (File.Exists(configFilePath))
             {
                 try
                 {
-                    var settings = Settings.LoadFromFile(configFilePath);
+                    settings = Settings.LoadFromFile(configFilePath);
+                    Console.WriteLine($"Loaded configuration from: {configFilePath}");
                     if (settings.Preset != GamePreset.None)
                     {
                         Console.WriteLine($"Using preset: {settings.Preset}");
                     }
-                    return settings;
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Warning: Failed to load config file {configFilePath}: {ex.Message}");
                     Console.WriteLine("Using default settings...");
+                    settings = new Settings();
+                }
+            }
+            else
+            {
+                Console.WriteLine("No appsettings.json found. Using command-line arguments and defaults.");
+                settings = new Settings();
+            }
+            
+            // Apply command-line argument overrides
+            settings = ApplyCommandLineArguments(settings, args);
+            
+            return settings;
+        }
+
+        /// <summary>
+        /// Applies command-line arguments to override settings values
+        /// </summary>
+        /// <param name="settings">Base settings to override</param>
+        /// <param name="args">Command-line arguments</param>
+        /// <returns>Settings with command-line overrides applied</returns>
+        private static Settings ApplyCommandLineArguments(Settings settings, string[] args)
+        {
+            for (int i = 0; i < args.Length; i++)
+            {
+                string arg = args[i].ToLowerInvariant();
+                string? value = i + 1 < args.Length ? args[i + 1] : null;
+
+                switch (arg)
+                {
+                    case "--pak-dir":
+                    case "--pakfilesdirectory":
+                        if (value != null)
+                        {
+                            settings.PakFilesDirectory = value;
+                            Console.WriteLine($"Override: PakFilesDirectory = {value}");
+                            i++; // Skip the value argument
+                        }
+                        break;
+                        
+                    case "--output":
+                    case "--exportoutputpath":
+                        if (value != null)
+                        {
+                            settings.ExportOutputPath = value;
+                            Console.WriteLine($"Override: ExportOutputPath = {value}");
+                            i++; // Skip the value argument
+                        }
+                        break;
+                        
+                    case "--mappings":
+                    case "--mappingfilepath":
+                        if (value != null)
+                        {
+                            settings.MappingFilePath = value;
+                            Console.WriteLine($"Override: MappingFilePath = {value}");
+                            i++; // Skip the value argument
+                        }
+                        break;
+                        
+                    case "--aes-key":
+                    case "--aeskeyhex":
+                        if (value != null)
+                        {
+                            settings.AesKeyHex = value.Equals("null", StringComparison.OrdinalIgnoreCase) ? null : value;
+                            Console.WriteLine($"Override: AesKeyHex = {(settings.AesKeyHex != null ? "[Set]" : "null")}");
+                            i++; // Skip the value argument
+                        }
+                        break;
+                        
+                    case "--preset":
+                        if (value != null && Enum.TryParse<GamePreset>(value, true, out var preset))
+                        {
+                            settings.Preset = preset;
+                            Console.WriteLine($"Override: Preset = {preset}");
+                            // Apply preset after parsing all arguments
+                            i++; // Skip the value argument
+                        }
+                        break;
+                        
+                    case "--ue-version":
+                    case "--unrealeversionversion":
+                        if (value != null)
+                        {
+                            settings.UnrealEngineVersion = value;
+                            Console.WriteLine($"Override: UnrealEngineVersion = {value}");
+                            i++; // Skip the value argument
+                        }
+                        break;
+                        
+                    case "--texture-platform":
+                    case "--textureplatform":
+                        if (value != null)
+                        {
+                            settings.TexturePlatform = value;
+                            Console.WriteLine($"Override: TexturePlatform = {value}");
+                            i++; // Skip the value argument
+                        }
+                        break;
+                        
+                    case "--needed-exports":
+                    case "--neededexportsfilepath":
+                        if (value != null)
+                        {
+                            settings.NeededExportsFilePath = value.Equals("null", StringComparison.OrdinalIgnoreCase) ? null : value;
+                            Console.WriteLine($"Override: NeededExportsFilePath = {settings.NeededExportsFilePath ?? "null"}");
+                            i++; // Skip the value argument
+                        }
+                        break;
+                        
+                    case "--logging":
+                    case "--isloggingenabled":
+                        if (value != null && bool.TryParse(value, out var logging))
+                        {
+                            settings.IsLoggingEnabled = logging;
+                            Console.WriteLine($"Override: IsLoggingEnabled = {logging}");
+                            i++; // Skip the value argument
+                        }
+                        break;
+                        
+                    case "--wipe-output":
+                    case "--shouldwipeoutputdirectory":
+                        if (value != null && bool.TryParse(value, out var wipe))
+                        {
+                            settings.ShouldWipeOutputDirectory = wipe;
+                            Console.WriteLine($"Override: ShouldWipeOutputDirectory = {wipe}");
+                            i++; // Skip the value argument
+                        }
+                        break;
+                        
+                    case "--help":
+                    case "-h":
+                        ShowHelp();
+                        Environment.Exit(0);
+                        break;
+                        
+                    default:
+                        if (arg.StartsWith("--"))
+                        {
+                            Console.WriteLine($"Warning: Unknown argument '{arg}' ignored.");
+                        }
+                        break;
                 }
             }
             
-            // Fall back to default settings
-            return new Settings();
+            // Apply preset after all arguments have been parsed (in case preset was specified via command line)
+            if (settings.Preset != GamePreset.None)
+            {
+                settings.ApplyPreset();
+            }
+            
+            return settings;
+        }
+
+        /// <summary>
+        /// Displays help information for command-line usage
+        /// </summary>
+        private static void ShowHelp()
+        {
+            Console.WriteLine("CUE4Parse BatchExport - Unreal Engine Asset Exporter");
+            Console.WriteLine();
+            Console.WriteLine("Usage: BatchExport.exe [OPTIONS]");
+            Console.WriteLine();
+            Console.WriteLine("Options:");
+            Console.WriteLine("  --pak-dir <path>           Path to directory containing .pak files");
+            Console.WriteLine("  --output <path>            Path where exported files will be saved");
+            Console.WriteLine("  --mappings <path>          Path to .usmap mappings file");
+            Console.WriteLine("  --aes-key <hex>            AES key for encrypted pak files (or 'null')");
+            Console.WriteLine("  --preset <name>            Game preset: None, DarkAndDarker, WarRobotsFrontiers");
+            Console.WriteLine("  --ue-version <version>     Unreal Engine version (e.g., GAME_UE5_4)");
+            Console.WriteLine("  --texture-platform <name>  Texture platform (e.g., DesktopMobile)");
+            Console.WriteLine("  --needed-exports <path>    Path to NeededExports.json file (or 'null')");
+            Console.WriteLine("  --logging <true|false>     Enable detailed logging");
+            Console.WriteLine("  --wipe-output <true|false> Clear output directory before exporting");
+            Console.WriteLine("  --help, -h                 Show this help message");
+            Console.WriteLine();
+            Console.WriteLine("Examples:");
+            Console.WriteLine("  BatchExport.exe --preset WarRobotsFrontiers \\");
+            Console.WriteLine("    --pak-dir \"C:\\Game\\Paks\" \\");
+            Console.WriteLine("    --output \"C:\\Export\" \\");
+            Console.WriteLine("    --mappings \"C:\\mappings.usmap\"");
+            Console.WriteLine();
+            Console.WriteLine("  BatchExport.exe --pak-dir \"C:\\Game\\Paks\" \\");
+            Console.WriteLine("    --output \"C:\\Export\" \\");
+            Console.WriteLine("    --mappings \"C:\\mappings.usmap\" \\");
+            Console.WriteLine("    --ue-version GAME_UE5_4 \\");
+            Console.WriteLine("    --aes-key null");
+            Console.WriteLine();
+            Console.WriteLine("Note: Command-line arguments override values in appsettings.json");
+            Console.WriteLine("      appsettings.json is optional if all required parameters are provided");
         }
 
         //Create all preceding directories of a given file if they don't yet exist
@@ -160,10 +348,10 @@ namespace BatchExport
             return targetExportDirectories.Any(dir => string.IsNullOrEmpty(dir) || assetFilePath.StartsWith(dir, StringComparison.OrdinalIgnoreCase));
         }
 
-        public static void Main()
+        public static void Main(string[] args)
         {
-            // Load settings (you can extend this to load from config file or command line args)
-            var settings = LoadSettings();
+            // Load settings from config file and command line arguments
+            var settings = LoadSettings(args);
             
             // Validate settings
             try
