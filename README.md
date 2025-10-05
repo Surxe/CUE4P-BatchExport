@@ -141,41 +141,12 @@ dotnet run -- --preset WarRobotsFrontiers \
 2. **Configuration file** (`appsettings.json`)
 3. **Default values** (lowest priority)
 
-### Usage Scenarios
-
-**Scenario 1: Config file + CLI overrides**
-```bash
-# Use appsettings.json but override logging and output path
-dotnet run -- --logging false --output "C:\NewExportPath"
-# Or: .\BatchExport.exe --logging false --output "C:\NewExportPath"
-```
-
-**Scenario 2: Completely CLI-driven (no config file)**
-```bash
-# All configuration via command line
-.\BatchExport.exe --pak-dir "C:\Game\Paks" \
-  --output "C:\Export" \
-  --mappings "C:\mappings.usmap" \
-  --ue-version GAME_UE5_4 \
-  --aes-key null \
-  --logging true \
-  --wipe-output false
-```
-
-**Scenario 3: Preset with custom paths**
-```bash
-# Use preset for game settings, specify custom paths
-.\BatchExport.exe --preset DarkAndDarker \
-  --pak-dir "D:\SteamLibrary\DarkAndDarker\Paks" \
-  --output "D:\Exports\DaD" \
-  --mappings "D:\Mappings\dad_5.3.usmap"
-```
-
 ## Advanced Configuration
 
 For detailed configuration options, see:
 - `SETTINGS.md` - Complete configuration reference
 - `appsettings.template.json` - Template configuration file
+- `RELEASES.md` - Download and release information
 - Command-line help: `BatchExport.exe --help`
 
 ## Repack using Unreal Engine (Dark and Darker Only)
