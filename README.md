@@ -11,7 +11,7 @@ dotnet build --configuration Release
 cd bin/Release/net8.0
 
 # Run with command-line arguments (no config file needed)
-.\BatchExport.exe --preset WarRobotsFrontiers --pak-dir "C:\Game\Paks" --output "C:\Export" --mappings "C:\mappings.usmap"
+.\BatchExport.exe --preset WarRobotsFrontiers --pak-files-directory "C:\Game\Paks" --export-output-path "C:\Export" --mapping-file-path "C:\mappings.usmap"
 
 # Or see all available options
 .\BatchExport.exe --help
@@ -55,11 +55,11 @@ cd bin/Release/net8.0
    **Option B - Using command-line arguments (no config file needed):**
    ```bash
    # Via dotnet run
-   dotnet run -- --pak-dir "C:\Game\Paks" --output "C:\Export" --mappings "C:\mappings.usmap" --preset WarRobotsFrontiers
+   dotnet run -- --pak-files-directory "C:\Game\Paks" --export-output-path "C:\Export" --mapping-file-path "C:\mappings.usmap" --preset WarRobotsFrontiers
    
    # Or run the executable directly
    cd bin/Release/net8.0
-   .\BatchExport.exe --pak-dir "C:\Game\Paks" --output "C:\Export" --mappings "C:\mappings.usmap" --preset WarRobotsFrontiers
+   .\BatchExport.exe --pak-files-directory "C:\Game\Paks" --export-output-path "C:\Export" --mapping-file-path "C:\mappings.usmap" --preset WarRobotsFrontiers
    ```
 
 ## Supported Games & Presets
@@ -83,7 +83,7 @@ The application includes built-in presets for popular games:
 
 **Via command-line arguments:**
 ```bash
-BatchExport.exe --preset WarRobotsFrontiers --pak-dir "C:\Game\Paks" --output "C:\Export" --mappings "C:\mappings.usmap"
+BatchExport.exe --preset WarRobotsFrontiers --pak-files-directory "C:\Game\Paks" --export-output-path "C:\Export" --mapping-file-path "C:\mappings.usmap"
 ```
 
 ## Features
@@ -103,37 +103,37 @@ The application supports comprehensive command-line arguments, making configurat
 ```bash
 # Using preset (recommended) - via dotnet run
 dotnet run -- --preset WarRobotsFrontiers \
-  --pak-dir "C:\Game\Paks" \
-  --output "C:\Export" \
-  --mappings "C:\mappings.usmap"
+  --pak-files-directory "C:\Game\Paks" \
+  --export-output-path "C:\Export" \
+  --mapping-file-path "C:\mappings.usmap"
 
 # Using preset - direct executable (after build)
 .\BatchExport.exe --preset WarRobotsFrontiers \
-  --pak-dir "C:\Game\Paks" \
-  --output "C:\Export" \
-  --mappings "C:\mappings.usmap"
+  --pak-files-directory "C:\Game\Paks" \
+  --export-output-path "C:\Export" \
+  --mapping-file-path "C:\mappings.usmap"
 
 # Manual configuration - direct executable
-.\BatchExport.exe --pak-dir "C:\Game\Paks" \
-  --output "C\Export" \
-  --mappings "C:\mappings.usmap" \
-  --ue-version GAME_UE5_4 \
-  --aes-key null
+.\BatchExport.exe --pak-files-directory "C:\Game\Paks" \
+  --export-output-path "C:\Export" \
+  --mapping-file-path "C:\mappings.usmap" \
+  --unreal-engine-version GAME_UE5_4 \
+  --aes-key-hex null
 ```
 
 ### Available Arguments
 | Argument | Description | Example |
 |----------|-------------|---------|
-| `--pak-dir <path>` | Directory containing .pak files | `--pak-dir "C:\Game\Paks"` |
-| `--output <path>` | Export output directory | `--output "C:\Export"` |
-| `--mappings <path>` | Path to .usmap mappings file | `--mappings "C:\mappings.usmap"` |
+| `--pak-files-directory <path>` | Directory containing .pak files | `--pak-files-directory "C:\Game\Paks"` |
+| `--export-output-path <path>` | Export output directory | `--export-output-path "C:\Export"` |
+| `--mapping-file-path <path>` | Path to .usmap mappings file | `--mapping-file-path "C:\mappings.usmap"` |
 | `--preset <name>` | Game preset (None, DarkAndDarker, WarRobotsFrontiers) | `--preset WarRobotsFrontiers` |
-| `--aes-key <hex>` | AES encryption key (or 'null') | `--aes-key "0x1234..."` |
-| `--ue-version <version>` | Unreal Engine version | `--ue-version GAME_UE5_4` |
+| `--aes-key-hex <hex>` | AES encryption key (or 'null') | `--aes-key-hex "0x1234..."` |
+| `--unreal-engine-version <version>` | Unreal Engine version | `--unreal-engine-version GAME_UE5_4` |
 | `--texture-platform <name>` | Texture platform | `--texture-platform DesktopMobile` |
-| `--needed-exports <path>` | Path to NeededExports.json (or 'null') | `--needed-exports "exports.json"` |
-| `--logging <true\|false>` | Enable detailed logging | `--logging false` |
-| `--wipe-output <true\|false>` | Clear output directory first | `--wipe-output true` |
+| `--needed-exports-file-path <path>` | Path to NeededExports.json (or 'null') | `--needed-exports-file-path "exports.json"` |
+| `--is-logging-enabled <true\|false>` | Enable detailed logging | `--is-logging-enabled false` |
+| `--should-wipe-output-directory <true\|false>` | Clear output directory first | `--should-wipe-output-directory true` |
 | `--help`, `-h` | Show help message | `--help` |
 
 ### Configuration Priority
