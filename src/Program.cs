@@ -71,8 +71,8 @@ namespace BatchExport
 
                 switch (arg)
                 {
-                    case "--pak-dir":
-                    case "--pakfilesdirectory":
+                    case "--pak-files-directory":
+                    case "--pak-dir": // Legacy support
                         if (value != null)
                         {
                             settings.PakFilesDirectory = value;
@@ -81,8 +81,8 @@ namespace BatchExport
                         }
                         break;
                         
-                    case "--output":
-                    case "--exportoutputpath":
+                    case "--export-output-path":
+                    case "--output": // Legacy support
                         if (value != null)
                         {
                             settings.ExportOutputPath = value;
@@ -91,8 +91,8 @@ namespace BatchExport
                         }
                         break;
                         
-                    case "--mappings":
-                    case "--mappingfilepath":
+                    case "--mapping-file-path":
+                    case "--mappings": // Legacy support
                         if (value != null)
                         {
                             settings.MappingFilePath = value;
@@ -101,8 +101,8 @@ namespace BatchExport
                         }
                         break;
                         
-                    case "--aes-key":
-                    case "--aeskeyhex":
+                    case "--aes-key-hex":
+                    case "--aes-key": // Legacy support
                         if (value != null)
                         {
                             settings.AesKeyHex = value.Equals("null", StringComparison.OrdinalIgnoreCase) ? null : value;
@@ -121,8 +121,8 @@ namespace BatchExport
                         }
                         break;
                         
-                    case "--ue-version":
-                    case "--unrealeversionversion":
+                    case "--unreal-engine-version":
+                    case "--ue-version": // Legacy support
                         if (value != null)
                         {
                             settings.UnrealEngineVersion = value;
@@ -141,8 +141,8 @@ namespace BatchExport
                         }
                         break;
                         
-                    case "--needed-exports":
-                    case "--neededexportsfilepath":
+                    case "--needed-exports-file-path":
+                    case "--needed-exports": // Legacy support
                         if (value != null)
                         {
                             settings.NeededExportsFilePath = value.Equals("null", StringComparison.OrdinalIgnoreCase) ? null : value;
@@ -151,8 +151,8 @@ namespace BatchExport
                         }
                         break;
                         
-                    case "--logging":
-                    case "--isloggingenabled":
+                    case "--is-logging-enabled":
+                    case "--logging": // Legacy support
                         if (value != null && bool.TryParse(value, out var logging))
                         {
                             settings.IsLoggingEnabled = logging;
@@ -161,8 +161,8 @@ namespace BatchExport
                         }
                         break;
                         
-                    case "--wipe-output":
-                    case "--shouldwipeoutputdirectory":
+                    case "--should-wipe-output-directory":
+                    case "--wipe-output": // Legacy support
                         if (value != null && bool.TryParse(value, out var wipe))
                         {
                             settings.ShouldWipeOutputDirectory = wipe;
@@ -205,29 +205,29 @@ namespace BatchExport
             Console.WriteLine("Usage: BatchExport.exe [OPTIONS]");
             Console.WriteLine();
             Console.WriteLine("Options:");
-            Console.WriteLine("  --pak-dir <path>           Path to directory containing .pak files");
-            Console.WriteLine("  --output <path>            Path where exported files will be saved");
-            Console.WriteLine("  --mappings <path>          Path to .usmap mappings file");
-            Console.WriteLine("  --aes-key <hex>            AES key for encrypted pak files (or 'null')");
-            Console.WriteLine("  --preset <name>            Game preset: None, DarkAndDarker, WarRobotsFrontiers");
-            Console.WriteLine("  --ue-version <version>     Unreal Engine version (e.g., GAME_UE5_4)");
-            Console.WriteLine("  --texture-platform <name>  Texture platform (e.g., DesktopMobile)");
-            Console.WriteLine("  --needed-exports <path>    Path to NeededExports.json file (or 'null')");
-            Console.WriteLine("  --logging <true|false>     Enable detailed logging");
-            Console.WriteLine("  --wipe-output <true|false> Clear output directory before exporting");
-            Console.WriteLine("  --help, -h                 Show this help message");
+            Console.WriteLine("  --pak-files-directory <path>        Path to directory containing .pak files");
+            Console.WriteLine("  --export-output-path <path>         Path where exported files will be saved");
+            Console.WriteLine("  --mapping-file-path <path>          Path to .usmap mappings file");
+            Console.WriteLine("  --aes-key-hex <hex>                 AES key for encrypted pak files (or 'null')");
+            Console.WriteLine("  --preset <name>                     Game preset: None, DarkAndDarker, WarRobotsFrontiers");
+            Console.WriteLine("  --unreal-engine-version <version>   Unreal Engine version (e.g., GAME_UE5_4)");
+            Console.WriteLine("  --texture-platform <name>           Texture platform (e.g., DesktopMobile)");
+            Console.WriteLine("  --needed-exports-file-path <path>   Path to NeededExports.json file (or 'null')");
+            Console.WriteLine("  --is-logging-enabled <true|false>   Enable detailed logging");
+            Console.WriteLine("  --should-wipe-output-directory <true|false> Clear output directory before exporting");
+            Console.WriteLine("  --help, -h                          Show this help message");
             Console.WriteLine();
             Console.WriteLine("Examples:");
             Console.WriteLine("  BatchExport.exe --preset WarRobotsFrontiers \\");
-            Console.WriteLine("    --pak-dir \"C:\\Game\\Paks\" \\");
-            Console.WriteLine("    --output \"C:\\Export\" \\");
-            Console.WriteLine("    --mappings \"C:\\mappings.usmap\"");
+            Console.WriteLine("    --pak-files-directory \"C:\\Game\\Paks\" \\");
+            Console.WriteLine("    --export-output-path \"C:\\Export\" \\");
+            Console.WriteLine("    --mapping-file-path \"C:\\mappings.usmap\"");
             Console.WriteLine();
-            Console.WriteLine("  BatchExport.exe --pak-dir \"C:\\Game\\Paks\" \\");
-            Console.WriteLine("    --output \"C:\\Export\" \\");
-            Console.WriteLine("    --mappings \"C:\\mappings.usmap\" \\");
-            Console.WriteLine("    --ue-version GAME_UE5_4 \\");
-            Console.WriteLine("    --aes-key null");
+            Console.WriteLine("  BatchExport.exe --pak-files-directory \"C:\\Game\\Paks\" \\");
+            Console.WriteLine("    --export-output-path \"C:\\Export\" \\");
+            Console.WriteLine("    --mapping-file-path \"C:\\mappings.usmap\" \\");
+            Console.WriteLine("    --unreal-engine-version GAME_UE5_4 \\");
+            Console.WriteLine("    --aes-key-hex null");
             Console.WriteLine();
             Console.WriteLine("Note: Command-line arguments override values in appsettings.json");
             Console.WriteLine("      appsettings.json is optional if all required parameters are provided");
