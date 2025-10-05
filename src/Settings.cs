@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Linq;
 using CUE4Parse.UE4.Versions;
 using CUE4Parse.UE4.Assets.Exports.Texture;
 
@@ -163,54 +164,99 @@ namespace BatchExport
 
                 if (presetSettings != null)
                 {
-                    // Store ONLY the 3 user path settings that should be preserved
-                    string userPakPath = PakFilesDirectory;
-                    string userOutputPath = ExportOutputPath;
-                    string userMappingPath = MappingFilePath;
+                    // Store all current user settings to check what was explicitly set
+                    var userSettings = new
+                    {
+                        PakFilesDirectory = PakFilesDirectory,
+                        ExportOutputPath = ExportOutputPath,
+                        MappingFilePath = MappingFilePath,
+                        AesKeyHex = AesKeyHex,
+                        NeededExportsFilePath = NeededExportsFilePath,
+                        UnrealEngineVersion = UnrealEngineVersion,
+                        TexturePlatform = TexturePlatform,
+                        IsLoggingEnabled = IsLoggingEnabled,
+                        ShouldWipeOutputDirectory = ShouldWipeOutputDirectory,
+                        SupportedAssetFileExtensions = SupportedAssetFileExtensions,
+                        ExcludedAssetFilePrefixes = ExcludedAssetFilePrefixes
+                    };
                     
-                    // Apply ALL preset settings (overwrite current values)
-                    AesKeyHex = presetSettings.AesKeyHex;
-                    Console.WriteLine($"Loaded from preset: AesKeyHex = {(AesKeyHex != null ? "[Set]" : "null")}");
+                    // Create defaults to compare against
+                    var defaults = new Settings();
                     
-                    if (presetSettings.SupportedAssetFileExtensions != null) 
+                    // Apply preset settings ONLY if user hasn't explicitly set them (i.e., they're still at default values)
+                    
+                    // Always preserve user-specified paths (these should never be overridden by presets)
+                    // PakFilesDirectory, ExportOutputPath, MappingFilePath are preserved as-is
+                    
+                    // Apply AES key from preset only if user hasn't set it (still null)
+                    if (userSettings.AesKeyHex == defaults.AesKeyHex && presetSettings.AesKeyHex != null)
+                    {
+                        AesKeyHex = presetSettings.AesKeyHex;
+                        Console.WriteLine($"Loaded from preset: AesKeyHex = {(AesKeyHex != null ? "[Set]" : "null")}");
+                    }
+                    
+                    // Apply SupportedAssetFileExtensions from preset only if user hasn't changed defaults
+                    if (userSettings.SupportedAssetFileExtensions.SequenceEqual(defaults.SupportedAssetFileExtensions) && 
+                        presetSettings.SupportedAssetFileExtensions != null)
                     {
                         SupportedAssetFileExtensions = presetSettings.SupportedAssetFileExtensions;
                         Console.WriteLine($"Loaded from preset: SupportedAssetFileExtensions = [{string.Join(", ", SupportedAssetFileExtensions)}]");
                     }
                     
-                    ExcludedAssetFilePrefixes = presetSettings.ExcludedAssetFilePrefixes;
-                    var excludedDisplay = ExcludedAssetFilePrefixes != null ? $"[{string.Join(", ", ExcludedAssetFilePrefixes)}]" : "null (no exclusions)";
-                    Console.WriteLine($"Loaded from preset: ExcludedAssetFilePrefixes = {excludedDisplay}");
+                    // Apply ExcludedAssetFilePrefixes from preset only if user hasn't set it (still null)
+                    if (userSettings.ExcludedAssetFilePrefixes == defaults.ExcludedAssetFilePrefixes && 
+                        presetSettings.ExcludedAssetFilePrefixes != null)
+                    {
+                        ExcludedAssetFilePrefixes = presetSettings.ExcludedAssetFilePrefixes;
+                        var excludedDisplay = ExcludedAssetFilePrefixes != null ? $"[{string.Join(", ", ExcludedAssetFilePrefixes)}]" : "null (no exclusions)";
+                        Console.WriteLine($"Loaded from preset: ExcludedAssetFilePrefixes = {excludedDisplay}");
+                    }
                     
-                    if (!string.IsNullOrEmpty(presetSettings.UnrealEngineVersion)) 
+                    // Apply UnrealEngineVersion from preset only if user hasn't changed default
+                    if (userSettings.UnrealEngineVersion == defaults.UnrealEngineVersion && 
+                        !string.IsNullOrEmpty(presetSettings.UnrealEngineVersion))
                     {
                         UnrealEngineVersion = presetSettings.UnrealEngineVersion;
                         Console.WriteLine($"Loaded from preset: UnrealEngineVersion = {UnrealEngineVersion}");
                     }
                     
-                    if (!string.IsNullOrEmpty(presetSettings.TexturePlatform)) 
+                    // Apply TexturePlatform from preset only if user hasn't changed default
+                    if (userSettings.TexturePlatform == defaults.TexturePlatform && 
+                        !string.IsNullOrEmpty(presetSettings.TexturePlatform))
                     {
                         TexturePlatform = presetSettings.TexturePlatform;
                         Console.WriteLine($"Loaded from preset: TexturePlatform = {TexturePlatform}");
                     }
                     
-                    // Apply preset values for all non-path settings
-                    IsLoggingEnabled = presetSettings.IsLoggingEnabled;
-                    ShouldWipeOutputDirectory = presetSettings.ShouldWipeOutputDirectory;
-                    NeededExportsFilePath = presetSettings.NeededExportsFilePath;
+                    // Apply NeededExportsFilePath from preset only if user hasn't set it (still null)
+                    if (userSettings.NeededExportsFilePath == defaults.NeededExportsFilePath && 
+                        presetSettings.NeededExportsFilePath != null)
+                    {
+                        NeededExportsFilePath = presetSettings.NeededExportsFilePath;
+                        Console.WriteLine($"Loaded from preset: NeededExportsFilePath = {NeededExportsFilePath}");
+                    }
                     
-                    Console.WriteLine($"Loaded from preset: IsLoggingEnabled = {IsLoggingEnabled}");
-                    Console.WriteLine($"Loaded from preset: ShouldWipeOutputDirectory = {ShouldWipeOutputDirectory}");
-                    Console.WriteLine($"Loaded from preset: NeededExportsFilePath = {NeededExportsFilePath ?? "null"}");
+                    // Apply IsLoggingEnabled from preset only if user hasn't changed default
+                    if (userSettings.IsLoggingEnabled == defaults.IsLoggingEnabled)
+                    {
+                        IsLoggingEnabled = presetSettings.IsLoggingEnabled;
+                        Console.WriteLine($"Loaded from preset: IsLoggingEnabled = {IsLoggingEnabled}");
+                    }
                     
-                    // Restore ONLY the 3 user path settings that should never be overridden by preset
-                    PakFilesDirectory = userPakPath;
-                    ExportOutputPath = userOutputPath;
-                    MappingFilePath = userMappingPath;
+                    // Apply ShouldWipeOutputDirectory from preset only if user hasn't changed default
+                    if (userSettings.ShouldWipeOutputDirectory == defaults.ShouldWipeOutputDirectory)
+                    {
+                        ShouldWipeOutputDirectory = presetSettings.ShouldWipeOutputDirectory;
+                        Console.WriteLine($"Loaded from preset: ShouldWipeOutputDirectory = {ShouldWipeOutputDirectory}");
+                    }
                     
-                    Console.WriteLine($"User paths preserved: PakFilesDirectory = {PakFilesDirectory}");
-                    Console.WriteLine($"User paths preserved: ExportOutputPath = {ExportOutputPath}");
-                    Console.WriteLine($"User paths preserved: MappingFilePath = {MappingFilePath}");
+                    // Always show what user paths were preserved (never overridden by presets)
+                    if (userSettings.PakFilesDirectory != defaults.PakFilesDirectory)
+                        Console.WriteLine($"User paths preserved: PakFilesDirectory = {PakFilesDirectory}");
+                    if (userSettings.ExportOutputPath != defaults.ExportOutputPath)
+                        Console.WriteLine($"User paths preserved: ExportOutputPath = {ExportOutputPath}");
+                    if (userSettings.MappingFilePath != defaults.MappingFilePath)
+                        Console.WriteLine($"User paths preserved: MappingFilePath = {MappingFilePath}");
                 }
             }
             catch (Exception ex)
