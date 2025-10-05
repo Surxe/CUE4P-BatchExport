@@ -379,7 +379,19 @@ namespace BatchExport
         /// <returns>Full path to the NeededExports.json file</returns>
         public string GetNeededExportsFilePath(string applicationRootPath)
         {
-            return NeededExportsFilePath ?? Path.Combine(applicationRootPath, "NeededExports.json");
+            if (NeededExportsFilePath == null)
+            {
+                return Path.Combine(applicationRootPath, "NeededExports.json");
+            }
+            
+            // If the path is already absolute, use it as-is
+            if (Path.IsPathRooted(NeededExportsFilePath))
+            {
+                return NeededExportsFilePath;
+            }
+            
+            // For relative paths, always resolve relative to the src directory (applicationRootPath)
+            return Path.Combine(applicationRootPath, NeededExportsFilePath);
         }
 
         /// <summary>

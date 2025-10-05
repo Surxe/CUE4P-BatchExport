@@ -357,7 +357,8 @@ namespace BatchExport
             }
 
             // Create exports directory
-            string applicationRootPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..\\..\\..\\"));
+            // All relative paths should be relative to the src directory
+            string applicationRootPath = Utils.GetSrcDirectory();
             Utils.LogInfo("Output Directory: " + settings.ExportOutputPath, settings.IsLoggingEnabled);
 
             // Handle output directory cleanup if requested

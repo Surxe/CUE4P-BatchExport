@@ -43,7 +43,7 @@ Create an `appsettings.json` file in the same directory as the executable with y
 | `aesKeyHex` | string? | AES encryption key (hex string) or null | null |
 | `supportedAssetFileExtensions` | string[] | File extensions to process | [".uasset", ".umap"] |
 | `excludedAssetFilePrefixes` | string[]? | File prefixes to exclude | null (no exclusions) |
-| `neededExportsFilePath` | string? | Custom path to NeededExports.json | null (exports all assets) |
+| `neededExportsFilePath` | string? | Custom path to NeededExports.json, relative from src | null (exports all assets) |
 
 -- Personal and preference
 | `isLoggingEnabled` | bool | Enable detailed logging | true |
