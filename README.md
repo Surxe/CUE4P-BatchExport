@@ -1,20 +1,7 @@
-# CUE4P-Batch.\# CUE4P-BatchExport
+# CUE4P-BatchExport
 > C#, Unreal Engine 4 (and 5), Parse, Export JSON
 
-A .NET application that exports Unreal Engine game assets to JSON format using [CUE4Parse](https://github.com/FabianFG/CUE4Parse). Supports multiple games with preset configurations and can export assets, localization files, and more.xport
-> C#, Unreal Engine 4 (and 5), Parse, Ex   .\.\BatchExport.exe --pak-files-directory "C:\Game\Paks" --export-output-path "C:\Export" --mapping-file-path "C:\mappings.usmap" --preset WarRobotsFrontiersort JSON
-
-A .NET application that exportdotnet run -- --preset WarRobotsFrontiers \\
-  --pak-files-directory "C:\Game\Paks" \\
-  --export-output-path "C:\Export" \\
-  --mapping-file-path "C:\mappings.usmap"re.\.\BatchExport.exe --preset WarRobotsFrontiers \\
-  --pak-files-directory "C:\Game\Paks" \\
-  --export-output-path "C:\Export" \\
-  --mapping-file-path "C:\mappings.usmap"ng.\.\BatchExport.exe --pak-files-directory "C:\Game\Paks" \\
-  --export-output-path "C:\Export" \\
-  --mapping-file-path "C:\mappings.usmap" \\
-  --unreal-engine-version GAME_UE5_4 \\
-  --aes-key-hex nullame assets to JSON format using [CUE4Parse](https://github.com/FabianFG/CUE4Parse). Supports multiple games with preset configurations and can export assets, localization files, and more.
+A .NET application that exports Unreal Engine game assets to JSON format using [CUE4Parse](https://github.com/FabianFG/CUE4Parse). Supports multiple games with preset configurations and can export assets, localization files, and more.
 
 ## Quick Start
 
