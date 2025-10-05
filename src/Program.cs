@@ -357,7 +357,15 @@ namespace BatchExport
             }
 
             // Create exports directory
-            string applicationRootPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..\\..\\..\\"));
+            // For published single-file apps, use the base directory directly
+            // For development builds, go up to the project root
+            string applicationRootPath = AppContext.BaseDirectory;
+            string srcPath = Path.Combine(applicationRootPath, "src");
+            if (!Directory.Exists(Path.Combine(applicationRootPath, "presets")) && Directory.Exists(srcPath))
+            {
+                // We're in development mode (bin/Debug/net8.0), go up to project root
+                applicationRootPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..\\..\\..\\"));
+            }
             Utils.LogInfo("Output Directory: " + settings.ExportOutputPath, settings.IsLoggingEnabled);
 
             // Handle output directory cleanup if requested
