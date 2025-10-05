@@ -469,6 +469,7 @@ namespace BatchExport
             }
 
             // Export to .json
+            Console.WriteLine("Starting file export...");
             Utils.LogInfo("Please wait while the script exports files...", settings.IsLoggingEnabled);
             int totalFilesProcessed = 0;
             int totalFilesExported = 0;
