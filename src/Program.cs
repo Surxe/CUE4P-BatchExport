@@ -72,7 +72,6 @@ namespace BatchExport
                 switch (arg)
                 {
                     case "--pak-files-directory":
-                    case "--pak-dir": // Legacy support
                         if (value != null)
                         {
                             settings.PakFilesDirectory = value;
@@ -82,7 +81,6 @@ namespace BatchExport
                         break;
                         
                     case "--export-output-path":
-                    case "--output": // Legacy support
                         if (value != null)
                         {
                             settings.ExportOutputPath = value;
@@ -92,7 +90,6 @@ namespace BatchExport
                         break;
                         
                     case "--mapping-file-path":
-                    case "--mappings": // Legacy support
                         if (value != null)
                         {
                             settings.MappingFilePath = value;
@@ -102,7 +99,6 @@ namespace BatchExport
                         break;
                         
                     case "--aes-key-hex":
-                    case "--aes-key": // Legacy support
                         if (value != null)
                         {
                             settings.AesKeyHex = value.Equals("null", StringComparison.OrdinalIgnoreCase) ? null : value;
@@ -122,7 +118,6 @@ namespace BatchExport
                         break;
                         
                     case "--unreal-engine-version":
-                    case "--ue-version": // Legacy support
                         if (value != null)
                         {
                             settings.UnrealEngineVersion = value;
@@ -142,7 +137,6 @@ namespace BatchExport
                         break;
                         
                     case "--needed-exports-file-path":
-                    case "--needed-exports": // Legacy support
                         if (value != null)
                         {
                             settings.NeededExportsFilePath = value.Equals("null", StringComparison.OrdinalIgnoreCase) ? null : value;
@@ -152,7 +146,6 @@ namespace BatchExport
                         break;
                         
                     case "--is-logging-enabled":
-                    case "--logging": // Legacy support
                         if (value != null && bool.TryParse(value, out var logging))
                         {
                             settings.IsLoggingEnabled = logging;
@@ -162,7 +155,6 @@ namespace BatchExport
                         break;
                         
                     case "--should-wipe-output-directory":
-                    case "--wipe-output": // Legacy support
                         if (value != null && bool.TryParse(value, out var wipe))
                         {
                             settings.ShouldWipeOutputDirectory = wipe;
