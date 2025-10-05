@@ -16,7 +16,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: windows-x64
+          - os: win-x64
             runner: windows-latest
             artifact-name: BatchExport-windows-x64
             executable-extension: .exe
@@ -46,12 +46,12 @@ jobs:
         dotnet publish src/BatchExport.csproj --configuration Release --runtime ${{ matrix.os }} --self-contained true --output ./publish/${{ matrix.os }} -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
 
     - name: Create archive (Windows)
-      if: matrix.os == 'windows-x64'
+      if: matrix.os == 'win-x64'
       run: |
         Compress-Archive -Path ./publish/${{ matrix.os }}/* -DestinationPath ${{ matrix.artifact-name }}.zip
 
     - name: Create archive (Unix)
-      if: matrix.os != 'windows-x64'
+      if: matrix.os != 'win-x64'
       run: |
         cd ./publish/${{ matrix.os }}
         tar -czf ../../${{ matrix.artifact-name }}.tar.gz *
