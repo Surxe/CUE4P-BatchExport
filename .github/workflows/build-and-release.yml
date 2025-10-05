@@ -43,13 +43,7 @@ jobs:
 
     - name: Build application
       run: |
-        dotnet publish src/BatchExport.csproj \
-          --configuration Release \
-          --runtime ${{ matrix.os }} \
-          --self-contained true \
-          --output ./publish/${{ matrix.os }} \
-          -p:PublishSingleFile=true \
-          -p:IncludeNativeLibrariesForSelfExtract=true
+        dotnet publish src/BatchExport.csproj --configuration Release --runtime ${{ matrix.os }} --self-contained true --output ./publish/${{ matrix.os }} -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
 
     - name: Create archive (Windows)
       if: matrix.os == 'windows-x64'
