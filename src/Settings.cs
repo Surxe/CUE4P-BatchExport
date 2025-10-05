@@ -390,16 +390,8 @@ namespace BatchExport
                 return NeededExportsFilePath;
             }
             
-            // For relative paths, try both the application root and the executable directory
-            string rootPath = Path.Combine(applicationRootPath, NeededExportsFilePath);
-            if (File.Exists(rootPath))
-            {
-                return rootPath;
-            }
-            
-            // If not found in application root, try relative to executable directory
-            string executablePath = Path.Combine(AppContext.BaseDirectory, NeededExportsFilePath);
-            return executablePath;
+            // For relative paths, always resolve relative to the src directory (applicationRootPath)
+            return Path.Combine(applicationRootPath, NeededExportsFilePath);
         }
 
         /// <summary>
