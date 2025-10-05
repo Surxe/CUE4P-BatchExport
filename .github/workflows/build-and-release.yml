@@ -1,0 +1,163 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # Triggers on version tags like v1.0.0
+  workflow_dispatch:  # Allows manual triggering
+
+env:
+  DOTNET_VERSION: '8.0.x'
+
+jobs:
+  build:
+    name: Build for ${{ matrix.os }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        include:
+          - os: windows-x64
+            runner: windows-latest
+            artifact-name: BatchExport-windows-x64
+            executable-extension: .exe
+          - os: linux-x64
+            runner: ubuntu-latest
+            artifact-name: BatchExport-linux-x64
+            executable-extension: ''
+          - os: osx-x64
+            runner: macos-latest
+            artifact-name: BatchExport-macos-x64
+            executable-extension: ''
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Restore dependencies
+      run: dotnet restore src/BatchExport.csproj
+
+    - name: Build application
+      run: |
+        dotnet publish src/BatchExport.csproj \
+          --configuration Release \
+          --runtime ${{ matrix.os }} \
+          --self-contained true \
+          --output ./publish/${{ matrix.os }} \
+          -p:PublishSingleFile=true \
+          -p:IncludeNativeLibrariesForSelfExtract=true
+
+    - name: Create archive (Windows)
+      if: matrix.os == 'windows-x64'
+      run: |
+        Compress-Archive -Path ./publish/${{ matrix.os }}/* -DestinationPath ${{ matrix.artifact-name }}.zip
+
+    - name: Create archive (Unix)
+      if: matrix.os != 'windows-x64'
+      run: |
+        cd ./publish/${{ matrix.os }}
+        tar -czf ../../${{ matrix.artifact-name }}.tar.gz *
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.artifact-name }}
+        path: |
+          ${{ matrix.artifact-name }}.zip
+          ${{ matrix.artifact-name }}.tar.gz
+        retention-days: 5
+
+  release:
+    name: Create GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    
+    permissions:
+      contents: write
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Fetch full history for changelog
+
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: ./artifacts
+
+    - name: Extract version from tag
+      id: version
+      run: |
+        VERSION=${GITHUB_REF#refs/tags/}
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "version_number=${VERSION#v}" >> $GITHUB_OUTPUT
+
+    - name: Generate changelog
+      id: changelog
+      run: |
+        # Get commits since last tag
+        LAST_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+        if [ -z "$LAST_TAG" ]; then
+          CHANGELOG=$(git log --pretty=format:"- %s" --no-merges)
+        else
+          CHANGELOG=$(git log ${LAST_TAG}..HEAD --pretty=format:"- %s" --no-merges)
+        fi
+        
+        # Create release notes
+        cat << EOF > RELEASE_NOTES.md
+        ## What's New in ${{ steps.version.outputs.version }}
+        
+        ### Changes
+        $CHANGELOG
+        
+        ### Downloads
+        - **Windows (x64)**: BatchExport-windows-x64.zip
+        - **Linux (x64)**: BatchExport-linux-x64.tar.gz  
+        - **macOS (x64)**: BatchExport-macos-x64.tar.gz
+        
+        ### Usage
+        Extract the archive for your platform and run:
+        \`\`\`bash
+        # Windows
+        BatchExport.exe --help
+        
+        # Linux/macOS
+        ./BatchExport --help
+        \`\`\`
+        
+        ### Quick Start
+        \`\`\`bash
+        # Example usage
+        ./BatchExport --preset WarRobotsFrontiers \\
+          --pak-files-directory "C:\\Game\\Paks" \\
+          --export-output-path "C:\\Export" \\
+          --mapping-file-path "C:\\mappings.usmap"
+        \`\`\`
+        EOF
+
+    - name: Prepare release assets
+      run: |
+        mkdir -p release-assets
+        find ./artifacts -name "*.zip" -o -name "*.tar.gz" | while read file; do
+          cp "$file" release-assets/
+        done
+        ls -la release-assets/
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ steps.version.outputs.version }}
+        name: Release ${{ steps.version.outputs.version }}
+        body_path: RELEASE_NOTES.md
+        draft: false
+        prerelease: ${{ contains(steps.version.outputs.version, '-') }}
+        files: release-assets/*
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
