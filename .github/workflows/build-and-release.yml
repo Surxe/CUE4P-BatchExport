@@ -141,6 +141,8 @@ jobs:
         find ./artifacts -name "*.zip" -o -name "*.tar.gz" | while read file; do
           cp "$file" release-assets/
         done
+        # Include README.md in the release assets
+        cp README.md release-assets/
         ls -la release-assets/
 
     - name: Create GitHub Release
