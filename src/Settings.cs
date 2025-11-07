@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using System.Linq;
 using CUE4Parse.UE4.Versions;
 using CUE4Parse.UE4.Assets.Exports.Texture;
+using BatchExport.Enums;
 
 namespace BatchExport
 {
@@ -86,6 +87,11 @@ namespace BatchExport
         /// Texture platform to use for parsing. Common options: "DesktopMobile", "Mobile", "Console"
         /// </summary>
         public string TexturePlatform { get; set; } = "DesktopMobile";
+
+        /// <summary>
+        /// Format to use when exporting textures. Common options: "PNG", "JPG", "TGA", "BMP", "DDS", "HDR"
+        /// </summary>
+        public string TextureFormat { get; set; } = "PNG";
 
         /// <summary>
         /// Game preset to use for automatic configuration. When set to a value other than None, 
@@ -425,6 +431,21 @@ namespace BatchExport
                 "DESKTOPMOBILE" => ETexturePlatform.DesktopMobile,
                 // Add other platforms as needed based on the CUE4Parse library version
                 _ => throw new ArgumentException($"Unsupported texture platform: {TexturePlatform}. Currently supported: DesktopMobile")
+            };
+        }
+
+        public ETextureFormat GetTextureFormat()
+        {
+            return this.TextureFormat switch
+            {
+                var x when "PNG".Equals(x, StringComparison.OrdinalIgnoreCase) => ETextureFormat.Png,
+                var x when "JPG".Equals(x, StringComparison.OrdinalIgnoreCase) => ETextureFormat.Jpeg,
+                var x when "JPEG".Equals(x, StringComparison.OrdinalIgnoreCase) => ETextureFormat.Jpeg,
+                var x when "TGA".Equals(x, StringComparison.OrdinalIgnoreCase) => ETextureFormat.Tga,
+                var x when "BMP".Equals(x, StringComparison.OrdinalIgnoreCase) => ETextureFormat.Bmp,
+                var x when "DDS".Equals(x, StringComparison.OrdinalIgnoreCase) => ETextureFormat.Dds,
+                var x when "HDR".Equals(x, StringComparison.OrdinalIgnoreCase) => ETextureFormat.Hdr,
+                _ => ETextureFormat.Png // Default to PNG if format not recognized
             };
         }
     }

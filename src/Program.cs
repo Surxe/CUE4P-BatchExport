@@ -136,6 +136,16 @@ namespace BatchExport
                             i++; // Skip the value argument
                         }
                         break;
+
+                    case "--texture-format":
+                    case "--textureformat":
+                        if (value != null)
+                        {
+                            settings.TextureFormat = value;
+                            Console.WriteLine($"Override: TextureFormat = {value}");
+                            i++; // Skip the value argument
+                        }
+                        break;
                         
                     case "--needed-exports-file-path":
                         if (value != null)
@@ -204,7 +214,8 @@ namespace BatchExport
             Console.WriteLine("  --aes-key-hex <hex>                 AES key for encrypted pak files (or 'null')");
             Console.WriteLine("  --preset <name>                     Game preset: None, DarkAndDarker, WarRobotsFrontiers");
             Console.WriteLine("  --unreal-engine-version <version>   Unreal Engine version (e.g., GAME_UE5_4)");
-            Console.WriteLine("  --texture-platform <name>           Texture platform (e.g., DesktopMobile)");
+            Console.WriteLine("  --texture-platform <n>           Texture platform (e.g., DesktopMobile)");
+            Console.WriteLine("  --texture-format <n>              Texture format for exports (PNG, JPG, TGA, BMP, DDS, HDR)");
             Console.WriteLine("  --needed-exports-file-path <path>   Path to NeededExports.json file (or 'null')");
             Console.WriteLine("  --is-logging-enabled <true|false>   Enable detailed logging");
             Console.WriteLine("  --should-wipe-output-directory <true|false> Clear output directory before exporting");
@@ -254,93 +265,17 @@ namespace BatchExport
             }
 
             // Handle regular UE packages (.uasset, .umap)
-            var package = gameFileProvider.LoadPackage(assetPath);
-            var assetExports = package.GetExports();
-
-            // Check if this is a texture asset
-            var textureExport = assetExports.FirstOrDefault(export => export is UTexture2D) as UTexture2D;
-            if (textureExport != null)
+            var exporterOptions = new ExporterOptions
             {
-                try
-                {
-                    // Export the texture as PNG
-                    var destinationFilePath = settings.ExportOutputPath + "/" + assetPath + ".png";
-                    CreateNeededDirectories(destinationFilePath, settings.ExportOutputPath);
+                TextureFormat = settings.GetTextureFormat(),
+                Platform = settings.GetTexturePlatform(),
+                ExportHdrTexturesAsHdr = true,
+                ExportMaterials = true,
+                ExportMorphTargets = true
+            };
 
-                    try
-                    {
-                        // Get texture data using CUE4Parse's built-in texture decoding
-                        var texturePlatform = settings.GetTexturePlatform(); // Use the configured texture platform
-                        
-                        // Try to decode the texture using CUE4Parse's built-in texture decoding
-                        var firstMip = textureExport.GetFirstMip();
-                        if (firstMip != null)
-                        {
-                            var width = firstMip.SizeX;
-                            var height = firstMip.SizeY;
-                            var pixelData = firstMip.BulkData.Data;
-
-                            if (pixelData != null && pixelData.Length > 0)
-                            {
-                                // Create bitmap with texture dimensions
-                                using (var bitmap = new SKBitmap(new SKImageInfo(width, height, SKColorType.Rgba8888)))
-                                {
-                                    // Copy pixel data to bitmap
-                                    var bitmapPtr = bitmap.GetPixels();
-                                    System.Runtime.InteropServices.Marshal.Copy(pixelData, 0, bitmapPtr, pixelData.Length);
-
-                                    // Create image and save as PNG
-                                    using (var image = SKImage.FromBitmap(bitmap))
-                                    using (var data = image.Encode(SKEncodedImageFormat.Png, 100))
-                                    using (var stream = File.OpenWrite(destinationFilePath))
-                                    {
-                                        data.SaveTo(stream);
-                                    }
-                                }
-                                return;
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Utils.LogInfo($"Failed to decode texture {assetPath}: {ex.Message}", settings.IsLoggingEnabled);
-                        // Fall back to JSON export
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"An error occurred when exporting texture from {assetPath}: {ex.Message}");
-                    // Fall back to JSON export
-                }
-            }
-
-            // Handle non-texture assets with JSON export
-            var serializedJson = "";
-            try 
-            {
-                serializedJson = JsonConvert.SerializeObject(assetExports, Formatting.Indented);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("An error occurred when serializing JSON from file " + assetPath + ": " + ex.Message);
-                return;
-            }
-            
-            // Destination path within exports directory for JSON
-            string jsonDestinationPath = settings.ExportOutputPath + "/" + assetPath + ".json";
-
-            // Create the directories if they don't exist
-            CreateNeededDirectories(jsonDestinationPath, settings.ExportOutputPath);
-
-            // Write the JSON to file
-            try
-            {
-                File.WriteAllText(jsonDestinationPath, serializedJson);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("An error occurred when writing export to file: " + jsonDestinationPath + " " + ex.Message);
-            }
+            var exporter = new AssetExporter(exporterOptions, settings.ExportOutputPath, settings.IsLoggingEnabled);
+            exporter.ExportAsset(gameFileProvider, assetPath);
         }
 
         private static void ExtractLocresFile(DefaultFileProvider gameFileProvider, string assetPath, Settings settings)
