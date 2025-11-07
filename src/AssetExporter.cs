@@ -34,7 +34,35 @@ namespace BatchExport
 
                 bool anyExported = false;
                 
-                // Check for textures first
+                // Check for SVG assets first
+                var svgAssets = assetExports.Where(x => x.ExportType.Contains("SvgAsset")).ToList();
+                if (svgAssets.Any())
+                {
+                    Utils.LogInfo($"Found SVG asset in {assetPath}", _isLoggingEnabled);
+                    // SVG data is typically stored in the asset properties
+                    foreach (var svgAsset in svgAssets)
+                    {
+                        try
+                        {
+                            var svgProperty = svgAsset.Properties?.FirstOrDefault(p => p.Name == "Data");
+                            var svgData = svgProperty?.Tag?.ToString();
+                            if (!string.IsNullOrEmpty(svgData))
+                            {
+                                var svgPath = Path.Combine(_outputPath, $"{assetPath}.svg");
+                                CreateNeededDirectories(svgPath);
+                                File.WriteAllText(svgPath, svgData);
+                                anyExported = true;
+                                Utils.LogInfo($"Exported SVG: {svgPath}", _isLoggingEnabled);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Utils.LogInfo($"Failed to export SVG from {assetPath}: {ex.Message}", _isLoggingEnabled);
+                        }
+                    }
+                }
+
+                // Check for regular textures
                 var textures = assetExports.OfType<UTexture2D>().ToList();
                 if (textures.Count > 0)
                 {
