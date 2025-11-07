@@ -257,25 +257,41 @@ namespace BatchExport
         //Extract an asset and write it to a JSON file or image file
         private static void ExtractAsset(DefaultFileProvider gameFileProvider, string assetPath, Settings settings)
         {
-            // Check if this is a .locres file (localization resource)
-            if (assetPath.EndsWith(".locres", StringComparison.OrdinalIgnoreCase))
+            try
             {
-                ExtractLocresFile(gameFileProvider, assetPath, settings);
-                return;
+                // Check if this is a .locres file (localization resource)
+                if (assetPath.EndsWith(".locres", StringComparison.OrdinalIgnoreCase))
+                {
+                    ExtractLocresFile(gameFileProvider, assetPath, settings);
+                    return;
+                }
+
+                // Handle regular UE packages (.uasset, .umap)
+                var exporterOptions = new ExporterOptions
+                {
+                    TextureFormat = settings.GetTextureFormat(),
+                    Platform = settings.GetTexturePlatform(),
+                    ExportHdrTexturesAsHdr = true,
+                    ExportMaterials = true,
+                    ExportMorphTargets = true
+                };
+
+                var exporter = new AssetExporter(exporterOptions, settings.ExportOutputPath, settings.IsLoggingEnabled);
+                exporter.ExportAsset(gameFileProvider, assetPath);
             }
-
-            // Handle regular UE packages (.uasset, .umap)
-            var exporterOptions = new ExporterOptions
+            catch (Exception ex)
             {
-                TextureFormat = settings.GetTextureFormat(),
-                Platform = settings.GetTexturePlatform(),
-                ExportHdrTexturesAsHdr = true,
-                ExportMaterials = true,
-                ExportMorphTargets = true
-            };
-
-            var exporter = new AssetExporter(exporterOptions, settings.ExportOutputPath, settings.IsLoggingEnabled);
-            exporter.ExportAsset(gameFileProvider, assetPath);
+                Utils.LogInfo($"Failed to extract asset {assetPath}: {ex.Message}", settings.IsLoggingEnabled);
+                if (settings.IsLoggingEnabled)
+                {
+                    Utils.LogInfo($"Stack trace: {ex.StackTrace}", settings.IsLoggingEnabled);
+                    if (ex.InnerException != null)
+                    {
+                        Utils.LogInfo($"Inner exception: {ex.InnerException.Message}", settings.IsLoggingEnabled);
+                        Utils.LogInfo($"Inner stack trace: {ex.InnerException.StackTrace}", settings.IsLoggingEnabled);
+                    }
+                }
+            }
         }
 
         private static void ExtractLocresFile(DefaultFileProvider gameFileProvider, string assetPath, Settings settings)

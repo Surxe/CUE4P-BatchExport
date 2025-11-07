@@ -79,6 +79,12 @@ namespace BatchExport
                     return;
                 }
 
+                if (firstMip.SizeX <= 0 || firstMip.SizeY <= 0 || firstMip.SizeX > 16384 || firstMip.SizeY > 16384)
+                {
+                    Utils.LogInfo($"Texture {assetPath} has invalid dimensions ({firstMip.SizeX}x{firstMip.SizeY}) - skipping", _isLoggingEnabled);
+                    return;
+                }
+
                 var extension = _options.TextureFormat switch
                 {
                     ETextureFormat.Png => "png",
@@ -93,22 +99,89 @@ namespace BatchExport
                 var destinationFilePath = Path.Combine(_outputPath, $"{assetPath}.{extension}");
                 CreateNeededDirectories(destinationFilePath);
 
-                using (var bitmap = new SKBitmap(new SKImageInfo(firstMip.SizeX, firstMip.SizeY, SKColorType.Rgba8888)))
+                SKBitmap? bitmap = null;
+                try
                 {
+                    var info = new SKImageInfo(firstMip.SizeX, firstMip.SizeY, SKColorType.Rgba8888);
+                    bitmap = new SKBitmap(info);
+                    if (bitmap == null)
+                    {
+                        Utils.LogInfo($"Failed to create bitmap for texture {assetPath} - skipping", _isLoggingEnabled);
+                        return;
+                    }
+
                     var bitmapPtr = bitmap.GetPixels();
-                    System.Runtime.InteropServices.Marshal.Copy(firstMip.BulkData.Data, 0, bitmapPtr, firstMip.BulkData.Data.Length);
+                    if (bitmapPtr == IntPtr.Zero)
+                    {
+                        Utils.LogInfo($"Failed to get bitmap pixels for texture {assetPath} - skipping", _isLoggingEnabled);
+                        return;
+                    }
+
+                    var sourceData = firstMip.BulkData.Data;
+                    var expectedLength = firstMip.SizeX * firstMip.SizeY * 4; // RGBA = 4 bytes per pixel
+                    if (sourceData.Length < expectedLength)
+                    {
+                        Utils.LogInfo($"Texture {assetPath} data length ({sourceData.Length}) is less than expected ({expectedLength}) - skipping", _isLoggingEnabled);
+                        return;
+                    }
+
+                    // Use GC.AddMemoryPressure to help prevent OOM in large batch operations
+                    GC.AddMemoryPressure(sourceData.Length);
+                    try
+                    {
+                        System.Runtime.InteropServices.Marshal.Copy(sourceData, 0, bitmapPtr, Math.Min(sourceData.Length, expectedLength));
+                    }
+                    finally
+                    {
+                        GC.RemoveMemoryPressure(sourceData.Length);
+                    }
 
                     using var image = SKImage.FromBitmap(bitmap);
+                    if (image == null)
+                    {
+                        Utils.LogInfo($"Failed to create image from bitmap for texture {assetPath} - skipping", _isLoggingEnabled);
+                        return;
+                    }
+
                     using var data = image.Encode(GetSkiaFormat(_options.TextureFormat), 100);
+                    if (data == null)
+                    {
+                        Utils.LogInfo($"Failed to encode image for texture {assetPath} - skipping", _isLoggingEnabled);
+                        return;
+                    }
+
                     using var stream = File.OpenWrite(destinationFilePath);
                     data.SaveTo(stream);
+                }
+                finally
+                {
+                    bitmap?.Dispose();
                 }
             }
             catch (Exception ex)
             {
                 Utils.LogInfo($"Failed to export texture {assetPath}: {ex.Message}", _isLoggingEnabled);
-                // Fall back to JSON export
-                ExportToJson(texture, assetPath);
+                if (_isLoggingEnabled)
+                {
+                    Utils.LogInfo($"Stack trace: {ex.StackTrace}", _isLoggingEnabled);
+                    if (ex.InnerException != null)
+                    {
+                        Utils.LogInfo($"Inner exception: {ex.InnerException.Message}", _isLoggingEnabled);
+                        Utils.LogInfo($"Inner stack trace: {ex.InnerException.StackTrace}", _isLoggingEnabled);
+                    }
+                }
+                // Don't attempt JSON fallback for memory-related errors
+                if (!(ex is OutOfMemoryException || ex.InnerException is OutOfMemoryException))
+                {
+                    try
+                    {
+                        ExportToJson(texture, assetPath);
+                    }
+                    catch
+                    {
+                        // Ignore JSON fallback errors
+                    }
+                }
             }
         }
 
