@@ -1,3 +1,4 @@
+using System.Linq;
 using CUE4Parse.UE4.Assets.Exports;
 using CUE4Parse.UE4.Assets.Exports.Texture;
 using CUE4Parse.UE4.Assets.Exports.Material;
@@ -31,35 +32,50 @@ namespace BatchExport
                 var package = provider.LoadPackage(assetPath);
                 var assetExports = package.GetExports();
 
+                // First try to export each asset individually if it's a supported type
+                bool anyExported = false;
                 foreach (var export in assetExports)
                 {
-                    switch (export)
+                    try 
                     {
-                        case UTexture2D texture:
-                            ExportTexture(texture, assetPath);
-                            break;
-                        
-                        case UMaterialInterface material:
-                            ExportMaterial(material, assetPath);
-                            break;
-                        
-                        case UAnimSequence anim:
-                            ExportAnimation(anim, assetPath);
-                            break;
-                        
-                        case UStaticMesh staticMesh:
-                            ExportStaticMesh(staticMesh, assetPath);
-                            break;
-                        
-                        case USkeletalMesh skeletalMesh:
-                            ExportSkeletalMesh(skeletalMesh, assetPath);
-                            break;
-                        
-                        default:
-                            // Fallback to JSON export for unsupported types
-                            ExportToJson(export, assetPath);
-                            break;
+                        switch (export)
+                        {
+                            case UTexture2D texture:
+                                ExportTexture(texture, $"{assetPath}_{texture.Name}");
+                                anyExported = true;
+                                continue;
+                            
+                            case UMaterialInterface material:
+                                ExportMaterial(material, $"{assetPath}_{material.Name}");
+                                anyExported = true;
+                                continue;
+                            
+                            case UAnimSequence anim:
+                                ExportAnimation(anim, $"{assetPath}_{anim.Name}");
+                                anyExported = true;
+                                continue;
+                            
+                            case UStaticMesh staticMesh:
+                                ExportStaticMesh(staticMesh, $"{assetPath}_{staticMesh.Name}");
+                                anyExported = true;
+                                continue;
+                            
+                            case USkeletalMesh skeletalMesh:
+                                ExportSkeletalMesh(skeletalMesh, $"{assetPath}_{skeletalMesh.Name}");
+                                anyExported = true;
+                                continue;
+                        }
                     }
+                    catch (Exception ex)
+                    {
+                        Utils.LogInfo($"Failed to export individual asset {export.Name} from {assetPath}: {ex.Message}", _isLoggingEnabled);
+                    }
+                }
+
+                // If no individual exports succeeded or there are multiple assets, export everything as JSON
+                if (!anyExported || assetExports.Count() > 1)
+                {
+                    ExportToJson(assetExports.ToList(), assetPath);
                 }
             }
             catch (Exception ex)
@@ -209,7 +225,7 @@ namespace BatchExport
             ExportToJson(mesh, assetPath);
         }
 
-        private void ExportToJson(UObject obj, string assetPath)
+        private void ExportToJson<T>(T obj, string assetPath)
         {
             try
             {
