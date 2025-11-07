@@ -32,19 +32,36 @@ namespace BatchExport
                 var package = provider.LoadPackage(assetPath);
                 var assetExports = package.GetExports();
 
-                // First try to export each asset individually if it's a supported type
                 bool anyExported = false;
+                
+                // Check for textures first
+                var textures = assetExports.OfType<UTexture2D>().ToList();
+                if (textures.Count > 0)
+                {
+                    if (textures.Count > 1)
+                    {
+                        Utils.LogInfo($"Warning: Multiple textures found in {assetPath}. Using first texture only.", _isLoggingEnabled);
+                    }
+                    try
+                    {
+                        ExportTexture(textures[0], assetPath);
+                        anyExported = true;
+                    }
+                    catch (Exception ex)
+                    {
+                        Utils.LogInfo($"Failed to export texture from {assetPath}: {ex.Message}", _isLoggingEnabled);
+                    }
+                }
+
+                // Handle other asset types
                 foreach (var export in assetExports)
                 {
+                    if (export is UTexture2D) continue; // Skip textures as they were handled above
+                    
                     try 
                     {
                         switch (export)
-                        {
-                            case UTexture2D texture:
-                                ExportTexture(texture, $"{assetPath}_{texture.Name}");
-                                anyExported = true;
-                                continue;
-                            
+                        {                            
                             case UMaterialInterface material:
                                 ExportMaterial(material, $"{assetPath}_{material.Name}");
                                 anyExported = true;
