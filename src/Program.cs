@@ -9,6 +9,7 @@ using CUE4Parse.MappingsProvider;
 using CUE4Parse.Compression;
 using CUE4Parse.UE4.Assets.Exports.Texture;
 using CUE4Parse.UE4.Localization;
+using SkiaSharp;
 
 namespace BatchExport
 {
@@ -242,7 +243,7 @@ namespace BatchExport
             }
         }
 
-        //Extract an asset and write it to a JSON file
+        //Extract an asset and write it to a JSON file or image file
         private static void ExtractAsset(DefaultFileProvider gameFileProvider, string assetPath, Settings settings)
         {
             // Check if this is a .locres file (localization resource)
@@ -253,8 +254,67 @@ namespace BatchExport
             }
 
             // Handle regular UE packages (.uasset, .umap)
-            // load all exports the asset has and transform them in a single Json string
-            var assetExports = gameFileProvider.LoadPackage(assetPath).GetExports();
+            var package = gameFileProvider.LoadPackage(assetPath);
+            var assetExports = package.GetExports();
+
+            // Check if this is a texture asset
+            var textureExport = assetExports.FirstOrDefault(export => export is UTexture2D) as UTexture2D;
+            if (textureExport != null)
+            {
+                try
+                {
+                    // Export the texture as PNG
+                    var destinationFilePath = settings.ExportOutputPath + "/" + assetPath + ".png";
+                    CreateNeededDirectories(destinationFilePath, settings.ExportOutputPath);
+
+                    try
+                    {
+                        // Get texture data using CUE4Parse's built-in texture decoding
+                        var texturePlatform = settings.GetTexturePlatform(); // Use the configured texture platform
+                        
+                        // Try to decode the texture using CUE4Parse's built-in texture decoding
+                        var firstMip = textureExport.GetFirstMip();
+                        if (firstMip != null)
+                        {
+                            var width = firstMip.SizeX;
+                            var height = firstMip.SizeY;
+                            var pixelData = firstMip.BulkData.Data;
+
+                            if (pixelData != null && pixelData.Length > 0)
+                            {
+                                // Create bitmap with texture dimensions
+                                using (var bitmap = new SKBitmap(new SKImageInfo(width, height, SKColorType.Rgba8888)))
+                                {
+                                    // Copy pixel data to bitmap
+                                    var bitmapPtr = bitmap.GetPixels();
+                                    System.Runtime.InteropServices.Marshal.Copy(pixelData, 0, bitmapPtr, pixelData.Length);
+
+                                    // Create image and save as PNG
+                                    using (var image = SKImage.FromBitmap(bitmap))
+                                    using (var data = image.Encode(SKEncodedImageFormat.Png, 100))
+                                    using (var stream = File.OpenWrite(destinationFilePath))
+                                    {
+                                        data.SaveTo(stream);
+                                    }
+                                }
+                                return;
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Utils.LogInfo($"Failed to decode texture {assetPath}: {ex.Message}", settings.IsLoggingEnabled);
+                        // Fall back to JSON export
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"An error occurred when exporting texture from {assetPath}: {ex.Message}");
+                    // Fall back to JSON export
+                }
+            }
+
+            // Handle non-texture assets with JSON export
             var serializedJson = "";
             try 
             {
@@ -265,20 +325,21 @@ namespace BatchExport
                 Console.WriteLine("An error occurred when serializing JSON from file " + assetPath + ": " + ex.Message);
                 return;
             }
-            // Destination path within exports directory
-            string destinationFilePath = settings.ExportOutputPath + "/" + assetPath + ".json";
+            
+            // Destination path within exports directory for JSON
+            string jsonDestinationPath = settings.ExportOutputPath + "/" + assetPath + ".json";
 
             // Create the directories if they don't exist
-            CreateNeededDirectories(destinationFilePath, settings.ExportOutputPath);
+            CreateNeededDirectories(jsonDestinationPath, settings.ExportOutputPath);
 
             // Write the JSON to file
             try
             {
-                File.WriteAllText(destinationFilePath, serializedJson);
+                File.WriteAllText(jsonDestinationPath, serializedJson);
             }
             catch (Exception ex)
             {
-                Console.WriteLine("An error occurred when writing export to file: " + destinationFilePath + " " + ex.Message);
+                Console.WriteLine("An error occurred when writing export to file: " + jsonDestinationPath + " " + ex.Message);
             }
         }
 
