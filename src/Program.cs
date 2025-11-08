@@ -9,6 +9,7 @@ using CUE4Parse.MappingsProvider;
 using CUE4Parse.Compression;
 using CUE4Parse.UE4.Assets.Exports.Texture;
 using CUE4Parse.UE4.Localization;
+using SkiaSharp;
 
 namespace BatchExport
 {
@@ -135,6 +136,16 @@ namespace BatchExport
                             i++; // Skip the value argument
                         }
                         break;
+
+                    case "--texture-format":
+                    case "--textureformat":
+                        if (value != null)
+                        {
+                            settings.TextureFormat = value;
+                            Console.WriteLine($"Override: TextureFormat = {value}");
+                            i++; // Skip the value argument
+                        }
+                        break;
                         
                     case "--needed-exports-file-path":
                         if (value != null)
@@ -203,7 +214,8 @@ namespace BatchExport
             Console.WriteLine("  --aes-key-hex <hex>                 AES key for encrypted pak files (or 'null')");
             Console.WriteLine("  --preset <name>                     Game preset: None, DarkAndDarker, WarRobotsFrontiers");
             Console.WriteLine("  --unreal-engine-version <version>   Unreal Engine version (e.g., GAME_UE5_4)");
-            Console.WriteLine("  --texture-platform <name>           Texture platform (e.g., DesktopMobile)");
+            Console.WriteLine("  --texture-platform <n>           Texture platform (e.g., DesktopMobile)");
+            Console.WriteLine("  --texture-format <n>              Texture format for exports (PNG, JPG, TGA, BMP, DDS, HDR)");
             Console.WriteLine("  --needed-exports-file-path <path>   Path to NeededExports.json file (or 'null')");
             Console.WriteLine("  --is-logging-enabled <true|false>   Enable detailed logging");
             Console.WriteLine("  --should-wipe-output-directory <true|false> Clear output directory before exporting");
@@ -242,43 +254,43 @@ namespace BatchExport
             }
         }
 
-        //Extract an asset and write it to a JSON file
+        //Extract an asset and write it to a JSON file or image file
         private static void ExtractAsset(DefaultFileProvider gameFileProvider, string assetPath, Settings settings)
         {
-            // Check if this is a .locres file (localization resource)
-            if (assetPath.EndsWith(".locres", StringComparison.OrdinalIgnoreCase))
-            {
-                ExtractLocresFile(gameFileProvider, assetPath, settings);
-                return;
-            }
-
-            // Handle regular UE packages (.uasset, .umap)
-            // load all exports the asset has and transform them in a single Json string
-            var assetExports = gameFileProvider.LoadPackage(assetPath).GetExports();
-            var serializedJson = "";
-            try 
-            {
-                serializedJson = JsonConvert.SerializeObject(assetExports, Formatting.Indented);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("An error occurred when serializing JSON from file " + assetPath + ": " + ex.Message);
-                return;
-            }
-            // Destination path within exports directory
-            string destinationFilePath = settings.ExportOutputPath + "/" + assetPath + ".json";
-
-            // Create the directories if they don't exist
-            CreateNeededDirectories(destinationFilePath, settings.ExportOutputPath);
-
-            // Write the JSON to file
             try
             {
-                File.WriteAllText(destinationFilePath, serializedJson);
+                // Check if this is a .locres file (localization resource)
+                if (assetPath.EndsWith(".locres", StringComparison.OrdinalIgnoreCase))
+                {
+                    ExtractLocresFile(gameFileProvider, assetPath, settings);
+                    return;
+                }
+
+                // Handle regular UE packages (.uasset, .umap)
+                var exporterOptions = new ExporterOptions
+                {
+                    TextureFormat = settings.GetTextureFormat(),
+                    Platform = settings.GetTexturePlatform(),
+                    ExportHdrTexturesAsHdr = true,
+                    ExportMaterials = true,
+                    ExportMorphTargets = true
+                };
+
+                var exporter = new AssetExporter(exporterOptions, settings.ExportOutputPath, settings.IsLoggingEnabled);
+                exporter.ExportAsset(gameFileProvider, assetPath);
             }
             catch (Exception ex)
             {
-                Console.WriteLine("An error occurred when writing export to file: " + destinationFilePath + " " + ex.Message);
+                Utils.LogInfo($"Failed to extract asset {assetPath}: {ex.Message}", settings.IsLoggingEnabled);
+                if (settings.IsLoggingEnabled)
+                {
+                    Utils.LogInfo($"Stack trace: {ex.StackTrace}", settings.IsLoggingEnabled);
+                    if (ex.InnerException != null)
+                    {
+                        Utils.LogInfo($"Inner exception: {ex.InnerException.Message}", settings.IsLoggingEnabled);
+                        Utils.LogInfo($"Inner stack trace: {ex.InnerException.StackTrace}", settings.IsLoggingEnabled);
+                    }
+                }
             }
         }
 
