@@ -91,22 +91,22 @@ namespace BatchExport
                         switch (export)
                         {                            
                             case UMaterialInterface material:
-                                ExportMaterial(material, $"{assetPath}_{material.Name}");
+                                ExportMaterial(material, assetPath);
                                 anyExported = true;
                                 continue;
                             
                             case UAnimSequence anim:
-                                ExportAnimation(anim, $"{assetPath}_{anim.Name}");
+                                ExportAnimation(anim, assetPath);
                                 anyExported = true;
                                 continue;
                             
                             case UStaticMesh staticMesh:
-                                ExportStaticMesh(staticMesh, $"{assetPath}_{staticMesh.Name}");
+                                ExportStaticMesh(staticMesh, assetPath);
                                 anyExported = true;
                                 continue;
                             
                             case USkeletalMesh skeletalMesh:
-                                ExportSkeletalMesh(skeletalMesh, $"{assetPath}_{skeletalMesh.Name}");
+                                ExportSkeletalMesh(skeletalMesh, assetPath);
                                 anyExported = true;
                                 continue;
                         }
