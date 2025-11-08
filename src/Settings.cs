@@ -69,11 +69,6 @@ namespace BatchExport
         public string[] SupportedAssetFileExtensions { get; set; } = { ".uasset", ".umap", ".locres" };
 
         /// <summary>
-        /// Asset file prefixes to exclude from processing
-        /// </summary>
-        public string[]? ExcludedAssetFilePrefixes { get; set; } = null;
-
-        /// <summary>
         /// Path to the NeededExports.json file. If null, will export all assets instead of using directory filtering.
         /// </summary>
         public string? NeededExportsFilePath { get; set; } = null;
@@ -183,7 +178,7 @@ namespace BatchExport
                         IsLoggingEnabled = IsLoggingEnabled,
                         ShouldWipeOutputDirectory = ShouldWipeOutputDirectory,
                         SupportedAssetFileExtensions = SupportedAssetFileExtensions,
-                        ExcludedAssetFilePrefixes = ExcludedAssetFilePrefixes
+                        // ExcludedAssetFilePrefixes removed
                     };
                     
                     // Create defaults to compare against
@@ -209,14 +204,7 @@ namespace BatchExport
                         Console.WriteLine($"Loaded from preset: SupportedAssetFileExtensions = [{string.Join(", ", SupportedAssetFileExtensions)}]");
                     }
                     
-                    // Apply ExcludedAssetFilePrefixes from preset only if user hasn't set it (still null)
-                    if (userSettings.ExcludedAssetFilePrefixes == defaults.ExcludedAssetFilePrefixes && 
-                        presetSettings.ExcludedAssetFilePrefixes != null)
-                    {
-                        ExcludedAssetFilePrefixes = presetSettings.ExcludedAssetFilePrefixes;
-                        var excludedDisplay = ExcludedAssetFilePrefixes != null ? $"[{string.Join(", ", ExcludedAssetFilePrefixes)}]" : "null (no exclusions)";
-                        Console.WriteLine($"Loaded from preset: ExcludedAssetFilePrefixes = {excludedDisplay}");
-                    }
+                    // ExcludedAssetFilePrefixes setting removed
                     
                     // Apply UnrealEngineVersion from preset only if user hasn't changed default
                     if (userSettings.UnrealEngineVersion == defaults.UnrealEngineVersion && 
