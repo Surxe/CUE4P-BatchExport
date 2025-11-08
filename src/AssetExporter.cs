@@ -236,7 +236,8 @@ namespace BatchExport
                 {
                     try
                     {
-                        ExportToJson(texture, assetPath);
+                        // Export as a list containing the single texture
+                        ExportToJson(new[] { texture }, assetPath);
                     }
                     catch
                     {
@@ -248,26 +249,26 @@ namespace BatchExport
 
         private void ExportMaterial(UMaterialInterface material, string assetPath)
         {
-            // For now, just export as JSON since we don't have material conversion code yet
-            ExportToJson(material, assetPath);
+            // Export as a list containing the single material
+            ExportToJson(new[] { material }, assetPath);
         }
 
         private void ExportAnimation(UAnimSequence anim, string assetPath)
         {
-            // For now, just export as JSON since we don't have animation conversion code yet
-            ExportToJson(anim, assetPath);
+            // Export as a list containing the single animation
+            ExportToJson(new[] { anim }, assetPath);
         }
 
         private void ExportStaticMesh(UStaticMesh mesh, string assetPath)
         {
-            // For now, just export as JSON since we don't have mesh conversion code yet
-            ExportToJson(mesh, assetPath);
+            // Export as a list containing the single mesh
+            ExportToJson(new[] { mesh }, assetPath);
         }
 
         private void ExportSkeletalMesh(USkeletalMesh mesh, string assetPath)
         {
-            // For now, just export as JSON since we don't have skeletal mesh conversion code yet
-            ExportToJson(mesh, assetPath);
+            // Export as a list containing the single mesh
+            ExportToJson(new[] { mesh }, assetPath);
         }
 
         private void ExportToJson<T>(T obj, string assetPath)
