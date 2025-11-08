@@ -340,14 +340,6 @@ namespace BatchExport
             if (assetFilePath.StartsWith("engine", StringComparison.OrdinalIgnoreCase))
                 return false;
 
-            // Check excluded prefixes (skip if null - means no exclusions)
-            if (settings.ExcludedAssetFilePrefixes != null)
-            {
-                var assetFileName = Path.GetFileName(assetFilePath);
-                if (settings.ExcludedAssetFilePrefixes.Any(prefix => assetFileName.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)))
-                    return false;
-            }
-
             // Check if file is in any export directory (empty string means export all)
             return targetExportDirectories.Any(dir => string.IsNullOrEmpty(dir) || assetFilePath.StartsWith(dir, StringComparison.OrdinalIgnoreCase));
         }
