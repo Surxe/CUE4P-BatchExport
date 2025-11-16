@@ -438,7 +438,7 @@ namespace BatchExport
             // Determine which directories to export
             List<string> exportDirectoriesToProcess;
             
-            if (settings.NeededExportsFilePath == null)
+            if (settings.NeededExportsFilePath == null || settings.NeededExportsFilePath.Equals("All", StringComparison.OrdinalIgnoreCase))
             {
                 // Export all assets when no specific export file is specified (null or 'All')
                 Utils.LogInfo("No NeededExports file specified - exporting all assets", settings.IsLoggingEnabled);
