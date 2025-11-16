@@ -150,8 +150,8 @@ namespace BatchExport
                     case "--needed-exports-file-path":
                         if (value != null)
                         {
-                            settings.NeededExportsFilePath = value.Equals("null", StringComparison.OrdinalIgnoreCase) ? null : value;
-                            Console.WriteLine($"Override: NeededExportsFilePath = {settings.NeededExportsFilePath ?? "null"}");
+                            settings.NeededExportsFilePath = (value.Equals("null", StringComparison.OrdinalIgnoreCase) || value.Equals("All", StringComparison.OrdinalIgnoreCase)) ? null : value;
+                            Console.WriteLine($"Override: NeededExportsFilePath = {settings.NeededExportsFilePath ?? "null (export all)"}");
                             i++; // Skip the value argument
                         }
                         break;
@@ -216,7 +216,7 @@ namespace BatchExport
             Console.WriteLine("  --unreal-engine-version <version>   Unreal Engine version (e.g., GAME_UE5_4)");
             Console.WriteLine("  --texture-platform <n>           Texture platform (e.g., DesktopMobile)");
             Console.WriteLine("  --texture-format <n>              Texture format for exports (PNG, JPG, TGA, BMP, DDS, HDR)");
-            Console.WriteLine("  --needed-exports-file-path <path>   Path to NeededExports.json file (or 'null')");
+            Console.WriteLine("  --needed-exports-file-path <path>   Path to NeededExports.json file (or 'null'/'All' to export everything)");
             Console.WriteLine("  --is-logging-enabled <true|false>   Enable detailed logging");
             Console.WriteLine("  --should-wipe-output-directory <true|false> Clear output directory before exporting");
             Console.WriteLine("  --help, -h                          Show this help message");
@@ -440,7 +440,7 @@ namespace BatchExport
             
             if (settings.NeededExportsFilePath == null)
             {
-                // Export all assets when no specific export file is specified
+                // Export all assets when no specific export file is specified (null or 'All')
                 Utils.LogInfo("No NeededExports file specified - exporting all assets", settings.IsLoggingEnabled);
                 exportDirectoriesToProcess = new List<string> { "" }; // Empty string matches all paths
             }
