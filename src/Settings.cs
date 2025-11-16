@@ -69,7 +69,7 @@ namespace BatchExport
         public string[] SupportedAssetFileExtensions { get; set; } = { ".uasset", ".umap", ".locres" };
 
         /// <summary>
-        /// Path to the NeededExports.json file. If null, will export all assets instead of using directory filtering.
+        /// Path to the NeededExports.json file. If All, will export all assets instead of using directory filtering.
         /// </summary>
         public string? NeededExportsFilePath { get; set; } = null;
 
@@ -178,7 +178,6 @@ namespace BatchExport
                         IsLoggingEnabled = IsLoggingEnabled,
                         ShouldWipeOutputDirectory = ShouldWipeOutputDirectory,
                         SupportedAssetFileExtensions = SupportedAssetFileExtensions,
-                        // ExcludedAssetFilePrefixes removed
                     };
                     
                     // Create defaults to compare against
@@ -204,8 +203,6 @@ namespace BatchExport
                         Console.WriteLine($"Loaded from preset: SupportedAssetFileExtensions = [{string.Join(", ", SupportedAssetFileExtensions)}]");
                     }
                     
-                    // ExcludedAssetFilePrefixes setting removed
-                    
                     // Apply UnrealEngineVersion from preset only if user hasn't changed default
                     if (userSettings.UnrealEngineVersion == defaults.UnrealEngineVersion && 
                         !string.IsNullOrEmpty(presetSettings.UnrealEngineVersion))
@@ -228,6 +225,12 @@ namespace BatchExport
                     {
                         NeededExportsFilePath = presetSettings.NeededExportsFilePath;
                         Console.WriteLine($"Loaded from preset: NeededExportsFilePath = {NeededExportsFilePath}");
+                    }
+                    // If its still null, change it to "All" to export all
+                    if (NeededExportsFilePath == null)
+                    {
+                        NeededExportsFilePath = "All";
+                        Console.WriteLine($"NeededExportsFilePath is null. It is now set to 'All' to export all assets.");
                     }
                     
                     // Apply IsLoggingEnabled from preset only if user hasn't changed default
@@ -344,8 +347,6 @@ namespace BatchExport
 
             if (SupportedAssetFileExtensions == null || SupportedAssetFileExtensions.Length == 0)
                 throw new ArgumentException("SupportedAssetFileExtensions cannot be null or empty");
-
-            // ExcludedAssetFilePrefixes can be null (meaning no exclusions)
 
             if (string.IsNullOrWhiteSpace(UnrealEngineVersion))
                 throw new ArgumentException("UnrealEngineVersion cannot be null or empty");
