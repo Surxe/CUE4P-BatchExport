@@ -178,7 +178,6 @@ namespace BatchExport
                         IsLoggingEnabled = IsLoggingEnabled,
                         ShouldWipeOutputDirectory = ShouldWipeOutputDirectory,
                         SupportedAssetFileExtensions = SupportedAssetFileExtensions,
-                        // ExcludedAssetFilePrefixes removed
                     };
                     
                     // Create defaults to compare against
@@ -203,8 +202,6 @@ namespace BatchExport
                         SupportedAssetFileExtensions = presetSettings.SupportedAssetFileExtensions;
                         Console.WriteLine($"Loaded from preset: SupportedAssetFileExtensions = [{string.Join(", ", SupportedAssetFileExtensions)}]");
                     }
-                    
-                    // ExcludedAssetFilePrefixes setting removed
                     
                     // Apply UnrealEngineVersion from preset only if user hasn't changed default
                     if (userSettings.UnrealEngineVersion == defaults.UnrealEngineVersion && 
@@ -344,8 +341,6 @@ namespace BatchExport
 
             if (SupportedAssetFileExtensions == null || SupportedAssetFileExtensions.Length == 0)
                 throw new ArgumentException("SupportedAssetFileExtensions cannot be null or empty");
-
-            // ExcludedAssetFilePrefixes can be null (meaning no exclusions)
 
             if (string.IsNullOrWhiteSpace(UnrealEngineVersion))
                 throw new ArgumentException("UnrealEngineVersion cannot be null or empty");

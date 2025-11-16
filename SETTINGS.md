@@ -42,7 +42,6 @@ Create an `appsettings.json` file in the same directory as the executable with y
 | `texturePlatform` | string | Texture platform for parsing | "DesktopMobile" |
 | `aesKeyHex` | string? | AES encryption key (hex string) or null | null |
 | `supportedAssetFileExtensions` | string[] | File extensions to process | [".uasset", ".umap"] |
-| `excludedAssetFilePrefixes` | string[]? | File prefixes to exclude | null (no exclusions) |
 | `neededExportsFilePath` | string? | Custom path to NeededExports.json, relative from src | null (exports all assets) |
 
 -- Personal and preference
@@ -123,14 +122,11 @@ Additional platforms may be available depending on the CUE4Parse library version
 ### WarRobotsFrontiers
 - **AES Key**: None (unencrypted)
 - **Supported Extensions**: `.uasset`, `.umap`
-- **Excluded Prefixes**: None
 - **UE Version**: `GAME_UE5_4`
 - **Texture Platform**: `DesktopMobile`
 
 ### DarkAndDarker
 - **AES Key**: `0x903DBEEB889CFB1C25AFA28A9463F6D4E816B174D68B3902427FE5867E8C688E`
-- **Supported Extensions**: `.uasset`, `.umap`
-- **Excluded Prefixes**: `FXS_`
 - **UE Version**: `GAME_UE5_3`
 - **Texture Platform**: `DesktopMobile`
 
