@@ -69,7 +69,7 @@ namespace BatchExport
         public string[] SupportedAssetFileExtensions { get; set; } = { ".uasset", ".umap", ".locres" };
 
         /// <summary>
-        /// Path to the NeededExports.json file. If null, will export all assets instead of using directory filtering.
+        /// Path to the NeededExports.json file. If All, will export all assets instead of using directory filtering.
         /// </summary>
         public string? NeededExportsFilePath { get; set; } = null;
 
@@ -225,6 +225,12 @@ namespace BatchExport
                     {
                         NeededExportsFilePath = presetSettings.NeededExportsFilePath;
                         Console.WriteLine($"Loaded from preset: NeededExportsFilePath = {NeededExportsFilePath}");
+                    }
+                    // If its still null, change it to "All" to export all
+                    if (NeededExportsFilePath == null)
+                    {
+                        NeededExportsFilePath = "All";
+                        Console.WriteLine($"NeededExportsFilePath is null. It is now set to 'All' to export all assets.");
                     }
                     
                     // Apply IsLoggingEnabled from preset only if user hasn't changed default
