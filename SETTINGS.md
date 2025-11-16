@@ -42,7 +42,7 @@ Create an `appsettings.json` file in the same directory as the executable with y
 | `texturePlatform` | string | Texture platform for parsing | "DesktopMobile" |
 | `aesKeyHex` | string? | AES encryption key (hex string) or null | null |
 | `supportedAssetFileExtensions` | string[] | File extensions to process | [".uasset", ".umap"] |
-| `neededExportsFilePath` | string? | Custom path to NeededExports.json, relative from src | null (exports all assets) |
+| `neededExportsFilePath` | string? | Custom path to NeededExports.json, relative from src | All (exports all assets) |
 
 -- Personal and preference
 | `isLoggingEnabled` | bool | Enable detailed logging | true |
@@ -83,7 +83,7 @@ Control which assets are exported using `neededExportsFilePath`:
 **Export All Assets:**
 ```json
 {
-  "neededExportsFilePath": null
+  "neededExportsFilePath": "All"
 }
 ```
 
@@ -94,9 +94,9 @@ Control which assets are exported using `neededExportsFilePath`:
 }
 ```
 
-When `neededExportsFilePath` is `null`, all assets will be exported (subject to file extension and prefix filters). When a path is specified, only assets in the directories listed in that JSON file will be exported.
+When `neededExportsFilePath` is `All`, all assets will be exported (subject to file extension and prefix filters). When a path is specified, only assets in the directories listed in that JSON file will be exported.
 
-By default, `neededExportsFilePath` is set to `null`, which means all assets will be exported. If you want to limit exports to specific directories, create a NeededExports.json file, set the path setting to it, and create a list of file paths. Use a tool with GUI like [FModel](https://fmodel.app) (also runs on CUE4Parse) to first discover paths you wish to export. See the following that can be referenced as examples:
+By default, `neededExportsFilePath` is set to `All`, which means all assets will be exported. If you want to limit exports to specific directories, create a NeededExports.json file, set the path setting to it, and create a list of file paths. Use a tool with GUI like [FModel](https://fmodel.app) (also runs on CUE4Parse) to first discover paths you wish to export. See the following that can be referenced as examples:
 - `src/presets/WarRobotsFrontiers/NeededExports.json`
 - `src/resets/DarkAndDarker/NeededExports.json`
 
