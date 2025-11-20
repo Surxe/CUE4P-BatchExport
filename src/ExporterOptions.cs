@@ -18,6 +18,7 @@ namespace BatchExport
         public bool ExportMorphTargets { get; set; }
         public bool ExportMaterials { get; set; }
         public bool ExportHdrTexturesAsHdr { get; set; }
+        public bool ExportSVG { get; set; }
 
         public ExporterOptions()
         {
@@ -33,6 +34,7 @@ namespace BatchExport
             ExportMorphTargets = true;
             ExportMaterials = true;
             ExportHdrTexturesAsHdr = true;
+            ExportSVG = false;
         }
     }
 }
