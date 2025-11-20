@@ -1,4 +1,3 @@
-using System.Linq;
 using CUE4Parse.UE4.Assets.Exports;
 using CUE4Parse.UE4.Assets.Exports.Texture;
 using CUE4Parse.UE4.Assets.Exports.Material;
@@ -30,13 +29,86 @@ namespace BatchExport
             try
             {
                 var package = provider.LoadPackage(assetPath);
-                var assetExports = package.GetExports();
+                var exportsLazy = package.ExportsLazy;
 
                 bool anyExported = false;
-                
-                // Check for SVG assets first
-                var svgAssets = assetExports.Where(x => x.ExportType.Contains("SvgAsset")).ToList();
-                if (svgAssets.Any())
+
+                UTexture2D? firstTexture = null;
+                List<UObject>? svgAssets = _options.ExportSVG == true ? new List<UObject>() : null;
+
+                var collectedForJson = new List<UObject>(exportsLazy.Length);
+
+                for (int i = 0; i < exportsLazy.Length; i++)
+                {
+                    UObject asset;
+                    try
+                    {
+                        asset = exportsLazy[i].Value;
+                    }
+                    catch
+                    {
+                        continue;
+                    }
+
+                    collectedForJson.Add(asset);
+
+                    // SVG check
+                    if (svgAssets != null)
+                    {
+                        var type = asset.ExportType;
+
+                        if (type != null && type.Contains("SvgAsset", StringComparison.Ordinal))
+                        {
+                            svgAssets.Add(asset);
+                        }
+                    }
+
+                    // Texture check
+                    if (asset is UTexture2D tex)
+                    {
+                        // Only export first texture
+                        if (firstTexture == null)
+                            firstTexture = tex;
+
+                        continue;
+                    }
+
+                    // Other assets check
+                    try
+                    {
+                        switch (asset)
+                        {
+                            case UMaterialInterface material:
+                                ExportMaterial(material, assetPath);
+                                anyExported = true;
+                                continue;
+
+                            case UAnimSequence anim:
+                                ExportAnimation(anim, assetPath);
+                                anyExported = true;
+                                continue;
+
+                            case UStaticMesh staticMesh:
+                                ExportStaticMesh(staticMesh, assetPath);
+                                anyExported = true;
+                                continue;
+
+                            case USkeletalMesh skeletalMesh:
+                                ExportSkeletalMesh(skeletalMesh, assetPath);
+                                anyExported = true;
+                                continue;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Utils.LogInfo(
+                            $"Failed to export individual asset {asset.Name} from {assetPath}: {ex.Message}",
+                            _isLoggingEnabled
+                        );
+                    }
+                }
+
+                if (svgAssets != null && svgAssets.Count > 0)
                 {
                     Utils.LogInfo($"Found SVG asset in {assetPath}", _isLoggingEnabled);
                     // SVG data is typically stored in the asset properties
@@ -62,66 +134,27 @@ namespace BatchExport
                     }
                 }
 
-                // Check for regular textures
-                var textures = assetExports.OfType<UTexture2D>().ToList();
-                if (textures.Count > 0)
+                if (firstTexture != null)
                 {
-                    if (textures.Count > 1)
-                    {
-                        Utils.LogInfo($"Warning: Multiple textures found in {assetPath}. Using first texture only.", _isLoggingEnabled);
-                    }
                     try
                     {
-                        ExportTexture(textures[0], assetPath);
+                        ExportTexture(firstTexture, assetPath);
                         anyExported = true;
+                        Utils.LogInfo(
+                            $"Successfully exported texture {assetPath}",_isLoggingEnabled);
                     }
                     catch (Exception ex)
                     {
-                        Utils.LogInfo($"Failed to export texture from {assetPath}: {ex.Message}", _isLoggingEnabled);
+                        Utils.LogInfo(
+                            $"Failed to export texture from {assetPath}: {ex.Message}", _isLoggingEnabled);
                     }
                 }
 
-                // Handle other asset types
-                foreach (var export in assetExports)
+                if (!anyExported || collectedForJson.Count > 1)
                 {
-                    if (export is UTexture2D) continue; // Skip textures as they were handled above
-                    
-                    try 
-                    {
-                        switch (export)
-                        {                            
-                            case UMaterialInterface material:
-                                ExportMaterial(material, assetPath);
-                                anyExported = true;
-                                continue;
-                            
-                            case UAnimSequence anim:
-                                ExportAnimation(anim, assetPath);
-                                anyExported = true;
-                                continue;
-                            
-                            case UStaticMesh staticMesh:
-                                ExportStaticMesh(staticMesh, assetPath);
-                                anyExported = true;
-                                continue;
-                            
-                            case USkeletalMesh skeletalMesh:
-                                ExportSkeletalMesh(skeletalMesh, assetPath);
-                                anyExported = true;
-                                continue;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Utils.LogInfo($"Failed to export individual asset {export.Name} from {assetPath}: {ex.Message}", _isLoggingEnabled);
-                    }
+                    ExportToJson(collectedForJson, assetPath);
                 }
 
-                // If no individual exports succeeded or there are multiple assets, export everything as JSON
-                if (!anyExported || assetExports.Count() > 1)
-                {
-                    ExportToJson(assetExports.ToList(), assetPath);
-                }
             }
             catch (Exception ex)
             {
