@@ -6,10 +6,12 @@ using CUE4Parse.UE4.Assets.Exports.Material;
 using CUE4Parse.UE4.Assets.Exports.SkeletalMesh;
 using CUE4Parse.UE4.Assets.Exports.StaticMesh;
 using CUE4Parse.UE4.Assets.Exports.Texture;
-using Newtonsoft.Json;
-using SkiaSharp;
 using System;
 using System.Linq;
+using CUE4Parse_Conversion.Textures;
+using Newtonsoft.Json;
+using SkiaSharp;
+using ETextureFormat = BatchExport.Enums.ETextureFormat;
 
 namespace BatchExport
 {
@@ -164,56 +166,46 @@ namespace BatchExport
                 SKBitmap? bitmap = null;
                 try
                 {
-                    var info = new SKImageInfo(firstMip.SizeX, firstMip.SizeY, SKColorType.Rgba8888);
-                    bitmap = new SKBitmap(info);
+                    bitmap = texture.Decode(firstMip);
                     if (bitmap == null)
                     {
-                        Utils.LogInfo($"Failed to create bitmap for texture {assetPath} - skipping", _isLoggingEnabled);
+                        Utils.LogInfo($"Failed to decode texture {assetPath} - skipping", _isLoggingEnabled);
                         return;
                     }
 
-                    var bitmapPtr = bitmap.GetPixels();
-                    if (bitmapPtr == IntPtr.Zero)
+                    if (_options.TextureFormat == ETextureFormat.Png)
                     {
-                        Utils.LogInfo($"Failed to get bitmap pixels for texture {assetPath} - skipping", _isLoggingEnabled);
-                        return;
+                        using var pixmap = bitmap.PeekPixels();
+                        var options = new SKPngEncoderOptions(SKPngEncoderFilterFlags.NoFilters, 1);
+                        using var data = pixmap.Encode(options);
+                        if (data == null)
+                        {
+                            Utils.LogInfo($"Failed to create data from bitmap for texture {assetPath} - skipping", _isLoggingEnabled);
+                            return;
+                        }
+                        using var stream = File.OpenWrite(destinationFilePath);
+                        data.SaveTo(stream);
                     }
+                    // Encode for all types other than png
+                    else
+                    {
+                        using var image = SKImage.FromBitmap(bitmap);
+                        if (image == null)
+                        {
+                            Utils.LogInfo($"Failed to create image from bitmap for texture {assetPath} - skipping", _isLoggingEnabled);
+                            return;
+                        }
 
-                    var sourceData = firstMip.BulkData.Data;
-                    var expectedLength = firstMip.SizeX * firstMip.SizeY * 4; // RGBA = 4 bytes per pixel
-                    if (sourceData.Length < expectedLength)
-                    {
-                        Utils.LogInfo($"Texture {assetPath} data length ({sourceData.Length}) is less than expected ({expectedLength}) - skipping", _isLoggingEnabled);
-                        return;
-                    }
+                        using var data = image.Encode(GetSkiaFormat(_options.TextureFormat), 100);
+                        if (data == null)
+                        {
+                            Utils.LogInfo($"Failed to encode image for texture {assetPath} - skipping", _isLoggingEnabled);
+                            return;
+                        }
 
-                    // Use GC.AddMemoryPressure to help prevent OOM in large batch operations
-                    GC.AddMemoryPressure(sourceData.Length);
-                    try
-                    {
-                        System.Runtime.InteropServices.Marshal.Copy(sourceData, 0, bitmapPtr, Math.Min(sourceData.Length, expectedLength));
+                        using var stream = File.OpenWrite(destinationFilePath);
+                        data.SaveTo(stream);
                     }
-                    finally
-                    {
-                        GC.RemoveMemoryPressure(sourceData.Length);
-                    }
-
-                    using var image = SKImage.FromBitmap(bitmap);
-                    if (image == null)
-                    {
-                        Utils.LogInfo($"Failed to create image from bitmap for texture {assetPath} - skipping", _isLoggingEnabled);
-                        return;
-                    }
-
-                    using var data = image.Encode(GetSkiaFormat(_options.TextureFormat), 100);
-                    if (data == null)
-                    {
-                        Utils.LogInfo($"Failed to encode image for texture {assetPath} - skipping", _isLoggingEnabled);
-                        return;
-                    }
-
-                    using var stream = File.OpenWrite(destinationFilePath);
-                    data.SaveTo(stream);
                 }
                 finally
                 {
