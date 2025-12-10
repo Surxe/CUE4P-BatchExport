@@ -1,9 +1,13 @@
+using BatchExport.Enums;
 using CUE4Parse.FileProvider;
+using CUE4Parse.UE4.Assets.Exports;
 using CUE4Parse.UE4.Assets.Exports.Animation;
 using CUE4Parse.UE4.Assets.Exports.Material;
 using CUE4Parse.UE4.Assets.Exports.SkeletalMesh;
 using CUE4Parse.UE4.Assets.Exports.StaticMesh;
 using CUE4Parse.UE4.Assets.Exports.Texture;
+using System;
+using System.Linq;
 using CUE4Parse_Conversion.Textures;
 using Newtonsoft.Json;
 using SkiaSharp;
@@ -267,8 +271,14 @@ namespace BatchExport
                 var jsonDestinationPath = Path.Combine(_outputPath, $"{assetPath}.json");
                 CreateNeededDirectories(jsonDestinationPath);
 
-                var serializedJson = JsonConvert.SerializeObject(obj, Formatting.Indented);
-                File.WriteAllText(jsonDestinationPath, serializedJson);
+                using (FileStream fs = File.Open(jsonDestinationPath, FileMode.Create)) // FileMode.Create will overwrite if file exists
+                using (StreamWriter sw = new StreamWriter(fs))
+                using (JsonTextWriter jw = new JsonTextWriter(sw))
+                {
+                    jw.Formatting = Formatting.Indented; // For human-readable output with indentation
+                    JsonSerializer serializer = new JsonSerializer();
+                    serializer.Serialize(jw, obj);
+                }
             }
             catch (Exception ex)
             {
