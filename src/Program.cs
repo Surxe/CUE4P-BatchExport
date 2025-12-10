@@ -1,15 +1,16 @@
+using CUE4Parse.Compression;
 using CUE4Parse.Encryption.Aes;
 using CUE4Parse.FileProvider;
+using CUE4Parse.MappingsProvider;
+using CUE4Parse.UE4.Assets.Exports.Texture;
+using CUE4Parse.UE4.Localization;
 using CUE4Parse.UE4.Objects.Core.Misc;
 using CUE4Parse.UE4.Versions;
 using Newtonsoft.Json;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
-using CUE4Parse.MappingsProvider;
-using CUE4Parse.Compression;
-using CUE4Parse.UE4.Assets.Exports.Texture;
-using CUE4Parse.UE4.Localization;
 using SkiaSharp;
+using System.Collections.Concurrent;
 
 namespace BatchExport
 {
@@ -344,6 +345,28 @@ namespace BatchExport
             return targetExportDirectories.Any(dir => string.IsNullOrEmpty(dir) || assetFilePath.StartsWith(dir, StringComparison.OrdinalIgnoreCase));
         }
 
+        private static DefaultFileProvider CreateIndependentProvider(Settings settings)
+        {
+            var provider = new DefaultFileProvider(
+                settings.PakFilesDirectory,
+                SearchOption.AllDirectories,
+                new VersionContainer(settings.GetUnrealEngineVersion(), settings.GetTexturePlatform()),
+                StringComparer.Ordinal
+            );
+
+            if (!string.IsNullOrEmpty(settings.AesKeyHex))
+                provider.SubmitKey(new FGuid(), new FAesKey(settings.AesKeyHex));
+
+            provider.MappingsContainer = new FileUsmapTypeMappingsProvider(settings.MappingFilePath);
+
+            provider.Initialize();
+            provider.Mount();
+            provider.PostMount();
+            provider.ChangeCulture("en");
+
+            return provider;
+        }
+
         public static void Main(string[] args)
         {
             // Load settings from config file and command line arguments
@@ -468,30 +491,38 @@ namespace BatchExport
             // Export to .json
             Console.WriteLine("Starting file export...");
             Utils.LogInfo("Please wait while the script exports files...", settings.IsLoggingEnabled);
+            var allFiles = fileProvider.Files.Select(kvp => kvp.Value.ToString()).ToList();
             int totalFilesProcessed = 0;
             int totalFilesExported = 0;
-            foreach (var gameFile in fileProvider.Files)
-            {
-                totalFilesProcessed++;
-                string currentFilePath = gameFile.Value.ToString();
-                if (ShouldProcessFile(currentFilePath, exportDirectoriesToProcess, settings))
+
+            int workerCount = Environment.ProcessorCount;
+
+            // Shared concurrent work queue
+            var workQueue = new ConcurrentQueue<string>(allFiles);
+
+            // Run N workers pulling from the queue until empty
+            Parallel.ForEach(Enumerable.Range(0, workerCount), new ParallelOptions { MaxDegreeOfParallelism = workerCount }, _ =>
                 {
-                    string assetPathForExport;
-                    if (currentFilePath.EndsWith(".locres", StringComparison.OrdinalIgnoreCase))
+                    var localProvider = CreateIndependentProvider(settings);
+
+                    while (workQueue.TryDequeue(out var currentFilePath))
                     {
-                        // Keep full path for .locres files (they need their extension)
-                        assetPathForExport = currentFilePath;
+                        Interlocked.Increment(ref totalFilesProcessed);
+
+                        if (!ShouldProcessFile(currentFilePath, exportDirectoriesToProcess, settings))
+                            continue;
+
+                        string assetPathForExport = currentFilePath.EndsWith(".locres", StringComparison.OrdinalIgnoreCase)
+                            ? currentFilePath
+                            : currentFilePath.Replace(".uasset", "").Replace(".umap", "");
+
+                        Utils.LogInfo("Exporting asset: " + assetPathForExport, settings.IsLoggingEnabled);
+
+                        ExtractAsset(localProvider, assetPathForExport, settings);
+
+                        Interlocked.Increment(ref totalFilesExported);
                     }
-                    else
-                    {
-                        // Remove extensions for UE packages (.uasset, .umap)
-                        assetPathForExport = currentFilePath.Replace(".uasset", "").Replace(".umap", "");
-                    }
-                    Utils.LogInfo("Exporting asset: " + assetPathForExport, settings.IsLoggingEnabled);
-                    ExtractAsset(fileProvider, assetPathForExport, settings);
-                    totalFilesExported++;
-                }
-            }
+                });
 
             Utils.LogInfo($"Processing complete. Files processed: {totalFilesProcessed}, Files exported: {totalFilesExported}", settings.IsLoggingEnabled);
         }
