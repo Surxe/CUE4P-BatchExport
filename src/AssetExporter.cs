@@ -136,18 +136,18 @@ namespace BatchExport
         {
             try
             {
-                var firstMip = texture.GetFirstMip();
-                if (firstMip == null || firstMip.BulkData.Data == null || firstMip.BulkData.Data.Length == 0)
-                {
-                    Utils.LogInfo($"Texture {assetPath} has no valid mip data - skipping", _isLoggingEnabled);
-                    return;
-                }
+                //var firstMip = texture.GetFirstMip();
+                //if (firstMip == null || firstMip.BulkData.Data == null || firstMip.BulkData.Data.Length == 0)
+                //{
+                //    Utils.LogInfo($"Texture {assetPath} has no valid mip data - skipping", _isLoggingEnabled);
+                //    return;
+                //}
 
-                if (firstMip.SizeX <= 0 || firstMip.SizeY <= 0 || firstMip.SizeX > 16384 || firstMip.SizeY > 16384)
-                {
-                    Utils.LogInfo($"Texture {assetPath} has invalid dimensions ({firstMip.SizeX}x{firstMip.SizeY}) - skipping", _isLoggingEnabled);
-                    return;
-                }
+                //if (firstMip.SizeX <= 0 || firstMip.SizeY <= 0 || firstMip.SizeX > 16384 || firstMip.SizeY > 16384)
+                //{
+                //    Utils.LogInfo($"Texture {assetPath} has invalid dimensions ({firstMip.SizeX}x{firstMip.SizeY}) - skipping", _isLoggingEnabled);
+                //    return;
+                //}
 
                 var extension = _options.TextureFormat switch
                 {
@@ -166,7 +166,7 @@ namespace BatchExport
                 SKBitmap? bitmap = null;
                 try
                 {
-                    bitmap = texture.Decode(firstMip);
+                    bitmap = texture.Decode();
                     if (bitmap == null)
                     {
                         Utils.LogInfo($"Failed to decode texture {assetPath} - skipping", _isLoggingEnabled);
@@ -271,7 +271,7 @@ namespace BatchExport
                 var jsonDestinationPath = Path.Combine(_outputPath, $"{assetPath}.json");
                 CreateNeededDirectories(jsonDestinationPath);
 
-                using (FileStream fs = File.Open(jsonDestinationPath, FileMode.Create)) // FileMode.Create will overwrite if file exists
+                using var fs = new FileStream(jsonDestinationPath, FileMode.Create, FileAccess.Write, FileShare.Read, 65536);
                 using (StreamWriter sw = new StreamWriter(fs))
                 using (JsonTextWriter jw = new JsonTextWriter(sw))
                 {
