@@ -423,6 +423,7 @@ namespace BatchExport
             OodleHelper.Initialize(OodleHelper.OODLE_DLL_NAME);
 
             Utils.LogInfo("Initializing Detex...", settings.IsLoggingEnabled);
+            DetexHelper.LoadDll();
             DetexHelper.Initialize(DetexHelper.DLL_NAME);
 
             Utils.LogInfo("Creating version container and file provider...", settings.IsLoggingEnabled);
