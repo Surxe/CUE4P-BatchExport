@@ -11,6 +11,8 @@ using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
 using SkiaSharp;
 using System.Collections.Concurrent;
+using CUE4Parse_Conversion.Textures;
+using CUE4Parse_Conversion.Textures.BC;
 
 namespace BatchExport
 {
@@ -419,6 +421,10 @@ namespace BatchExport
             Utils.LogInfo("Initializing Oodle...", settings.IsLoggingEnabled);
             OodleHelper.DownloadOodleDll();
             OodleHelper.Initialize(OodleHelper.OODLE_DLL_NAME);
+
+            Utils.LogInfo("Initializing Detex...", settings.IsLoggingEnabled);
+            DetexHelper.LoadDll();
+            DetexHelper.Initialize(DetexHelper.DLL_NAME);
 
             Utils.LogInfo("Creating version container and file provider...", settings.IsLoggingEnabled);
             Utils.LogInfo($"Game directory: {settings.PakFilesDirectory}", settings.IsLoggingEnabled);
