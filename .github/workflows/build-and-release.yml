@@ -41,7 +41,7 @@ jobs:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore BatchExport.sln
 
     - name: Build application
       run: |
