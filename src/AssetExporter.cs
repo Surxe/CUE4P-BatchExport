@@ -1,13 +1,9 @@
-using BatchExport.Enums;
 using CUE4Parse.FileProvider;
-using CUE4Parse.UE4.Assets.Exports;
 using CUE4Parse.UE4.Assets.Exports.Animation;
 using CUE4Parse.UE4.Assets.Exports.Material;
 using CUE4Parse.UE4.Assets.Exports.SkeletalMesh;
 using CUE4Parse.UE4.Assets.Exports.StaticMesh;
 using CUE4Parse.UE4.Assets.Exports.Texture;
-using System;
-using System.Linq;
 using CUE4Parse_Conversion.Textures;
 using Newtonsoft.Json;
 using SkiaSharp;
@@ -136,29 +132,7 @@ namespace BatchExport
         {
             try
             {
-                var firstMip = texture.GetFirstMip();
-                if (firstMip == null || firstMip.BulkData.Data == null || firstMip.BulkData.Data.Length == 0)
-                {
-                    Utils.LogInfo($"Texture {assetPath} has no valid mip data - skipping", _isLoggingEnabled);
-                    return;
-                }
-
-                if (firstMip.SizeX <= 0 || firstMip.SizeY <= 0 || firstMip.SizeX > 16384 || firstMip.SizeY > 16384)
-                {
-                    Utils.LogInfo($"Texture {assetPath} has invalid dimensions ({firstMip.SizeX}x{firstMip.SizeY}) - skipping", _isLoggingEnabled);
-                    return;
-                }
-
-                var extension = _options.TextureFormat switch
-                {
-                    ETextureFormat.Png => "png",
-                    ETextureFormat.Jpeg => "jpg",
-                    ETextureFormat.Tga => "tga",
-                    ETextureFormat.Bmp => "bmp",
-                    ETextureFormat.Dds => "dds",
-                    ETextureFormat.Hdr => "hdr",
-                    _ => "png"
-                };
+                string extension = GetTextureFormatAsString();
 
                 var destinationFilePath = Path.Combine(_outputPath, $"{assetPath}.{extension}");
                 CreateNeededDirectories(destinationFilePath);
@@ -166,17 +140,39 @@ namespace BatchExport
                 SKBitmap? bitmap = null;
                 try
                 {
-                    bitmap = texture.Decode(firstMip);
-                    if (bitmap == null)
+                    var textureData = texture.Decode();
+                    if (textureData == null)
                     {
                         Utils.LogInfo($"Failed to decode texture {assetPath} - skipping", _isLoggingEnabled);
                         return;
                     }
 
+                    // Create empty SKBitmap from SKImage frame
+                    var imageInfo = new SKImageInfo(textureData.Width, textureData.Height, GetSKColorType(textureData.PixelFormat));
+                    bitmap = new SKBitmap(imageInfo);
+
+                    var pixelPtr = bitmap.GetPixels();
+                    if (pixelPtr == IntPtr.Zero)
+                    {
+                        Utils.LogInfo($"Failed to get pixel pointer for texture {assetPath} - skipping", _isLoggingEnabled);
+                        return;
+                    }
+
+                    // Validate data size matches expected size
+                    int expectedSize = bitmap.ByteCount;
+                    if (textureData.Data.Length != expectedSize)
+                    {
+                        Utils.LogInfo($"Data size mismatch for texture {assetPath}: expected {expectedSize} bytes, got {textureData.Data.Length} bytes - skipping", _isLoggingEnabled);
+                        return;
+                    }
+
+                    // Set the bitmap's pointer to the CTexture's byte array (pixel data)
+                    System.Runtime.InteropServices.Marshal.Copy(textureData.Data, 0, pixelPtr, textureData.Data.Length);
+
                     if (_options.TextureFormat == ETextureFormat.Png)
                     {
                         using var pixmap = bitmap.PeekPixels();
-                        var options = new SKPngEncoderOptions(SKPngEncoderFilterFlags.NoFilters, 1);
+                        var options = new SKPngEncoderOptions(SKPngEncoderFilterFlags.Sub | SKPngEncoderFilterFlags.Up , 1);
                         using var data = pixmap.Encode(options);
                         if (data == null)
                         {
@@ -195,14 +191,12 @@ namespace BatchExport
                             Utils.LogInfo($"Failed to create image from bitmap for texture {assetPath} - skipping", _isLoggingEnabled);
                             return;
                         }
-
                         using var data = image.Encode(GetSkiaFormat(_options.TextureFormat), 100);
                         if (data == null)
                         {
                             Utils.LogInfo($"Failed to encode image for texture {assetPath} - skipping", _isLoggingEnabled);
                             return;
                         }
-
                         using var stream = File.OpenWrite(destinationFilePath);
                         data.SaveTo(stream);
                     }
@@ -295,6 +289,42 @@ namespace BatchExport
                 ETextureFormat.Bmp => SKEncodedImageFormat.Bmp,
                 _ => SKEncodedImageFormat.Png // Default to PNG for unsupported formats
             };
+        }
+
+        private static SKColorType GetSKColorType(EPixelFormat format)
+        {
+            // Map EPixelFormat to SKColorType
+            SKColorType colorType = format switch
+            {
+                EPixelFormat.PF_B8G8R8A8 => SKColorType.Bgra8888,
+                EPixelFormat.PF_R8G8B8A8 => SKColorType.Rgba8888,
+                EPixelFormat.PF_DXT1 => SKColorType.Rgba8888,
+                EPixelFormat.PF_DXT5 => SKColorType.Rgba8888,
+                EPixelFormat.PF_BC4 => SKColorType.Rgba8888,
+                EPixelFormat.PF_BC5 => SKColorType.Rgba8888,
+                EPixelFormat.PF_BC6H => SKColorType.Rgba8888,
+                EPixelFormat.PF_BC7 => SKColorType.Rgba8888,
+                EPixelFormat.PF_A8R8G8B8 => SKColorType.Bgra8888,
+                EPixelFormat.PF_G8 => SKColorType.Gray8,
+                EPixelFormat.PF_FloatRGBA => SKColorType.RgbaF16,
+                _ => SKColorType.Rgba8888 // Default fallback
+            };
+            return colorType;
+        }
+
+        private string GetTextureFormatAsString()
+        {
+            var extension = _options.TextureFormat switch
+            {
+                ETextureFormat.Png => "png",
+                ETextureFormat.Jpeg => "jpg",
+                ETextureFormat.Tga => "tga",
+                ETextureFormat.Bmp => "bmp",
+                ETextureFormat.Dds => "dds",
+                ETextureFormat.Hdr => "hdr",
+                _ => "png"
+            };
+            return extension;
         }
 
         private static void CreateNeededDirectories(string filePath)

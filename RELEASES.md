@@ -14,7 +14,7 @@ Each release package includes:
 
 - **Automatic releases**: Created when version tags (e.g., `v1.0.0`) are pushed
 - **Manual releases**: Can be triggered via GitHub Actions workflow dispatch
-- **Multi-platform**: Windows, Linux, macOS (Intel), macOS (Apple Silicon)
+- **Multi-platform**: Windows, Linux
 - **Self-contained**: No dependencies or runtime installation needed
 - **Single file**: Each executable is bundled into a single file for easy distribution
 
@@ -46,7 +46,7 @@ Releases can also be triggered manually:
 
 The automated build process:
 
-1. **Multi-platform compilation**: Builds on Windows, Linux, and macOS runners
+1. **Compilation**: Builds on Windows and Linux runners
 2. **Self-contained publishing**: Creates executables that don't require .NET runtime
 3. **Asset bundling**: Includes presets, templates, and documentation
 4. **Archive creation**: Packages everything into platform-specific archives
@@ -67,12 +67,16 @@ Follow semantic versioning for tags:
    # Windows
    .\BatchExport.exe --preset WarRobotsFrontiers --pak-dir "C:\Game\Paks" --output "C:\Export" --mappings "C:\mappings.usmap"
 
-   # Linux/macOS
+   # Linux
    ./BatchExport --preset WarRobotsFrontiers --pak-dir "/path/to/paks" --output "/path/to/export" --mappings "/path/to/mappings.usmap"
    ```
 
 3. **See all options:**
    ```bash
+   # Windows
+   .\BatchExport.exe --help
+
+   # Linux
    ./BatchExport --help
    ```
 

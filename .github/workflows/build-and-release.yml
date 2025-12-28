@@ -24,14 +24,12 @@ jobs:
             runner: ubuntu-latest
             artifact-name: BatchExport-linux-x64
             executable-extension: ''
-          - os: osx-x64
-            runner: macos-latest
-            artifact-name: BatchExport-macos-x64
-            executable-extension: ''
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        submodules: recursive
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
@@ -39,7 +37,7 @@ jobs:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Restore dependencies
-      run: dotnet restore src/BatchExport.csproj
+      run: dotnet restore BatchExport.sln
 
     - name: Build application
       run: |
@@ -50,8 +48,8 @@ jobs:
       run: |
         Compress-Archive -Path ./publish/${{ matrix.os }}/* -DestinationPath ${{ matrix.artifact-name }}.zip
 
-    - name: Create archive (Unix)
-      if: matrix.os != 'win-x64'
+    - name: Create archive (Linux)
+      if: matrix.os == 'linux-x64'
       run: |
         cd ./publish/${{ matrix.os }}
         tar -czf ../../${{ matrix.artifact-name }}.tar.gz *
@@ -79,6 +77,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         fetch-depth: 0  # Fetch full history for changelog
+        submodules: recursive
 
     - name: Download all artifacts
       uses: actions/download-artifact@v4
@@ -112,26 +111,31 @@ jobs:
         
         ### Downloads
         - **Windows (x64)**: BatchExport-windows-x64.zip
-        - **Linux (x64)**: BatchExport-linux-x64.tar.gz  
-        - **macOS (x64)**: BatchExport-macos-x64.tar.gz
+        - **Linux (x64)**: BatchExport-linux-x64.tar.gz
         
         ### Usage
-        Extract the archive for your platform and run:
+        Extract the archive and run:
         \`\`\`bash
         # Windows
         BatchExport.exe --help
-        
-        # Linux/macOS
+
+        # Linux
         ./BatchExport --help
         \`\`\`
         
         ### Quick Start
         \`\`\`bash
-        # Example usage
-        ./BatchExport --preset WarRobotsFrontiers \\
-          --pak-files-directory "C:\\Game\\Paks" \\
-          --export-output-path "C:\\Export" \\
+        # Windows
+        BatchExport.exe --preset WarRobotsFrontiers ^
+          --pak-files-directory "C:\\Game\\Paks" ^
+          --export-output-path "C:\\Export" ^
           --mapping-file-path "C:\\mappings.usmap"
+
+        # Linux
+        ./BatchExport --preset WarRobotsFrontiers \\
+          --pak-files-directory "/path/to/paks" \\
+          --export-output-path "/path/to/export" \\
+          --mapping-file-path "/path/to/mappings.usmap"
         \`\`\`
         EOF
 
