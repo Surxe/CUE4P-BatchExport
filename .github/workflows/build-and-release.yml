@@ -20,14 +20,6 @@ jobs:
             runner: windows-latest
             artifact-name: BatchExport-windows-x64
             executable-extension: .exe
-          - os: linux-x64
-            runner: ubuntu-latest
-            artifact-name: BatchExport-linux-x64
-            executable-extension: ''
-          - os: osx-x64
-            runner: macos-latest
-            artifact-name: BatchExport-macos-x64
-            executable-extension: ''
 
     steps:
     - name: Checkout code
@@ -47,24 +39,15 @@ jobs:
       run: |
         dotnet publish src/BatchExport.csproj --configuration Release --runtime ${{ matrix.os }} --self-contained true --output ./publish/${{ matrix.os }} -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
 
-    - name: Create archive (Windows)
-      if: matrix.os == 'win-x64'
+    - name: Create archive
       run: |
         Compress-Archive -Path ./publish/${{ matrix.os }}/* -DestinationPath ${{ matrix.artifact-name }}.zip
-
-    - name: Create archive (Unix)
-      if: matrix.os != 'win-x64'
-      run: |
-        cd ./publish/${{ matrix.os }}
-        tar -czf ../../${{ matrix.artifact-name }}.tar.gz *
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.artifact-name }}
-        path: |
-          ${{ matrix.artifact-name }}.zip
-          ${{ matrix.artifact-name }}.tar.gz
+        path: ${{ matrix.artifact-name }}.zip
         retention-days: 5
 
   release:
@@ -115,25 +98,19 @@ jobs:
         
         ### Downloads
         - **Windows (x64)**: BatchExport-windows-x64.zip
-        - **Linux (x64)**: BatchExport-linux-x64.tar.gz  
-        - **macOS (x64)**: BatchExport-macos-x64.tar.gz
         
         ### Usage
-        Extract the archive for your platform and run:
+        Extract the archive and run:
         \`\`\`bash
-        # Windows
         BatchExport.exe --help
-        
-        # Linux/macOS
-        ./BatchExport --help
         \`\`\`
         
         ### Quick Start
         \`\`\`bash
         # Example usage
-        ./BatchExport --preset WarRobotsFrontiers \\
-          --pak-files-directory "C:\\Game\\Paks" \\
-          --export-output-path "C:\\Export" \\
+        BatchExport.exe --preset WarRobotsFrontiers ^
+          --pak-files-directory "C:\\Game\\Paks" ^
+          --export-output-path "C:\\Export" ^
           --mapping-file-path "C:\\mappings.usmap"
         \`\`\`
         EOF
@@ -141,7 +118,7 @@ jobs:
     - name: Prepare release assets
       run: |
         mkdir -p release-assets
-        find ./artifacts -name "*.zip" -o -name "*.tar.gz" | while read file; do
+        find ./artifacts -name "*.zip" | while read file; do
           cp "$file" release-assets/
         done
         # Include README.md in the release assets
