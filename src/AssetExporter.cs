@@ -1,4 +1,5 @@
 using CUE4Parse.FileProvider;
+using CUE4Parse.UE4.Assets.Exports;
 using CUE4Parse.UE4.Assets.Exports.Animation;
 using CUE4Parse.UE4.Assets.Exports.Material;
 using CUE4Parse.UE4.Assets.Exports.SkeletalMesh;
@@ -29,102 +30,99 @@ namespace BatchExport
             try
             {
                 var package = provider.LoadPackage(assetPath);
-                var assetExports = package.GetExports();
+                Lazy<UObject>[] exportsLazy = package.ExportsLazy;
 
-                bool anyExported = false;
-                
-                // Check for SVG assets first
-                var svgAssets = assetExports.Where(x => x.ExportType.Contains("SvgAsset")).ToList();
-                if (svgAssets.Any())
+                // Force evaluation of all lazy exports upfront
+                UObject[] exports = new UObject[exportsLazy.Length];
+                for (int i = 0; i < exportsLazy.Length; i++)
                 {
-                    Utils.LogInfo($"Found SVG asset in {assetPath}", _isLoggingEnabled);
-                    // SVG data is typically stored in the asset properties
-                    foreach (var svgAsset in svgAssets)
+                    exports[i] = exportsLazy[i].Value;
+                }
+
+                bool textureExported = false;
+
+                // Single pass through all exports
+                foreach (UObject export in exports)
+                {
+                    // Handle SVG assets
+                    if (export.ExportType.Contains("SvgAsset"))
                     {
                         try
                         {
-                            var svgProperty = svgAsset.Properties?.FirstOrDefault(p => p.Name == "Data");
-                            var svgData = svgProperty?.Tag?.ToString();
-                            if (!string.IsNullOrEmpty(svgData))
-                            {
-                                var svgPath = Path.Combine(_outputPath, $"{assetPath}.svg");
-                                CreateNeededDirectories(svgPath);
-                                File.WriteAllText(svgPath, svgData);
-                                anyExported = true;
-                                Utils.LogInfo($"Exported SVG: {svgPath}", _isLoggingEnabled);
-                            }
+                            ExportSvgAsset(export, assetPath);
                         }
                         catch (Exception ex)
                         {
-                            Utils.LogInfo($"Failed to export SVG from {assetPath}: {ex.Message}", _isLoggingEnabled);
+                            Utils.LogInfo($"Failed to export SVG {export.Name} from {assetPath}: {ex.Message}", _isLoggingEnabled);
                         }
+                        continue;
                     }
-                }
 
-                // Check for regular textures
-                var textures = assetExports.OfType<UTexture2D>().ToList();
-                if (textures.Count > 0)
-                {
-                    if (textures.Count > 1)
+                    // Export only the first texture found
+                    if (export is UTexture2D texture && !textureExported)
                     {
-                        Utils.LogInfo($"Warning: Multiple textures found in {assetPath}. Using first texture only.", _isLoggingEnabled);
+                        try
+                        {
+                            ExportTexture(texture, assetPath);
+                            textureExported = true;
+                        }
+                        catch (Exception ex)
+                        {
+                            Utils.LogInfo($"Failed to export texture from {assetPath}: {ex.Message}", _isLoggingEnabled);
+                        }
+                        continue;
                     }
+
+                    // Handle other asset types
                     try
                     {
-                        ExportTexture(textures[0], assetPath);
-                        anyExported = true;
-                    }
-                    catch (Exception ex)
-                    {
-                        Utils.LogInfo($"Failed to export texture from {assetPath}: {ex.Message}", _isLoggingEnabled);
-                    }
-                }
-
-                // Handle other asset types
-                foreach (var export in assetExports)
-                {
-                    if (export is UTexture2D) continue; // Skip textures as they were handled above
-                    
-                    try 
-                    {
                         switch (export)
-                        {                            
+                        {
                             case UMaterialInterface material:
                                 ExportMaterial(material, assetPath);
-                                anyExported = true;
-                                continue;
-                            
+                                break;
+
                             case UAnimSequence anim:
                                 ExportAnimation(anim, assetPath);
-                                anyExported = true;
-                                continue;
-                            
+                                break;
+
                             case UStaticMesh staticMesh:
                                 ExportStaticMesh(staticMesh, assetPath);
-                                anyExported = true;
-                                continue;
-                            
+                                break;
+
                             case USkeletalMesh skeletalMesh:
                                 ExportSkeletalMesh(skeletalMesh, assetPath);
-                                anyExported = true;
-                                continue;
+                                break;
                         }
                     }
                     catch (Exception ex)
                     {
-                        Utils.LogInfo($"Failed to export individual asset {export.Name} from {assetPath}: {ex.Message}", _isLoggingEnabled);
+                        Utils.LogInfo($"Failed to export {export.Name} from {assetPath}: {ex.Message}", _isLoggingEnabled);
                     }
                 }
 
-                // If no individual exports succeeded or there are multiple assets, export everything as JSON
-                if (!anyExported || assetExports.Count() > 1)
-                {
-                    ExportToJson(assetExports.ToList(), assetPath);
-                }
+                // Always export JSON
+                ExportToJson(exports, assetPath);
             }
             catch (Exception ex)
             {
                 Utils.LogInfo($"Failed to export asset {assetPath}: {ex.Message}", _isLoggingEnabled);
+            }
+        }
+
+        private void ExportSvgAsset(UObject export, string assetPath)
+        {
+            Utils.LogInfo($"Found SVG asset in {assetPath}", _isLoggingEnabled);
+
+            var svgProperty = export.Properties?.FirstOrDefault(p => p.Name == "Data");
+            var svgData = svgProperty?.Tag?.ToString();
+
+            if (!string.IsNullOrEmpty(svgData))
+            {
+                var svgPath = Path.Combine(_outputPath, $"{assetPath}.svg");
+                CreateNeededDirectories(svgPath);
+                File.WriteAllText(svgPath, svgData);
+                Utils.LogInfo($"Exported SVG: {svgPath}", _isLoggingEnabled);
             }
         }
 
@@ -137,73 +135,65 @@ namespace BatchExport
                 var destinationFilePath = Path.Combine(_outputPath, $"{assetPath}.{extension}");
                 CreateNeededDirectories(destinationFilePath);
 
-                SKBitmap? bitmap = null;
-                try
+                var textureData = texture.Decode();
+                if (textureData == null)
                 {
-                    var textureData = texture.Decode();
-                    if (textureData == null)
-                    {
-                        Utils.LogInfo($"Failed to decode texture {assetPath} - skipping", _isLoggingEnabled);
-                        return;
-                    }
-
-                    // Create empty SKBitmap from SKImage frame
-                    var imageInfo = new SKImageInfo(textureData.Width, textureData.Height, GetSKColorType(textureData.PixelFormat));
-                    bitmap = new SKBitmap(imageInfo);
-
-                    var pixelPtr = bitmap.GetPixels();
-                    if (pixelPtr == IntPtr.Zero)
-                    {
-                        Utils.LogInfo($"Failed to get pixel pointer for texture {assetPath} - skipping", _isLoggingEnabled);
-                        return;
-                    }
-
-                    // Validate data size matches expected size
-                    int expectedSize = bitmap.ByteCount;
-                    if (textureData.Data.Length != expectedSize)
-                    {
-                        Utils.LogInfo($"Data size mismatch for texture {assetPath}: expected {expectedSize} bytes, got {textureData.Data.Length} bytes - skipping", _isLoggingEnabled);
-                        return;
-                    }
-
-                    // Set the bitmap's pointer to the CTexture's byte array (pixel data)
-                    System.Runtime.InteropServices.Marshal.Copy(textureData.Data, 0, pixelPtr, textureData.Data.Length);
-
-                    if (_options.TextureFormat == ETextureFormat.Png)
-                    {
-                        using var pixmap = bitmap.PeekPixels();
-                        var options = new SKPngEncoderOptions(SKPngEncoderFilterFlags.Sub | SKPngEncoderFilterFlags.Up , 1);
-                        using var data = pixmap.Encode(options);
-                        if (data == null)
-                        {
-                            Utils.LogInfo($"Failed to create data from bitmap for texture {assetPath} - skipping", _isLoggingEnabled);
-                            return;
-                        }
-                        using var stream = File.OpenWrite(destinationFilePath);
-                        data.SaveTo(stream);
-                    }
-                    // Encode for all types other than png
-                    else
-                    {
-                        using var image = SKImage.FromBitmap(bitmap);
-                        if (image == null)
-                        {
-                            Utils.LogInfo($"Failed to create image from bitmap for texture {assetPath} - skipping", _isLoggingEnabled);
-                            return;
-                        }
-                        using var data = image.Encode(GetSkiaFormat(_options.TextureFormat), 100);
-                        if (data == null)
-                        {
-                            Utils.LogInfo($"Failed to encode image for texture {assetPath} - skipping", _isLoggingEnabled);
-                            return;
-                        }
-                        using var stream = File.OpenWrite(destinationFilePath);
-                        data.SaveTo(stream);
-                    }
+                    Utils.LogInfo($"Failed to decode texture {assetPath} - skipping", _isLoggingEnabled);
+                    return;
                 }
-                finally
+
+                // Create empty SKBitmap from SKImage frame
+                var imageInfo = new SKImageInfo(textureData.Width, textureData.Height, GetSKColorType(textureData.PixelFormat));
+                using var bitmap = new SKBitmap(imageInfo);
+
+                var pixelPtr = bitmap.GetPixels();
+                if (pixelPtr == IntPtr.Zero)
                 {
-                    bitmap?.Dispose();
+                    Utils.LogInfo($"Failed to get pixel pointer for texture {assetPath} - skipping", _isLoggingEnabled);
+                    return;
+                }
+
+                // Validate data size matches expected size
+                int expectedSize = bitmap.ByteCount;
+                if (textureData.Data.Length != expectedSize)
+                {
+                    Utils.LogInfo($"Data size mismatch for texture {assetPath}: expected {expectedSize} bytes, got {textureData.Data.Length} bytes - skipping", _isLoggingEnabled);
+                    return;
+                }
+
+                // Set the bitmap's pointer to the CTexture's byte array (pixel data)
+                System.Runtime.InteropServices.Marshal.Copy(textureData.Data, 0, pixelPtr, textureData.Data.Length);
+
+                if (_options.TextureFormat == ETextureFormat.Png)
+                {
+                    using var pixmap = bitmap.PeekPixels();
+                    var options = new SKPngEncoderOptions(SKPngEncoderFilterFlags.Sub | SKPngEncoderFilterFlags.Up , 1);
+                    using var data = pixmap.Encode(options);
+                    if (data == null)
+                    {
+                        Utils.LogInfo($"Failed to create data from bitmap for texture {assetPath} - skipping", _isLoggingEnabled);
+                        return;
+                    }
+                    using var stream = File.OpenWrite(destinationFilePath);
+                    data.SaveTo(stream);
+                }
+                // Encode for all types other than png
+                else
+                {
+                    using var image = SKImage.FromBitmap(bitmap);
+                    if (image == null)
+                    {
+                        Utils.LogInfo($"Failed to create image from bitmap for texture {assetPath} - skipping", _isLoggingEnabled);
+                        return;
+                    }
+                    using var data = image.Encode(GetSkiaFormat(_options.TextureFormat), 100);
+                    if (data == null)
+                    {
+                        Utils.LogInfo($"Failed to encode image for texture {assetPath} - skipping", _isLoggingEnabled);
+                        return;
+                    }
+                    using var stream = File.OpenWrite(destinationFilePath);
+                    data.SaveTo(stream);
                 }
             }
             catch (Exception ex)
