@@ -65,6 +65,9 @@ namespace BatchExport
                 var textures = assetExports.OfType<UTexture2D>().ToList();
                 if (textures.Count > 0)
                 {
+                    // Skip this for now debugging
+                    if (1 == 2)
+                    {
                     if (textures.Count > 1)
                     {
                         Utils.LogInfo($"Warning: Multiple textures found in {assetPath}. Using first texture only.", _isLoggingEnabled);
@@ -77,6 +80,7 @@ namespace BatchExport
                     catch (Exception ex)
                     {
                         Utils.LogInfo($"Failed to export texture from {assetPath}: {ex.Message}", _isLoggingEnabled);
+                    }
                     }
                 }
 
