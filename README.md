@@ -134,6 +134,7 @@ dotnet run -- --preset WarRobotsFrontiers \
 | `--needed-exports-file-path <path>` | Path to NeededExports.json (or 'null') | `--needed-exports-file-path "exports.json"` |
 | `--is-logging-enabled <true\|false>` | Enable detailed logging | `--is-logging-enabled false` |
 | `--should-wipe-output-directory <true\|false>` | Clear output directory first | `--should-wipe-output-directory true` |
+| `--should-export-textures <true\|false>` | Export texture files | `--should-export-textures false` |
 | `--help`, `-h` | Show help message | `--help` |
 
 ### Configuration Priority
