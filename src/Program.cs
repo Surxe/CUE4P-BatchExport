@@ -177,6 +177,15 @@ namespace BatchExport
                         }
                         break;
                         
+                    case "--should-export-textures":
+                        if (value != null && bool.TryParse(value, out var exportTextures))
+                        {
+                            settings.ShouldExportTextures = exportTextures;
+                            Console.WriteLine($"Override: ShouldExportTextures = {exportTextures}");
+                            i++; // Skip the value argument
+                        }
+                        break;
+                        
                     case "--help":
                     case "-h":
                         ShowHelp();
@@ -222,6 +231,7 @@ namespace BatchExport
             Console.WriteLine("  --needed-exports-file-path <path>   Path to NeededExports.json file (or 'null'/'All' to export everything)");
             Console.WriteLine("  --is-logging-enabled <true|false>   Enable detailed logging");
             Console.WriteLine("  --should-wipe-output-directory <true|false> Clear output directory before exporting");
+            Console.WriteLine("  --should-export-textures <true|false> Export texture files");
             Console.WriteLine("  --help, -h                          Show this help message");
             Console.WriteLine();
             Console.WriteLine("Examples:");
@@ -279,7 +289,7 @@ namespace BatchExport
                     ExportMorphTargets = true
                 };
 
-                var exporter = new AssetExporter(exporterOptions, settings.ExportOutputPath, settings.IsLoggingEnabled);
+                var exporter = new AssetExporter(exporterOptions, settings.ExportOutputPath, settings.IsLoggingEnabled, settings.ShouldExportTextures);
                 exporter.ExportAsset(gameFileProvider, assetPath);
             }
             catch (Exception ex)

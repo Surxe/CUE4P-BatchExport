@@ -47,6 +47,7 @@ Create an `appsettings.json` file in the same directory as the executable with y
 -- Personal and preference
 | `isLoggingEnabled` | bool | Enable detailed logging | true |
 | `shouldWipeOutputDirectory` | bool | Clear output directory before export | false |
+| `shouldExportTextures` | bool | Export texture files | true |
 
 ## Benefits of the Settings System
 

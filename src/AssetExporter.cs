@@ -17,12 +17,14 @@ namespace BatchExport
         private readonly ExporterOptions _options;
         private readonly string _outputPath;
         private readonly bool _isLoggingEnabled;
+        private readonly bool _shouldExportTextures;
 
-        public AssetExporter(ExporterOptions options, string outputPath, bool isLoggingEnabled)
+        public AssetExporter(ExporterOptions options, string outputPath, bool isLoggingEnabled, bool shouldExportTextures)
         {
             _options = options;
             _outputPath = outputPath;
             _isLoggingEnabled = isLoggingEnabled;
+            _shouldExportTextures = shouldExportTextures;
         }
 
         public void ExportAsset(DefaultFileProvider provider, string assetPath)
@@ -58,8 +60,8 @@ namespace BatchExport
                         continue;
                     }
 
-                    // Export only the first texture found
-                    if (export is UTexture2D texture && !textureExported)
+                    // Export only the first texture found if texture export is enabled
+                    if (export is UTexture2D texture && !textureExported && _shouldExportTextures)
                     {
                         try
                         {

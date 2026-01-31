@@ -84,6 +84,11 @@ namespace BatchExport
         public string TexturePlatform { get; set; } = "DesktopMobile";
 
         /// <summary>
+        /// Whether to export texture files
+        /// </summary>
+        public bool ShouldExportTextures { get; set; } = true;
+
+        /// <summary>
         /// Format to use when exporting textures. Common options: "PNG", "JPG", "TGA", "BMP", "DDS", "HDR"
         /// </summary>
         public string TextureFormat { get; set; } = "PNG";
@@ -177,6 +182,7 @@ namespace BatchExport
                         TexturePlatform = TexturePlatform,
                         IsLoggingEnabled = IsLoggingEnabled,
                         ShouldWipeOutputDirectory = ShouldWipeOutputDirectory,
+                        ShouldExportTextures = ShouldExportTextures,
                         SupportedAssetFileExtensions = SupportedAssetFileExtensions,
                     };
                     
@@ -245,6 +251,13 @@ namespace BatchExport
                     {
                         ShouldWipeOutputDirectory = presetSettings.ShouldWipeOutputDirectory;
                         Console.WriteLine($"Loaded from preset: ShouldWipeOutputDirectory = {ShouldWipeOutputDirectory}");
+                    }
+                    
+                    // Apply ShouldExportTextures from preset only if user hasn't changed default
+                    if (userSettings.ShouldExportTextures == defaults.ShouldExportTextures)
+                    {
+                        ShouldExportTextures = presetSettings.ShouldExportTextures;
+                        Console.WriteLine($"Loaded from preset: ShouldExportTextures = {ShouldExportTextures}");
                     }
                     
                     // Always show what user paths were preserved (never overridden by presets)
