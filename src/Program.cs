@@ -2,18 +2,14 @@ using CUE4Parse.Compression;
 using CUE4Parse.Encryption.Aes;
 using CUE4Parse.FileProvider;
 using CUE4Parse.MappingsProvider;
-using CUE4Parse.UE4.Assets.Exports.Texture;
 using CUE4Parse.UE4.Localization;
 using CUE4Parse.UE4.Objects.Core.Misc;
 using CUE4Parse.UE4.Versions;
-using CUE4Parse_Conversion.Textures;
 using CUE4Parse_Conversion.Textures.BC;
 using Newtonsoft.Json;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
-using SkiaSharp;
 using System.Collections.Concurrent;
-using System.Runtime.InteropServices;
 
 namespace BatchExport
 {
