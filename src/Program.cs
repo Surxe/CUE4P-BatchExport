@@ -6,13 +6,14 @@ using CUE4Parse.UE4.Assets.Exports.Texture;
 using CUE4Parse.UE4.Localization;
 using CUE4Parse.UE4.Objects.Core.Misc;
 using CUE4Parse.UE4.Versions;
+using CUE4Parse_Conversion.Textures;
+using CUE4Parse_Conversion.Textures.BC;
 using Newtonsoft.Json;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
 using SkiaSharp;
 using System.Collections.Concurrent;
-using CUE4Parse_Conversion.Textures;
-using CUE4Parse_Conversion.Textures.BC;
+using System.Runtime.InteropServices;
 
 namespace BatchExport
 {
@@ -379,6 +380,11 @@ namespace BatchExport
             return provider;
         }
 
+        // P/Invoke declaration (place at the top of your class)
+        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool DeleteFile(string lpFileName);
+
         public static void Main(string[] args)
         {
             // Load settings from config file and command line arguments
@@ -400,19 +406,42 @@ namespace BatchExport
             string applicationRootPath = Utils.GetSrcDirectory();
             Utils.LogInfo("Output Directory: " + settings.ExportOutputPath, settings.IsLoggingEnabled);
 
+
+
             // Handle output directory cleanup if requested
             if (settings.ShouldWipeOutputDirectory && Directory.Exists(settings.ExportOutputPath))
             {
-                try
+                string tempPath = settings.ExportOutputPath + "_old_" + DateTime.Now.Ticks;
+                Directory.Move(settings.ExportOutputPath, tempPath);
+
+                // Create the fresh output directory immediately so the export can proceed
+                Directory.CreateDirectory(settings.ExportOutputPath);
+
+                // Delete the old directory in the background
+                _ = Task.Run(() =>
                 {
-                    Utils.LogInfo("Wiping existing output directory contents...", settings.IsLoggingEnabled);
-                    Directory.Delete(settings.ExportOutputPath, true);
-                    Utils.LogInfo("Output directory successfully cleared.", settings.IsLoggingEnabled);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Warning: Failed to delete output directory: {ex.Message}");
-                }
+                    try
+                    {
+                        int threadCount = Math.Max(2, Environment.ProcessorCount / 2);
+
+                        IEnumerable<string> files = Directory.EnumerateFiles(tempPath, "*", SearchOption.AllDirectories
+                        );
+
+                        Parallel.ForEach(files, new ParallelOptions { MaxDegreeOfParallelism = threadCount }, file =>
+                        {
+                            File.Delete(file);
+                        });
+
+                        Directory.Delete(tempPath, true);
+                        Utils.LogInfo("Old output directory successfully cleaned up.", settings.IsLoggingEnabled);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Warning: Failed to clean up old output directory: {ex.Message}");
+                    }
+                });
+
+                Utils.LogInfo("Output directory ready.", settings.IsLoggingEnabled);
             }
 
             // Ensure output directory exists
