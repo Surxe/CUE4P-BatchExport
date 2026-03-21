@@ -380,11 +380,6 @@ namespace BatchExport
             return provider;
         }
 
-        // P/Invoke declaration (place at the top of your class)
-        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool DeleteFile(string lpFileName);
-
         public static void Main(string[] args)
         {
             // Load settings from config file and command line arguments
