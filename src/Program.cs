@@ -248,19 +248,16 @@ namespace BatchExport
         }
 
         //Create all preceding directories of a given file if they don't yet exist
-        private static void CreateNeededDirectories(string destinationFilePath, string baseExportPath)
+        private static void CreateNeededDirectories(string destinationFilePath)
         {
-            string[] directoryParts = destinationFilePath.Split('/'); //List of directories to create
-            Array.Resize(ref directoryParts, directoryParts.Length - 1); //Remove last element which is the actual object name
-            string currentDirectoryPath = baseExportPath;
-
-            foreach (string directoryName in directoryParts)
+            // destinationFilePath is a full path already rooted at ExportOutputPath,
+            // so create its parent directory directly. (The previous version split
+            // the full path and re-prepended the base, doubling it — the parent was
+            // never created and locres writes failed with DirectoryNotFoundException.)
+            var directory = Path.GetDirectoryName(destinationFilePath);
+            if (!string.IsNullOrEmpty(directory))
             {
-                currentDirectoryPath = Path.Combine(currentDirectoryPath, directoryName);
-                if (!Directory.Exists(currentDirectoryPath))
-                {
-                    Directory.CreateDirectory(currentDirectoryPath);
-                }
+                Directory.CreateDirectory(directory);
             }
         }
 
@@ -324,7 +321,7 @@ namespace BatchExport
                     string destinationFilePath = settings.ExportOutputPath + "/" + assetPath.Replace(".locres", ".json");
 
                     // Create the directories if they don't exist
-                    CreateNeededDirectories(destinationFilePath, settings.ExportOutputPath);
+                    CreateNeededDirectories(destinationFilePath);
 
                     // Write the JSON to file
                     File.WriteAllText(destinationFilePath, serializedJson);
