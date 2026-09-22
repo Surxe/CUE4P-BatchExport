@@ -1,7 +1,7 @@
 using CUE4Parse.Compression;
 using CUE4Parse.Encryption.Aes;
 using CUE4Parse.FileProvider;
-using CUE4Parse.MappingsProvider;
+using CUE4Parse.MappingsProvider.Usmap;
 using CUE4Parse.UE4.Localization;
 using CUE4Parse.UE4.Objects.Core.Misc;
 using CUE4Parse.UE4.Versions;
@@ -360,12 +360,13 @@ namespace BatchExport
                 StringComparer.Ordinal
             );
 
-            if (!string.IsNullOrEmpty(settings.AesKeyHex))
-                provider.SubmitKey(new FGuid(), new FAesKey(settings.AesKeyHex));
-
             provider.MappingsContainer = new FileUsmapTypeMappingsProvider(settings.MappingFilePath);
 
             provider.Initialize();
+
+            if (!string.IsNullOrEmpty(settings.AesKeyHex))
+                provider.SubmitKey(new FGuid(), new FAesKey(settings.AesKeyHex));
+
             provider.Mount();
             provider.PostMount();
             provider.ChangeCulture("en");
@@ -447,7 +448,7 @@ namespace BatchExport
 
             Utils.LogInfo("Initializing Oodle...", settings.IsLoggingEnabled);
             OodleHelper.DownloadOodleDll();
-            OodleHelper.Initialize(OodleHelper.OODLE_DLL_NAME);
+            OodleHelper.Initialize(OodleHelper.OodleFileName);
 
             Utils.LogInfo("Initializing Detex...", settings.IsLoggingEnabled);
             DetexHelper.LoadDll();
@@ -460,7 +461,14 @@ namespace BatchExport
             Utils.LogInfo("Creating provider...", settings.IsLoggingEnabled);
             Utils.LogInfo($"Using UE version: {settings.UnrealEngineVersion}, Texture platform: {settings.TexturePlatform}", settings.IsLoggingEnabled);
             var fileProvider = new DefaultFileProvider(settings.PakFilesDirectory, SearchOption.AllDirectories, new VersionContainer(settings.GetUnrealEngineVersion(), settings.GetTexturePlatform()), StringComparer.Ordinal);
+
+            Utils.LogInfo("Setting mappings...", settings.IsLoggingEnabled);
+            fileProvider.MappingsContainer = new FileUsmapTypeMappingsProvider(settings.MappingFilePath);
             
+            Utils.LogInfo("Initializing provider...", settings.IsLoggingEnabled);
+            fileProvider.Initialize();
+            Utils.LogInfo($"Files found after Initialize(): {fileProvider.Files.Count}", settings.IsLoggingEnabled);
+
             // Submit AES key if provided
             if (!string.IsNullOrEmpty(settings.AesKeyHex))
             {
@@ -471,18 +479,11 @@ namespace BatchExport
             {
                 Utils.LogInfo("No AES key provided - assuming unencrypted pak files", settings.IsLoggingEnabled);
             }
-            
-            Utils.LogInfo("Setting mappings...", settings.IsLoggingEnabled);
-            fileProvider.MappingsContainer = new FileUsmapTypeMappingsProvider(settings.MappingFilePath);
-            
-            Utils.LogInfo("Initializing provider...", settings.IsLoggingEnabled);
-            fileProvider.Initialize();
-            Utils.LogInfo($"Files found after Initialize(): {fileProvider.Files.Count}", settings.IsLoggingEnabled);
-            
+
             Utils.LogInfo("Mounting provider...", settings.IsLoggingEnabled);
             fileProvider.Mount();
             Utils.LogInfo($"Files found after Mount(): {fileProvider.Files.Count}", settings.IsLoggingEnabled);
-            
+
             Utils.LogInfo("Post-mounting provider...", settings.IsLoggingEnabled);
             fileProvider.PostMount();
             Utils.LogInfo($"Files found after PostMount(): {fileProvider.Files.Count}", settings.IsLoggingEnabled);
