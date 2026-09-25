@@ -283,7 +283,7 @@ namespace BatchExport
                     ExportMorphTargets = true
                 };
 
-                var exporter = new AssetExporter(exporterOptions, settings.ExportOutputPath, settings.IsLoggingEnabled, settings.ShouldExportTextures);
+                var exporter = new AssetExporter(exporterOptions, settings.ExportOutputPath, settings.IsLoggingEnabled, settings.ShouldExportTextures, settings.ShouldExportMeshes);
                 exporter.ExportAsset(gameFileProvider, assetPath);
             }
             catch (Exception ex)

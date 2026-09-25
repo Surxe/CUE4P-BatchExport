@@ -48,6 +48,11 @@ Create an `appsettings.json` file in the same directory as the executable with y
 | `isLoggingEnabled` | bool | Enable detailed logging | true |
 | `shouldWipeOutputDirectory` | bool | Clear output directory before export | false |
 | `shouldExportTextures` | bool | Export texture files | true |
+| `shouldExportMeshes` | bool | Export mesh geometry as `.uemodel` (UEFormat, zstd) for static/skeletal meshes and skeletons | true |
+
+Mesh export writes `<output>/<package path>/<name>.uemodel` for every `UStaticMesh`,
+`USkeletalMesh`, and `USkeleton` export: LOD0 geometry (vertices/indices/normals),
+skeleton bones, and sockets — the inputs for building hitbox + untextured models.
 
 ## Benefits of the Settings System
 

@@ -89,6 +89,11 @@ namespace BatchExport
         public bool ShouldExportTextures { get; set; } = true;
 
         /// <summary>
+        /// Whether to export mesh geometry files (.uemodel) for static/skeletal meshes and skeletons
+        /// </summary>
+        public bool ShouldExportMeshes { get; set; } = true;
+
+        /// <summary>
         /// Format to use when exporting textures. Common options: "PNG", "JPG", "TGA", "BMP", "DDS", "HDR"
         /// </summary>
         public string TextureFormat { get; set; } = "PNG";
@@ -183,6 +188,7 @@ namespace BatchExport
                         IsLoggingEnabled = IsLoggingEnabled,
                         ShouldWipeOutputDirectory = ShouldWipeOutputDirectory,
                         ShouldExportTextures = ShouldExportTextures,
+                        ShouldExportMeshes = ShouldExportMeshes,
                         SupportedAssetFileExtensions = SupportedAssetFileExtensions,
                     };
                     
@@ -258,6 +264,13 @@ namespace BatchExport
                     {
                         ShouldExportTextures = presetSettings.ShouldExportTextures;
                         Console.WriteLine($"Loaded from preset: ShouldExportTextures = {ShouldExportTextures}");
+                    }
+
+                    // Apply ShouldExportMeshes from preset only if user hasn't changed default
+                    if (userSettings.ShouldExportMeshes == defaults.ShouldExportMeshes)
+                    {
+                        ShouldExportMeshes = presetSettings.ShouldExportMeshes;
+                        Console.WriteLine($"Loaded from preset: ShouldExportMeshes = {ShouldExportMeshes}");
                     }
                     
                     // Always show what user paths were preserved (never overridden by presets)
