@@ -94,6 +94,18 @@ namespace BatchExport
         public bool ShouldExportMeshes { get; set; } = true;
 
         /// <summary>
+        /// Filename prefixes to skip entirely (e.g. materials, animations, audio).
+        /// Empty array = process everything.
+        /// </summary>
+        public string[] SkipAssetNamePrefixes { get; set; } = Array.Empty<string>();
+
+        /// <summary>
+        /// Asset-path directory prefixes for which texture .png files are exported.
+        /// Empty array = export all textures. Used to limit texture decode to 2D icons.
+        /// </summary>
+        public string[] TextureExportDirectories { get; set; } = Array.Empty<string>();
+
+        /// <summary>
         /// Format to use when exporting textures. Common options: "PNG", "JPG", "TGA", "BMP", "DDS", "HDR"
         /// </summary>
         public string TextureFormat { get; set; } = "PNG";
@@ -189,6 +201,8 @@ namespace BatchExport
                         ShouldWipeOutputDirectory = ShouldWipeOutputDirectory,
                         ShouldExportTextures = ShouldExportTextures,
                         ShouldExportMeshes = ShouldExportMeshes,
+                        SkipAssetNamePrefixes = SkipAssetNamePrefixes,
+                        TextureExportDirectories = TextureExportDirectories,
                         SupportedAssetFileExtensions = SupportedAssetFileExtensions,
                     };
                     
@@ -271,6 +285,20 @@ namespace BatchExport
                     {
                         ShouldExportMeshes = presetSettings.ShouldExportMeshes;
                         Console.WriteLine($"Loaded from preset: ShouldExportMeshes = {ShouldExportMeshes}");
+                    }
+
+                    // SkipAssetNamePrefixes / TextureExportDirectories have no CLI
+                    // overrides, so take them straight from the preset.
+                    if (presetSettings.SkipAssetNamePrefixes != null)
+                    {
+                        SkipAssetNamePrefixes = presetSettings.SkipAssetNamePrefixes;
+                        Console.WriteLine($"Loaded from preset: SkipAssetNamePrefixes = [{string.Join(", ", SkipAssetNamePrefixes)}]");
+                    }
+
+                    if (presetSettings.TextureExportDirectories != null)
+                    {
+                        TextureExportDirectories = presetSettings.TextureExportDirectories;
+                        Console.WriteLine($"Loaded from preset: TextureExportDirectories = [{string.Join(", ", TextureExportDirectories)}]");
                     }
                     
                     // Always show what user paths were preserved (never overridden by presets)

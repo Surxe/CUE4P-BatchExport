@@ -279,11 +279,12 @@ namespace BatchExport
                     TextureFormat = settings.GetTextureFormat(),
                     Platform = settings.GetTexturePlatform(),
                     ExportHdrTexturesAsHdr = true,
-                    ExportMaterials = true,
-                    ExportMorphTargets = true
+                    // Geometry is untextured; materials and morph targets are not needed.
+                    ExportMaterials = false,
+                    ExportMorphTargets = false
                 };
 
-                var exporter = new AssetExporter(exporterOptions, settings.ExportOutputPath, settings.IsLoggingEnabled, settings.ShouldExportTextures, settings.ShouldExportMeshes);
+                var exporter = new AssetExporter(exporterOptions, settings.ExportOutputPath, settings.IsLoggingEnabled, settings.ShouldExportTextures, settings.ShouldExportMeshes, settings.TextureExportDirectories);
                 exporter.ExportAsset(gameFileProvider, assetPath);
             }
             catch (Exception ex)
@@ -345,6 +346,11 @@ namespace BatchExport
 
             // Skip engine files
             if (assetFilePath.StartsWith("engine", StringComparison.OrdinalIgnoreCase))
+                return false;
+
+            // Skip explicitly-ignored asset classes (materials, animations, audio, ...).
+            string fileName = Path.GetFileNameWithoutExtension(assetFilePath);
+            if (settings.SkipAssetNamePrefixes.Any(prefix => fileName.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)))
                 return false;
 
             // Check if file is in any export directory (empty string means export all)
