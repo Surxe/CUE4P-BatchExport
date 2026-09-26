@@ -534,7 +534,10 @@ namespace BatchExport
             int totalFilesProcessed = 0;
             int totalFilesExported = 0;
 
-            int workerCount = Environment.ProcessorCount;
+            // Hardcoded to 2 (was Environment.ProcessorCount = 12): each worker builds a
+            // full independent DefaultFileProvider (mounts every pak + 62k-entry VFS index),
+            // so N workers multiplied peak memory and OOM-killed the 64 GB machine mid-export.
+            int workerCount = 2;
 
             // Shared concurrent work queue
             var workQueue = new ConcurrentQueue<string>(allFiles);
