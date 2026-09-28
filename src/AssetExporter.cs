@@ -6,11 +6,17 @@ using CUE4Parse.UE4.Assets.Exports.SkeletalMesh;
 using CUE4Parse.UE4.Assets.Exports.StaticMesh;
 using CUE4Parse.UE4.Assets.Exports.Texture;
 using CUE4Parse_Conversion;
-using CUE4Parse_Conversion.Meshes;
+using CUE4Parse_Conversion.Dto;
+using CUE4Parse_Conversion.Formats.Meshes;
+using CUE4Parse_Conversion.Options;
 using CUE4Parse_Conversion.Textures;
 using Newtonsoft.Json;
 using SkiaSharp;
 using ETextureFormat = BatchExport.Enums.ETextureFormat;
+using ExportOptions = CUE4Parse_Conversion.Options.ExportOptions;
+using ConversionMeshFormat = CUE4Parse_Conversion.Options.EMeshFormat;
+using ConversionNaniteMeshFormat = CUE4Parse_Conversion.Options.ENaniteMeshFormat;
+using ConversionSocketFormat = CUE4Parse_Conversion.Options.ESocketFormat;
 
 namespace BatchExport
 {
@@ -301,49 +307,78 @@ namespace BatchExport
         /// </summary>
         private void ExportMeshGeometry(UObject export, string assetPath)
         {
-            // Map the (subset) BatchExport enums onto CUE4Parse-Conversion's by name.
-            static TEnum Map<TEnum>(string name, TEnum fallback) where TEnum : struct, Enum =>
-                Enum.TryParse<TEnum>(name, true, out var parsed) ? parsed : fallback;
-
-            var conversionOptions = new CUE4Parse_Conversion.ExporterOptions
-            {
-                LodFormat = Map(_options.LodFormat.ToString(), CUE4Parse_Conversion.Meshes.ELodFormat.FirstLod),
-                MeshFormat = _options.MeshFormat switch
+            // Map the (subset) BatchExport enums onto CUE4Parse-Conversion's.
+            var conversionOptions = new ExportOptions(
+                meshFormat: _options.MeshFormat switch
                 {
-                    BatchExport.Enums.EMeshFormat.ActorX => CUE4Parse_Conversion.Meshes.EMeshFormat.ActorX,
-                    BatchExport.Enums.EMeshFormat.GLB => CUE4Parse_Conversion.Meshes.EMeshFormat.Gltf2,
-                    _ => CUE4Parse_Conversion.Meshes.EMeshFormat.UEFormat
+                    BatchExport.Enums.EMeshFormat.ActorX => ConversionMeshFormat.ActorX,
+                    BatchExport.Enums.EMeshFormat.GLB => ConversionMeshFormat.Gltf2,
+                    _ => ConversionMeshFormat.UEFormat
                 },
-                NaniteMeshFormat = Map(_options.NaniteMeshFormat.ToString(), CUE4Parse.UE4.Assets.Exports.Nanite.ENaniteMeshFormat.OnlyNaniteLOD),
-                AnimFormat = Map(_options.AnimFormat.ToString(), CUE4Parse_Conversion.Animations.EAnimFormat.UEFormat),
-                MaterialFormat = Map(_options.MaterialFormat.ToString(), CUE4Parse.UE4.Assets.Exports.Material.EMaterialFormat.AllLayersNoRef),
-                TextureFormat = Map(_options.TextureFormat.ToString(), CUE4Parse_Conversion.Textures.ETextureFormat.Png),
+                naniteMeshFormat: _options.NaniteMeshFormat switch
+                {
+                    BatchExport.Enums.ENaniteMeshFormat.OnlyInterimLOD => ConversionNaniteMeshFormat.NoNanite,
+                    BatchExport.Enums.ENaniteMeshFormat.BothLODs => ConversionNaniteMeshFormat.NaniteFirst,
+                    _ => ConversionNaniteMeshFormat.NaniteOnly
+                },
+                meshQuality: _options.LodFormat == BatchExport.Enums.ELodFormat.AllLods ? EMeshQuality.All : EMeshQuality.Highest,
+                texturePlatform: _options.Platform,
+                exportHdrTexturesAsHdr: _options.ExportHdrTexturesAsHdr,
+                exportMaterials: _options.ExportMaterials,
+                exportMorphTargets: _options.ExportMorphTargets,
+                socketFormat: _options.SocketFormat == BatchExport.Enums.ESocketFormat.None ? ConversionSocketFormat.None : ConversionSocketFormat.Bone,
                 // Match FModel's output: zstd-compressed .uemodel payloads.
-                CompressionFormat = CUE4Parse_Conversion.UEFormat.Enums.EFileCompressionFormat.ZSTD,
-                Platform = _options.Platform,
-                SocketFormat = Map(_options.SocketFormat.ToString(), CUE4Parse_Conversion.Meshes.ESocketFormat.Bone),
-                ExportMorphTargets = _options.ExportMorphTargets,
-                ExportMaterials = _options.ExportMaterials,
-                ExportHdrTexturesAsHdr = _options.ExportHdrTexturesAsHdr
-            };
+                compressionFormat: CUE4Parse_Conversion.Writers.UEFormat.Enums.EFileCompressionFormat.ZSTD
+            );
 
-            MeshExporter meshExporter = export switch
+            IMeshExportFormat format = conversionOptions.MeshFormat switch
             {
-                UStaticMesh staticMesh => new MeshExporter(staticMesh, conversionOptions),
-                USkeletalMesh skeletalMesh => new MeshExporter(skeletalMesh, conversionOptions),
-                USkeleton skeleton => new MeshExporter(skeleton, conversionOptions),
-                _ => throw new NotSupportedException($"Mesh geometry export of '{export.GetType()}' is not supported")
+                ConversionMeshFormat.ActorX => new ActorXMeshFormat(),
+                ConversionMeshFormat.Gltf2 => new GltfMeshFormat(),
+                _ => new UEFormatMeshFormat()
             };
 
             try
             {
-                if (meshExporter.TryWriteToDir(new DirectoryInfo(_outputPath), out var label, out var savedFilePath))
+                // Build the files directly instead of going through ExportSession, whose
+                // output path resolution rewrites '/' to '\' and breaks on Linux.
+                IReadOnlyList<ExportFile> files;
+                switch (export)
                 {
-                    Utils.LogInfo($"Exported mesh: {savedFilePath}", _isLoggingEnabled);
+                    case UStaticMesh staticMesh:
+                    {
+                        using var dto = new StaticMeshDto(staticMesh, conversionOptions.MeshQuality, conversionOptions.NaniteMeshFormat);
+                        files = dto.LODs.Count == 0 ? [] : format.BuildStaticMesh(export.Name, export.GetPathName(), conversionOptions, dto);
+                        break;
+                    }
+                    case USkeletalMesh skeletalMesh:
+                    {
+                        using var dto = new SkeletalMeshDto(skeletalMesh, conversionOptions.MeshQuality, conversionOptions.NaniteMeshFormat, conversionOptions.ExportMorphTargets);
+                        files = dto.LODs.Count == 0 ? [] : format.BuildSkeletalMesh(export.Name, export.GetPathName(), conversionOptions, dto);
+                        break;
+                    }
+                    case USkeleton skeleton:
+                    {
+                        using var dto = new SkeletonDto(skeleton);
+                        files = format.BuildSkeleton(export.Name, export.GetPathName(), conversionOptions, dto);
+                        break;
+                    }
+                    default:
+                        throw new NotSupportedException($"Mesh geometry export of '{export.GetType()}' is not supported");
                 }
-                else
+
+                if (files.Count == 0)
                 {
                     Utils.LogInfo($"No mesh data to export for {assetPath} (empty LODs) - skipping", _isLoggingEnabled);
+                    return;
+                }
+
+                foreach (var file in files)
+                {
+                    var savedFilePath = Path.Combine(_outputPath, $"{assetPath}{file.NameSuffix}.{file.Extension}");
+                    CreateNeededDirectories(savedFilePath);
+                    File.WriteAllBytes(savedFilePath, file.Data);
+                    Utils.LogInfo($"Exported mesh: {savedFilePath}", _isLoggingEnabled);
                 }
             }
             catch (Exception ex)

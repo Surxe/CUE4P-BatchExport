@@ -1,7 +1,7 @@
 using CUE4Parse.Compression;
 using CUE4Parse.Encryption.Aes;
 using CUE4Parse.FileProvider;
-using CUE4Parse.MappingsProvider;
+using CUE4Parse.MappingsProvider.Usmap;
 using CUE4Parse.UE4.Localization;
 using CUE4Parse.UE4.Objects.Core.Misc;
 using CUE4Parse.UE4.Versions;
@@ -453,7 +453,7 @@ namespace BatchExport
 
             Utils.LogInfo("Initializing Oodle...", settings.IsLoggingEnabled);
             OodleHelper.DownloadOodleDll();
-            OodleHelper.Initialize(OodleHelper.OODLE_DLL_NAME);
+            OodleHelper.Initialize(OodleHelper.OodleFileName);
 
             Utils.LogInfo("Initializing Detex...", settings.IsLoggingEnabled);
             DetexHelper.LoadDll();
