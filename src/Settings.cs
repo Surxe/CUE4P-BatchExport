@@ -418,6 +418,7 @@ namespace BatchExport
                 "GAME_UE5_3" => CUE4Parse.UE4.Versions.EGame.GAME_UE5_3,
                 "GAME_UE5_4" => CUE4Parse.UE4.Versions.EGame.GAME_UE5_4,
                 "GAME_UE5_5" => CUE4Parse.UE4.Versions.EGame.GAME_UE5_5,
+                "GAME_UE5_8" => CUE4Parse.UE4.Versions.EGame.GAME_UE5_8,
                 _ => throw new ArgumentException($"Unsupported Unreal Engine version: {UnrealEngineVersion}")
             };
         }
