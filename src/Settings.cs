@@ -89,21 +89,29 @@ namespace BatchExport
         public bool ShouldExportTextures { get; set; } = true;
 
         /// <summary>
-        /// Whether to export mesh geometry files (.uemodel) for static/skeletal meshes and skeletons
+        /// Whether to export mesh geometry files (.uemodel) for static/skeletal meshes and skeletons.
+        /// Null = unset (taken from the preset, else false).
         /// </summary>
-        public bool ShouldExportMeshes { get; set; } = true;
+        public bool? ShouldExportMeshes { get; set; } = null;
 
         /// <summary>
-        /// Filename prefixes to skip entirely (e.g. materials, animations, audio).
-        /// Empty array = process everything.
+        /// Asset filename prefixes to skip entirely (e.g. "M_" materials, "AS_" animations).
+        /// Null = unset (taken from the preset, else nothing is skipped).
         /// </summary>
-        public string[] SkipAssetNamePrefixes { get; set; } = Array.Empty<string>();
+        public string[]? SkipAssetNamePrefixes { get; set; } = null;
 
         /// <summary>
-        /// Asset-path directory prefixes for which texture .png files are exported.
-        /// Empty array = export all textures. Used to limit texture decode to 2D icons.
+        /// Asset-path directory prefixes whose textures are exported (e.g. UI icons only).
+        /// Null = unset (taken from the preset, else all textures are exported).
         /// </summary>
-        public string[] TextureExportDirectories { get; set; } = Array.Empty<string>();
+        public string[]? TextureExportDirectories { get; set; } = null;
+
+        /// <summary>
+        /// Number of parallel export workers. Each worker mounts its own file provider,
+        /// so peak memory scales with this. Null or 0 = unset (taken from the preset,
+        /// else one per logical processor).
+        /// </summary>
+        public int? WorkerCount { get; set; } = null;
 
         /// <summary>
         /// Format to use when exporting textures. Common options: "PNG", "JPG", "TGA", "BMP", "DDS", "HDR"
@@ -200,9 +208,6 @@ namespace BatchExport
                         IsLoggingEnabled = IsLoggingEnabled,
                         ShouldWipeOutputDirectory = ShouldWipeOutputDirectory,
                         ShouldExportTextures = ShouldExportTextures,
-                        ShouldExportMeshes = ShouldExportMeshes,
-                        SkipAssetNamePrefixes = SkipAssetNamePrefixes,
-                        TextureExportDirectories = TextureExportDirectories,
                         SupportedAssetFileExtensions = SupportedAssetFileExtensions,
                     };
                     
@@ -280,27 +285,33 @@ namespace BatchExport
                         Console.WriteLine($"Loaded from preset: ShouldExportTextures = {ShouldExportTextures}");
                     }
 
-                    // Apply ShouldExportMeshes from preset only if user hasn't changed default
-                    if (userSettings.ShouldExportMeshes == defaults.ShouldExportMeshes)
+                    // Nullable settings: null means the user left it unset, so the preset
+                    // fills it. Unlike the default-comparison checks above, an explicit
+                    // user value that happens to equal the default is still preserved.
+                    if (ShouldExportMeshes == null && presetSettings.ShouldExportMeshes != null)
                     {
                         ShouldExportMeshes = presetSettings.ShouldExportMeshes;
                         Console.WriteLine($"Loaded from preset: ShouldExportMeshes = {ShouldExportMeshes}");
                     }
 
-                    // SkipAssetNamePrefixes / TextureExportDirectories have no CLI
-                    // overrides, so take them straight from the preset.
-                    if (presetSettings.SkipAssetNamePrefixes != null)
+                    if (SkipAssetNamePrefixes == null && presetSettings.SkipAssetNamePrefixes != null)
                     {
                         SkipAssetNamePrefixes = presetSettings.SkipAssetNamePrefixes;
                         Console.WriteLine($"Loaded from preset: SkipAssetNamePrefixes = [{string.Join(", ", SkipAssetNamePrefixes)}]");
                     }
 
-                    if (presetSettings.TextureExportDirectories != null)
+                    if (TextureExportDirectories == null && presetSettings.TextureExportDirectories != null)
                     {
                         TextureExportDirectories = presetSettings.TextureExportDirectories;
                         Console.WriteLine($"Loaded from preset: TextureExportDirectories = [{string.Join(", ", TextureExportDirectories)}]");
                     }
-                    
+
+                    if ((WorkerCount ?? 0) <= 0 && presetSettings.WorkerCount > 0)
+                    {
+                        WorkerCount = presetSettings.WorkerCount;
+                        Console.WriteLine($"Loaded from preset: WorkerCount = {WorkerCount}");
+                    }
+
                     // Always show what user paths were preserved (never overridden by presets)
                     if (userSettings.PakFilesDirectory != defaults.PakFilesDirectory)
                         Console.WriteLine($"User paths preserved: PakFilesDirectory = {PakFilesDirectory}");
@@ -408,6 +419,9 @@ namespace BatchExport
             if (string.IsNullOrWhiteSpace(TexturePlatform))
                 throw new ArgumentException("TexturePlatform cannot be null or empty");
 
+            if (WorkerCount < 0)
+                throw new ArgumentException("WorkerCount cannot be negative");
+
             // Validate that the UE version and texture platform are supported
             try
             {
@@ -477,6 +491,14 @@ namespace BatchExport
                 // Add other platforms as needed based on the CUE4Parse library version
                 _ => throw new ArgumentException($"Unsupported texture platform: {TexturePlatform}. Currently supported: DesktopMobile")
             };
+        }
+
+        /// <summary>
+        /// Gets the number of export workers, falling back to one per logical processor when unset
+        /// </summary>
+        public int GetWorkerCount()
+        {
+            return WorkerCount is > 0 ? WorkerCount.Value : Environment.ProcessorCount;
         }
 
         public ETextureFormat GetTextureFormat()

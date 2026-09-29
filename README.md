@@ -135,6 +135,10 @@ dotnet run -- --preset WarRobotsFrontiers \
 | `--is-logging-enabled <true\|false>` | Enable detailed logging | `--is-logging-enabled false` |
 | `--should-wipe-output-directory <true\|false>` | Clear output directory first | `--should-wipe-output-directory true` |
 | `--should-export-textures <true\|false>` | Export texture files | `--should-export-textures false` |
+| `--should-export-meshes <true\|false>` | Export mesh geometry (.uemodel) | `--should-export-meshes true` |
+| `--skip-asset-name-prefixes <list>` | Comma-separated asset filename prefixes to skip | `--skip-asset-name-prefixes "M_,MI_,AS_"` |
+| `--texture-export-directories <list>` | Comma-separated asset-path prefixes whose textures are exported | `--texture-export-directories "Game/UI"` |
+| `--worker-count <n>` | Parallel export workers (0 = one per logical processor) | `--worker-count 2` |
 | `--help`, `-h` | Show help message | `--help` |
 
 ### Configuration Priority

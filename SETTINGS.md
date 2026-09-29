@@ -48,10 +48,17 @@ Create an `appsettings.json` file in the same directory as the executable with y
 | `isLoggingEnabled` | bool | Enable detailed logging | true |
 | `shouldWipeOutputDirectory` | bool | Clear output directory before export | false |
 | `shouldExportTextures` | bool | Export texture files | true |
-| `shouldExportMeshes` | bool | Export mesh geometry as `.uemodel` (UEFormat, zstd) for static/skeletal meshes and skeletons | true |
+| `shouldExportMeshes` | bool? | Export mesh geometry as `.uemodel` (UEFormat, zstd) for static/skeletal meshes and skeletons | null (preset, else false) |
+| `skipAssetNamePrefixes` | string[]? | Asset filename prefixes to skip entirely, e.g. `["M_", "AS_"]` | null (preset, else none) |
+| `textureExportDirectories` | string[]? | Asset-path prefixes whose textures are exported; other textures are skipped | null (preset, else all) |
+| `workerCount` | int? | Parallel export workers. Each mounts its own file provider, so memory scales with it | null (preset, else one per logical processor) |
 
-Mesh export writes `<output>/<package path>/<name>.uemodel` for every `UStaticMesh`,
-`USkeletalMesh`, and `USkeleton` export: LOD0 geometry (vertices/indices/normals),
+Settings typed `?` are nullable: leave them `null` (or omit them) to take the preset's value.
+Any explicit value, including `false`, `0`, or `[]`, overrides the preset. On the command line,
+lists are comma-separated, and an empty string (`""`) passes an empty list.
+
+Mesh export writes `<output>/<package path>/<name>.uemodel` next to the asset's `.json` for every
+`UStaticMesh`, `USkeletalMesh`, and `USkeleton` export: LOD0 geometry (vertices/indices/normals),
 skeleton bones, and sockets — the inputs for building hitbox + untextured models.
 
 ## Benefits of the Settings System
@@ -127,9 +134,13 @@ Additional platforms may be available depending on the CUE4Parse library version
 
 ### WarRobotsFrontiers
 - **AES Key**: None (unencrypted)
-- **Supported Extensions**: `.uasset`, `.umap`
+- **Supported Extensions**: `.uasset`, `.locres`
 - **UE Version**: `GAME_UE5_4`
 - **Texture Platform**: `DesktopMobile`
+- **Mesh Export**: enabled
+- **Skipped Prefixes**: materials, animations, and audio (`M_`, `MI_`, `MF_`, `MLI_`, `ABP_`, `AS_`, `CR_`, `AM_`, `AKE_`)
+- **Texture Export Directories**: UI icons and robot customization textures only
+- **Workers**: 2 (keeps peak memory in check)
 
 ### DarkAndDarker
 - **AES Key**: `0x903DBEEB889CFB1C25AFA28A9463F6D4E816B174D68B3902427FE5867E8C688E`

@@ -18,7 +18,6 @@ namespace BatchExport
         public bool ExportMorphTargets { get; set; }
         public bool ExportMaterials { get; set; }
         public bool ExportHdrTexturesAsHdr { get; set; }
-        public bool ShouldExportMeshes { get; set; }
 
         public ExporterOptions()
         {
@@ -34,7 +33,6 @@ namespace BatchExport
             ExportMorphTargets = true;
             ExportMaterials = true;
             ExportHdrTexturesAsHdr = true;
-            ShouldExportMeshes = true;
         }
     }
 }
