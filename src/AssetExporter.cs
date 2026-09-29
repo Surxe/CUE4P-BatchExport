@@ -5,10 +5,18 @@ using CUE4Parse.UE4.Assets.Exports.Material;
 using CUE4Parse.UE4.Assets.Exports.SkeletalMesh;
 using CUE4Parse.UE4.Assets.Exports.StaticMesh;
 using CUE4Parse.UE4.Assets.Exports.Texture;
+using CUE4Parse_Conversion;
+using CUE4Parse_Conversion.Dto;
+using CUE4Parse_Conversion.Formats.Meshes;
+using CUE4Parse_Conversion.Options;
 using CUE4Parse_Conversion.Textures;
 using Newtonsoft.Json;
 using SkiaSharp;
 using ETextureFormat = BatchExport.Enums.ETextureFormat;
+using ExportOptions = CUE4Parse_Conversion.Options.ExportOptions;
+using ConversionMeshFormat = CUE4Parse_Conversion.Options.EMeshFormat;
+using ConversionNaniteMeshFormat = CUE4Parse_Conversion.Options.ENaniteMeshFormat;
+using ConversionSocketFormat = CUE4Parse_Conversion.Options.ESocketFormat;
 
 namespace BatchExport
 {
@@ -18,13 +26,30 @@ namespace BatchExport
         private readonly string _outputPath;
         private readonly bool _isLoggingEnabled;
         private readonly bool _shouldExportTextures;
+        private readonly bool _shouldExportMeshes;
+        private readonly string[] _textureExportDirectories;
 
-        public AssetExporter(ExporterOptions options, string outputPath, bool isLoggingEnabled, bool shouldExportTextures)
+        public AssetExporter(ExporterOptions options, string outputPath, bool isLoggingEnabled, bool shouldExportTextures, bool shouldExportMeshes, string[] textureExportDirectories)
         {
             _options = options;
             _outputPath = outputPath;
             _isLoggingEnabled = isLoggingEnabled;
             _shouldExportTextures = shouldExportTextures;
+            _shouldExportMeshes = shouldExportMeshes;
+            _textureExportDirectories = textureExportDirectories ?? Array.Empty<string>();
+        }
+
+        /// <summary>
+        /// Whether a texture's .png should be written. When TextureExportDirectories is
+        /// configured, only textures under those asset-path prefixes (e.g. UI icons) are
+        /// decoded; model material textures are skipped.
+        /// </summary>
+        private bool IsIconTexture(string assetPath)
+        {
+            if (_textureExportDirectories.Length == 0)
+                return true;
+
+            return _textureExportDirectories.Any(dir => assetPath.StartsWith(dir, StringComparison.OrdinalIgnoreCase));
         }
 
         public void ExportAsset(DefaultFileProvider provider, string assetPath)
@@ -61,7 +86,7 @@ namespace BatchExport
                     }
 
                     // Export only the first texture found if texture export is enabled
-                    if (export is UTexture2D texture && !textureExported && _shouldExportTextures)
+                    if (export is UTexture2D texture && !textureExported && _shouldExportTextures && IsIconTexture(assetPath))
                     {
                         try
                         {
@@ -94,6 +119,10 @@ namespace BatchExport
 
                             case USkeletalMesh skeletalMesh:
                                 ExportSkeletalMesh(skeletalMesh, assetPath);
+                                break;
+
+                            case USkeleton skeleton:
+                                ExportSkeleton(skeleton, assetPath);
                                 break;
                         }
                     }
@@ -242,12 +271,120 @@ namespace BatchExport
         {
             // Export as a list containing the single mesh
             ExportToJson(new[] { mesh }, assetPath);
+
+            if (_shouldExportMeshes)
+            {
+                ExportMeshGeometry(mesh, assetPath);
+            }
         }
 
         private void ExportSkeletalMesh(USkeletalMesh mesh, string assetPath)
         {
             // Export as a list containing the single mesh
             ExportToJson(new[] { mesh }, assetPath);
+
+            if (_shouldExportMeshes)
+            {
+                ExportMeshGeometry(mesh, assetPath);
+            }
+        }
+
+        private void ExportSkeleton(USkeleton skeleton, string assetPath)
+        {
+            // Export as a list containing the single skeleton
+            ExportToJson(new[] { skeleton }, assetPath);
+
+            if (_shouldExportMeshes)
+            {
+                ExportMeshGeometry(skeleton, assetPath);
+            }
+        }
+
+        /// <summary>
+        /// Exports mesh geometry (vertices/indices/normals, plus bones and sockets for
+        /// skeletal meshes) as a UEFormat .uemodel file via CUE4Parse-Conversion, so the
+        /// hitbox + untextured model can be reconstructed downstream.
+        /// </summary>
+        private void ExportMeshGeometry(UObject export, string assetPath)
+        {
+            // Map the (subset) BatchExport enums onto CUE4Parse-Conversion's.
+            var conversionOptions = new ExportOptions(
+                meshFormat: _options.MeshFormat switch
+                {
+                    BatchExport.Enums.EMeshFormat.ActorX => ConversionMeshFormat.ActorX,
+                    BatchExport.Enums.EMeshFormat.GLB => ConversionMeshFormat.Gltf2,
+                    _ => ConversionMeshFormat.UEFormat
+                },
+                naniteMeshFormat: _options.NaniteMeshFormat switch
+                {
+                    BatchExport.Enums.ENaniteMeshFormat.OnlyInterimLOD => ConversionNaniteMeshFormat.NoNanite,
+                    BatchExport.Enums.ENaniteMeshFormat.BothLODs => ConversionNaniteMeshFormat.NaniteFirst,
+                    _ => ConversionNaniteMeshFormat.NaniteOnly
+                },
+                meshQuality: _options.LodFormat == BatchExport.Enums.ELodFormat.AllLods ? EMeshQuality.All : EMeshQuality.Highest,
+                texturePlatform: _options.Platform,
+                exportHdrTexturesAsHdr: _options.ExportHdrTexturesAsHdr,
+                exportMaterials: _options.ExportMaterials,
+                exportMorphTargets: _options.ExportMorphTargets,
+                socketFormat: _options.SocketFormat == BatchExport.Enums.ESocketFormat.None ? ConversionSocketFormat.None : ConversionSocketFormat.Bone,
+                // Match FModel's output: zstd-compressed .uemodel payloads.
+                compressionFormat: CUE4Parse_Conversion.Writers.UEFormat.Enums.EFileCompressionFormat.ZSTD
+            );
+
+            IMeshExportFormat format = conversionOptions.MeshFormat switch
+            {
+                ConversionMeshFormat.ActorX => new ActorXMeshFormat(),
+                ConversionMeshFormat.Gltf2 => new GltfMeshFormat(),
+                _ => new UEFormatMeshFormat()
+            };
+
+            try
+            {
+                // Build the files directly instead of going through ExportSession, whose
+                // output path resolution rewrites '/' to '\' and breaks on Linux.
+                IReadOnlyList<ExportFile> files;
+                switch (export)
+                {
+                    case UStaticMesh staticMesh:
+                    {
+                        using var dto = new StaticMeshDto(staticMesh, conversionOptions.MeshQuality, conversionOptions.NaniteMeshFormat);
+                        files = dto.LODs.Count == 0 ? [] : format.BuildStaticMesh(export.Name, export.GetPathName(), conversionOptions, dto);
+                        break;
+                    }
+                    case USkeletalMesh skeletalMesh:
+                    {
+                        using var dto = new SkeletalMeshDto(skeletalMesh, conversionOptions.MeshQuality, conversionOptions.NaniteMeshFormat, conversionOptions.ExportMorphTargets);
+                        files = dto.LODs.Count == 0 ? [] : format.BuildSkeletalMesh(export.Name, export.GetPathName(), conversionOptions, dto);
+                        break;
+                    }
+                    case USkeleton skeleton:
+                    {
+                        using var dto = new SkeletonDto(skeleton);
+                        files = format.BuildSkeleton(export.Name, export.GetPathName(), conversionOptions, dto);
+                        break;
+                    }
+                    default:
+                        throw new NotSupportedException($"Mesh geometry export of '{export.GetType()}' is not supported");
+                }
+
+                if (files.Count == 0)
+                {
+                    Utils.LogInfo($"No mesh data to export for {assetPath} (empty LODs) - skipping", _isLoggingEnabled);
+                    return;
+                }
+
+                foreach (var file in files)
+                {
+                    var savedFilePath = Path.Combine(_outputPath, $"{assetPath}{file.NameSuffix}.{file.Extension}");
+                    CreateNeededDirectories(savedFilePath);
+                    File.WriteAllBytes(savedFilePath, file.Data);
+                    Utils.LogInfo($"Exported mesh: {savedFilePath}", _isLoggingEnabled);
+                }
+            }
+            catch (Exception ex)
+            {
+                Utils.LogInfo($"Failed to export mesh geometry for {assetPath}: {ex.Message}", _isLoggingEnabled);
+            }
         }
 
         private void ExportToJson<T>(T obj, string assetPath)
