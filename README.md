@@ -8,7 +8,7 @@ A .NET application that exports Unreal Engine game assets to JSON format using [
 **Build and run directly:**
 ```bash
 dotnet build --configuration Release
-cd bin/Release/net8.0
+cd bin/Release/net10.0
 
 # Run with command-line arguments (no config file needed)
 .\BatchExport.exe --preset WarRobotsFrontiers --pak-files-directory "C:\Game\Paks" --export-output-path "C:\Export" --mapping-file-path "C:\mappings.usmap"
@@ -20,7 +20,7 @@ cd bin/Release/net8.0
 ## Installation
 
 ### Prerequisites
-- [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) or higher
+- [.NET 10.0 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) or higher
 - Game `.pak` files
 - Corresponding `.usmap` mappings file for your game version
 
@@ -58,7 +58,7 @@ cd bin/Release/net8.0
    dotnet run -- --pak-files-directory "C:\Game\Paks" --export-output-path "C:\Export" --mapping-file-path "C:\mappings.usmap" --preset WarRobotsFrontiers
    
    # Or run the executable directly
-   cd bin/Release/net8.0
+   cd bin/Release/net10.0
    .\BatchExport.exe --pak-files-directory "C:\Game\Paks" --export-output-path "C:\Export" --mapping-file-path "C:\mappings.usmap" --preset WarRobotsFrontiers
    ```
 
