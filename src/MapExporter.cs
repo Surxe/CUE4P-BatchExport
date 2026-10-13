@@ -1,4 +1,5 @@
 using CUE4Parse.FileProvider;
+using CUE4Parse.FileProvider.Objects;
 using CUE4Parse.UE4.Assets;
 using CUE4Parse.UE4.Assets.Exports;
 using CUE4Parse.UE4.Assets.Exports.Actor;
@@ -67,6 +68,8 @@ namespace BatchExport
         private readonly Dictionary<string, JObject> _effectivePropsCache = new();
         private readonly Dictionary<string, JArray> _classChainCache = new();
         private readonly Dictionary<string, JObject?> _meshCache = new();
+        // Built on the first lookup that needs it, see LoadStaticMesh.
+        private Dictionary<string, GameFile>? _packagesIgnoringCase;
 
         // Instance properties left out of "props" because the scene already carries them as
         // resolved fields (transform, mesh, shape, collision), or because they are render or
@@ -829,12 +832,34 @@ namespace BatchExport
             return key;
         }
 
+        // Unreal treats package paths as case-insensitive, and a level may refer to a mesh in
+        // another letter case than the path it was cooked under (".../Spaceships/SM_X" for
+        // ".../SpaceShips/SM_X"). The provider looks paths up exactly, so a miss is retried
+        // against the game files with the case ignored.
+        private UStaticMesh? LoadStaticMesh(string objectPath)
+        {
+            try { return _provider.LoadPackageObject<UStaticMesh>(objectPath); }
+            catch (KeyNotFoundException)
+            {
+                _packagesIgnoringCase ??= _provider.Files
+                    .Where(file => file.Key.EndsWith(".uasset", StringComparison.OrdinalIgnoreCase))
+                    .GroupBy(file => file.Key, StringComparer.OrdinalIgnoreCase)
+                    .ToDictionary(group => group.Key, group => group.First().Value, StringComparer.OrdinalIgnoreCase);
+
+                var separator = objectPath.LastIndexOf('.');
+                var packagePath = separator < 0 ? objectPath : objectPath[..separator];
+                if (!_packagesIgnoringCase.TryGetValue(_provider.FixPath(packagePath), out var file)) throw;
+                var objectName = separator < 0 ? packagePath[(packagePath.LastIndexOf('/') + 1)..] : objectPath[(separator + 1)..];
+                return _provider.LoadPackage(file).GetExport<UStaticMesh>(objectName, StringComparison.OrdinalIgnoreCase);
+            }
+        }
+
         private JObject? ExportStaticMesh(Scene scene, FPackageIndex index, string key)
         {
             // Loaded through its own package rather than through the level's import table, which
             // would pin the mesh's vertex data in memory until the level itself is released.
             UStaticMesh? mesh;
-            try { mesh = _provider.LoadPackageObject<UStaticMesh>(key); }
+            try { mesh = LoadStaticMesh(key); }
             catch (Exception ex) { scene.Warn($"mesh {key} is not loadable from the game files: {ex.Message}"); return null; }
             if (mesh == null) { scene.Warn($"mesh {key} is not in the game files"); return null; }
 
