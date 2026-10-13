@@ -114,6 +114,30 @@ namespace BatchExport
         public int? WorkerCount { get; set; } = null;
 
         /// <summary>
+        /// What to export: "Assets" (every matching package as JSON/textures/meshes) or "Maps"
+        /// (levels as reconstructable scenes: actor placement plus the geometry they reference).
+        /// </summary>
+        public string ExportMode { get; set; } = "Assets";
+
+        /// <summary>
+        /// Maps mode only: which .umap packages to export as root worlds. Each entry is a package
+        /// path without extension, either full ("Game/Content/Maps/Arena/Arena") or a trailing part
+        /// of it ("Arena/Arena"). Null or empty = every .umap under the needed directories,
+        /// sublevels included.
+        /// </summary>
+        public string[]? MapFilters { get; set; } = null;
+
+        /// <summary>
+        /// Maps mode only: export full-detail Nanite geometry instead of the fallback LOD0.
+        /// </summary>
+        public bool MapUseNaniteMeshes { get; set; } = false;
+
+        /// <summary>
+        /// Maps mode only: also dump every visited level package as plain JSON next to its scene.
+        /// </summary>
+        public bool MapExportRawLevels { get; set; } = false;
+
+        /// <summary>
         /// Format to use when exporting textures. Common options: "PNG", "JPG", "TGA", "BMP", "DDS", "HDR"
         /// </summary>
         public string TextureFormat { get; set; } = "PNG";
@@ -422,6 +446,9 @@ namespace BatchExport
             if (WorkerCount < 0)
                 throw new ArgumentException("WorkerCount cannot be negative");
 
+            if (!IsMapsMode() && !"Assets".Equals(ExportMode, StringComparison.OrdinalIgnoreCase))
+                throw new ArgumentException($"Unsupported export mode: {ExportMode}. Currently supported: Assets, Maps");
+
             // Validate that the UE version and texture platform are supported
             try
             {
@@ -491,6 +518,14 @@ namespace BatchExport
                 // Add other platforms as needed based on the CUE4Parse library version
                 _ => throw new ArgumentException($"Unsupported texture platform: {TexturePlatform}. Currently supported: DesktopMobile")
             };
+        }
+
+        /// <summary>
+        /// Whether levels are exported as scenes instead of the regular per-asset export
+        /// </summary>
+        public bool IsMapsMode()
+        {
+            return "Maps".Equals(ExportMode, StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>

@@ -92,6 +92,7 @@ BatchExport.exe --preset WarRobotsFrontiers --pak-files-directory "C:\Game\Paks"
 - **Localization**: Automatically parses and exports localization files as JSON
 - **Game Presets**: Pre-configured settings for some games
 - **Flexible Filtering**: Include/exclude specific asset types and directories
+- **Map Export**: Export levels as reconstructable scenes (actor placement, meshes, terrain, navmesh) with `--export-mode Maps`; see `MAPS.md`
 - **Command-Line Interface**: Run without config files using CLI arguments
 - **Configuration Override**: CLI arguments take precedence over config file values
 
@@ -139,6 +140,10 @@ dotnet run -- --preset WarRobotsFrontiers \
 | `--skip-asset-name-prefixes <list>` | Comma-separated asset filename prefixes to skip | `--skip-asset-name-prefixes "M_,MI_,AS_"` |
 | `--texture-export-directories <list>` | Comma-separated asset-path prefixes whose textures are exported | `--texture-export-directories "Game/UI"` |
 | `--worker-count <n>` | Parallel export workers (0 = one per logical processor) | `--worker-count 2` |
+| `--export-mode <Assets\|Maps>` | Export assets (default) or levels as scenes | `--export-mode Maps` |
+| `--map-filters <list>` | Maps mode: comma-separated `.umap` package paths to export | `--map-filters "Maps/Arena/Arena"` |
+| `--map-use-nanite-meshes <true\|false>` | Maps mode: full Nanite geometry instead of the fallback LOD0 | `--map-use-nanite-meshes true` |
+| `--map-export-raw-levels <true\|false>` | Maps mode: also dump each visited level package as JSON | `--map-export-raw-levels true` |
 | `--help`, `-h` | Show help message | `--help` |
 
 ### Configuration Priority
@@ -150,6 +155,7 @@ dotnet run -- --preset WarRobotsFrontiers \
 
 For detailed configuration options, see:
 - `SETTINGS.md` - Complete configuration reference
+- `MAPS.md` - Map export: usage and output format
 - `appsettings.template.json` - Template configuration file
 - `RELEASES.md` - Download and release information
 - Command-line help: `BatchExport.exe --help`

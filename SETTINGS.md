@@ -52,6 +52,10 @@ Create an `appsettings.json` file in the same directory as the executable with y
 | `skipAssetNamePrefixes` | string[]? | Asset filename prefixes to skip entirely, e.g. `["M_", "AS_"]` | null (preset, else none) |
 | `textureExportDirectories` | string[]? | Asset-path prefixes whose textures are exported; other textures are skipped | null (preset, else all) |
 | `workerCount` | int? | Parallel export workers. Each mounts its own file provider, so memory scales with it | null (preset, else one per logical processor) |
+| `exportMode` | string | `"Assets"` exports packages; `"Maps"` exports levels as scenes (see `MAPS.md`) | "Assets" |
+| `mapFilters` | string[]? | Maps mode: `.umap` package paths (without extension) to export as root worlds; an entry matches the full path or a trailing part of it | null (every `.umap` under the needed directories) |
+| `mapUseNaniteMeshes` | bool | Maps mode: export full Nanite geometry instead of the fallback LOD0 | false |
+| `mapExportRawLevels` | bool | Maps mode: also dump each visited level package as JSON | false |
 
 Settings typed `?` are nullable: leave them `null` (or omit them) to take the preset's value.
 Any explicit value, including `false`, `0`, or `[]`, overrides the preset. On the command line,

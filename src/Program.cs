@@ -210,6 +210,42 @@ namespace BatchExport
                         }
                         break;
 
+                    case "--export-mode":
+                        if (value != null)
+                        {
+                            settings.ExportMode = value;
+                            Console.WriteLine($"Override: ExportMode = {value}");
+                            i++; // Skip the value argument
+                        }
+                        break;
+
+                    case "--map-filters":
+                        if (value != null)
+                        {
+                            settings.MapFilters = ParseList(value);
+                            Console.WriteLine($"Override: MapFilters = [{string.Join(", ", settings.MapFilters)}]");
+                            i++; // Skip the value argument
+                        }
+                        break;
+
+                    case "--map-use-nanite-meshes":
+                        if (value != null && bool.TryParse(value, out var mapNanite))
+                        {
+                            settings.MapUseNaniteMeshes = mapNanite;
+                            Console.WriteLine($"Override: MapUseNaniteMeshes = {mapNanite}");
+                            i++; // Skip the value argument
+                        }
+                        break;
+
+                    case "--map-export-raw-levels":
+                        if (value != null && bool.TryParse(value, out var mapRawLevels))
+                        {
+                            settings.MapExportRawLevels = mapRawLevels;
+                            Console.WriteLine($"Override: MapExportRawLevels = {mapRawLevels}");
+                            i++; // Skip the value argument
+                        }
+                        break;
+
                     case "--worker-count":
                         if (value != null && int.TryParse(value, out var workers))
                         {
@@ -278,6 +314,10 @@ namespace BatchExport
             Console.WriteLine("  --skip-asset-name-prefixes <list>   Comma-separated asset filename prefixes to skip (e.g. M_,MI_,AS_)");
             Console.WriteLine("  --texture-export-directories <list> Comma-separated asset-path prefixes whose textures are exported");
             Console.WriteLine("  --worker-count <n>                  Parallel export workers (0 = one per logical processor)");
+            Console.WriteLine("  --export-mode <Assets|Maps>         Assets (default) exports packages; Maps exports levels as scenes");
+            Console.WriteLine("  --map-filters <list>                Maps mode: comma-separated .umap package paths to export (e.g. Arena/Arena)");
+            Console.WriteLine("  --map-use-nanite-meshes <true|false> Maps mode: full Nanite geometry instead of the fallback LOD0");
+            Console.WriteLine("  --map-export-raw-levels <true|false> Maps mode: also dump each visited level package as JSON");
             Console.WriteLine("  --help, -h                          Show this help message");
             Console.WriteLine();
             Console.WriteLine("Examples:");
@@ -429,6 +469,85 @@ namespace BatchExport
             return provider;
         }
 
+        /// <summary>
+        /// Whether a .umap package path (without extension) is selected by the map filters.
+        /// A filter matches the whole path or a trailing part of it.
+        /// </summary>
+        private static bool MatchesMapFilter(string mapPath, string[]? filters)
+        {
+            if (filters == null || filters.Length == 0)
+                return true;
+
+            return filters.Any(filter =>
+            {
+                string normalized = filter.Replace('\\', '/').Trim('/');
+                if (normalized.EndsWith(".umap", StringComparison.OrdinalIgnoreCase))
+                    normalized = normalized[..^".umap".Length];
+                return mapPath.Equals(normalized, StringComparison.OrdinalIgnoreCase)
+                    || mapPath.EndsWith("/" + normalized, StringComparison.OrdinalIgnoreCase);
+            });
+        }
+
+        /// <summary>
+        /// Maps mode: exports every selected .umap as a scene (see MapExporter), plus the game's
+        /// .ini config files, which define the collision profiles and channels the scenes refer to.
+        /// </summary>
+        private static void ExportMaps(DefaultFileProvider fileProvider, List<string> exportDirectories, Settings settings)
+        {
+            var mapPaths = fileProvider.Files.Values
+                .Select(file => file.ToString())
+                .Where(path => path.EndsWith(".umap", StringComparison.OrdinalIgnoreCase))
+                .Where(path => exportDirectories.Any(dir => string.IsNullOrEmpty(dir) || path.StartsWith(dir, StringComparison.OrdinalIgnoreCase)))
+                .Select(path => path[..^".umap".Length])
+                .Where(path => MatchesMapFilter(path, settings.MapFilters))
+                .OrderBy(path => path, StringComparer.Ordinal)
+                .ToList();
+
+            if (settings.MapFilters is { Length: > 0 })
+            {
+                foreach (var filter in settings.MapFilters.Where(filter => !mapPaths.Any(path => MatchesMapFilter(path, [filter]))))
+                    Console.WriteLine($"Warning: map filter '{filter}' matched no .umap package");
+            }
+
+            Console.WriteLine($"Starting map export of {mapPaths.Count} map(s)...");
+
+            var exporter = new MapExporter(fileProvider, settings.ExportOutputPath, new MapExportOptions
+            {
+                UseNaniteMeshes = settings.MapUseNaniteMeshes,
+                ExportRawLevels = settings.MapExportRawLevels,
+                IsLoggingEnabled = settings.IsLoggingEnabled
+            });
+
+            int exported = 0;
+            foreach (var mapPath in mapPaths)
+            {
+                if (exporter.ExportWorld(mapPath))
+                    exported++;
+            }
+
+            int configFiles = 0;
+            foreach (var file in fileProvider.Files.Values)
+            {
+                string path = file.ToString();
+                if (!path.EndsWith(".ini", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                try
+                {
+                    string destinationFilePath = Path.Combine(settings.ExportOutputPath, "config", path);
+                    CreateNeededDirectories(destinationFilePath);
+                    File.WriteAllBytes(destinationFilePath, file.Read());
+                    configFiles++;
+                }
+                catch (Exception ex)
+                {
+                    Utils.LogInfo($"Failed to export config file {path}: {ex.Message}", settings.IsLoggingEnabled);
+                }
+            }
+
+            Console.WriteLine($"Map export complete. Maps exported: {exported}/{mapPaths.Count}, config files: {configFiles}");
+        }
+
         public static void Main(string[] args)
         {
             // Load settings from config file and command line arguments
@@ -575,6 +694,12 @@ namespace BatchExport
                 {
                     Utils.LogInfo("\t"+exportDirectory, settings.IsLoggingEnabled);
                 }
+            }
+
+            if (settings.IsMapsMode())
+            {
+                ExportMaps(fileProvider, exportDirectoriesToProcess, settings);
+                return;
             }
 
             // Export to .json
