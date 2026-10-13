@@ -8,7 +8,7 @@ A .NET application that exports Unreal Engine game assets to JSON format using [
 **Build and run directly:**
 ```bash
 dotnet build --configuration Release
-cd bin/Release/net8.0
+cd bin/Release/net10.0
 
 # Run with command-line arguments (no config file needed)
 .\BatchExport.exe --preset WarRobotsFrontiers --pak-files-directory "C:\Game\Paks" --export-output-path "C:\Export" --mapping-file-path "C:\mappings.usmap"
@@ -20,7 +20,7 @@ cd bin/Release/net8.0
 ## Installation
 
 ### Prerequisites
-- [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) or higher
+- [.NET 10.0 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) or higher
 - Game `.pak` files
 - Corresponding `.usmap` mappings file for your game version
 
@@ -58,7 +58,7 @@ cd bin/Release/net8.0
    dotnet run -- --pak-files-directory "C:\Game\Paks" --export-output-path "C:\Export" --mapping-file-path "C:\mappings.usmap" --preset WarRobotsFrontiers
    
    # Or run the executable directly
-   cd bin/Release/net8.0
+   cd bin/Release/net10.0
    .\BatchExport.exe --pak-files-directory "C:\Game\Paks" --export-output-path "C:\Export" --mapping-file-path "C:\mappings.usmap" --preset WarRobotsFrontiers
    ```
 
@@ -135,6 +135,10 @@ dotnet run -- --preset WarRobotsFrontiers \
 | `--is-logging-enabled <true\|false>` | Enable detailed logging | `--is-logging-enabled false` |
 | `--should-wipe-output-directory <true\|false>` | Clear output directory first | `--should-wipe-output-directory true` |
 | `--should-export-textures <true\|false>` | Export texture files | `--should-export-textures false` |
+| `--should-export-meshes <true\|false>` | Export mesh geometry (.uemodel) | `--should-export-meshes true` |
+| `--skip-asset-name-prefixes <list>` | Comma-separated asset filename prefixes to skip | `--skip-asset-name-prefixes "M_,MI_,AS_"` |
+| `--texture-export-directories <list>` | Comma-separated asset-path prefixes whose textures are exported | `--texture-export-directories "Game/UI"` |
+| `--worker-count <n>` | Parallel export workers (0 = one per logical processor) | `--worker-count 2` |
 | `--help`, `-h` | Show help message | `--help` |
 
 ### Configuration Priority

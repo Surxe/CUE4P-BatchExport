@@ -183,6 +183,42 @@ namespace BatchExport
                         }
                         break;
                         
+                    case "--should-export-meshes":
+                        if (value != null && bool.TryParse(value, out var exportMeshes))
+                        {
+                            settings.ShouldExportMeshes = exportMeshes;
+                            Console.WriteLine($"Override: ShouldExportMeshes = {exportMeshes}");
+                            i++; // Skip the value argument
+                        }
+                        break;
+
+                    case "--skip-asset-name-prefixes":
+                        if (value != null)
+                        {
+                            settings.SkipAssetNamePrefixes = ParseList(value);
+                            Console.WriteLine($"Override: SkipAssetNamePrefixes = [{string.Join(", ", settings.SkipAssetNamePrefixes)}]");
+                            i++; // Skip the value argument
+                        }
+                        break;
+
+                    case "--texture-export-directories":
+                        if (value != null)
+                        {
+                            settings.TextureExportDirectories = ParseList(value);
+                            Console.WriteLine($"Override: TextureExportDirectories = [{string.Join(", ", settings.TextureExportDirectories)}]");
+                            i++; // Skip the value argument
+                        }
+                        break;
+
+                    case "--worker-count":
+                        if (value != null && int.TryParse(value, out var workers))
+                        {
+                            settings.WorkerCount = workers;
+                            Console.WriteLine($"Override: WorkerCount = {workers}");
+                            i++; // Skip the value argument
+                        }
+                        break;
+                        
                     case "--help":
                     case "-h":
                         ShowHelp();
@@ -208,6 +244,15 @@ namespace BatchExport
         }
 
         /// <summary>
+        /// Parses a comma-separated command-line list. An empty string yields an empty
+        /// list, which explicitly disables the filter instead of falling back to the preset.
+        /// </summary>
+        private static string[] ParseList(string value)
+        {
+            return value.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        }
+
+        /// <summary>
         /// Displays help information for command-line usage
         /// </summary>
         private static void ShowHelp()
@@ -229,6 +274,10 @@ namespace BatchExport
             Console.WriteLine("  --is-logging-enabled <true|false>   Enable detailed logging");
             Console.WriteLine("  --should-wipe-output-directory <true|false> Clear output directory before exporting");
             Console.WriteLine("  --should-export-textures <true|false> Export texture files");
+            Console.WriteLine("  --should-export-meshes <true|false> Export mesh geometry (.uemodel) for meshes and skeletons");
+            Console.WriteLine("  --skip-asset-name-prefixes <list>   Comma-separated asset filename prefixes to skip (e.g. M_,MI_,AS_)");
+            Console.WriteLine("  --texture-export-directories <list> Comma-separated asset-path prefixes whose textures are exported");
+            Console.WriteLine("  --worker-count <n>                  Parallel export workers (0 = one per logical processor)");
             Console.WriteLine("  --help, -h                          Show this help message");
             Console.WriteLine();
             Console.WriteLine("Examples:");
@@ -279,11 +328,12 @@ namespace BatchExport
                     TextureFormat = settings.GetTextureFormat(),
                     Platform = settings.GetTexturePlatform(),
                     ExportHdrTexturesAsHdr = true,
-                    ExportMaterials = true,
-                    ExportMorphTargets = true
+                    // Geometry is untextured; materials and morph targets are not needed.
+                    ExportMaterials = false,
+                    ExportMorphTargets = false
                 };
 
-                var exporter = new AssetExporter(exporterOptions, settings.ExportOutputPath, settings.IsLoggingEnabled, settings.ShouldExportTextures);
+                var exporter = new AssetExporter(exporterOptions, settings.ExportOutputPath, settings.IsLoggingEnabled, settings.ShouldExportTextures, settings.ShouldExportMeshes ?? false, settings.TextureExportDirectories ?? []);
                 exporter.ExportAsset(gameFileProvider, assetPath);
             }
             catch (Exception ex)
@@ -345,6 +395,11 @@ namespace BatchExport
 
             // Skip engine files
             if (assetFilePath.StartsWith("engine", StringComparison.OrdinalIgnoreCase))
+                return false;
+
+            // Skip explicitly-ignored asset classes (materials, animations, audio, ...).
+            string fileName = Path.GetFileNameWithoutExtension(assetFilePath);
+            if (settings.SkipAssetNamePrefixes?.Any(prefix => fileName.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)) == true)
                 return false;
 
             // Check if file is in any export directory (empty string means export all)
@@ -529,7 +584,10 @@ namespace BatchExport
             int totalFilesProcessed = 0;
             int totalFilesExported = 0;
 
-            int workerCount = Environment.ProcessorCount;
+            // Each worker builds a full independent DefaultFileProvider (mounts every pak +
+            // the VFS index), so peak memory scales with the worker count.
+            int workerCount = settings.GetWorkerCount();
+            Utils.LogInfo($"Using {workerCount} export worker(s)", settings.IsLoggingEnabled);
 
             // Shared concurrent work queue
             var workQueue = new ConcurrentQueue<string>(allFiles);
